@@ -1,0 +1,6911 @@
+{
+ "aboleth": {
+  "nombre": "Aboleth",
+  "cr": "10",
+  "pg": 135,
+  "ca_fija": 17,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 21,
+   "DES": 9,
+   "CON": 15,
+   "INT": 18,
+   "SAB": 15,
+   "CAR": 18
+  },
+  "ataques": [
+   {
+    "nombre": "Tentacle",
+    "bono": 9,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Tail",
+    "bono": 9,
+    "danio": "3d6"
+   }
+  ],
+  "tipo_criatura": "Aberration"
+ },
+ "acolyte": {
+  "nombre": "Acolyte",
+  "cr": "1/4",
+  "pg": 9,
+  "ca_fija": 10,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 10,
+   "CON": 10,
+   "INT": 10,
+   "SAB": 14,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Club",
+    "bono": 2,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "air_elemental": {
+  "nombre": "Air Elemental",
+  "cr": "5",
+  "pg": 90,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 14,
+   "DES": 20,
+   "CON": 14,
+   "INT": 6,
+   "SAB": 10,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 8,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "animated_armor": {
+  "nombre": "Animated Armor",
+  "cr": "1",
+  "pg": 33,
+  "ca_fija": 18,
+  "velocidad_m": 8,
+  "atributos": {
+   "FUE": 14,
+   "DES": 11,
+   "CON": 13,
+   "INT": 1,
+   "SAB": 3,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Construct"
+ },
+ "ankheg": {
+  "nombre": "Ankheg",
+  "cr": "2",
+  "pg": 39,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 17,
+   "DES": 11,
+   "CON": 13,
+   "INT": 1,
+   "SAB": 13,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "2d6+1"
+   },
+   {
+    "nombre": "Acid Spray (Recharge 6)",
+    "bono": 0,
+    "danio": "3d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "ape": {
+  "nombre": "Ape",
+  "cr": "1/2",
+  "pg": 19,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 14,
+   "CON": 14,
+   "INT": 6,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Fist",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Rock",
+    "bono": 5,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "assassin": {
+  "nombre": "Assassin",
+  "cr": "8",
+  "pg": 78,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 11,
+   "DES": 16,
+   "CON": 14,
+   "INT": 13,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Shortsword",
+    "bono": 6,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Light Crossbow",
+    "bono": 6,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "awakened_shrub": {
+  "nombre": "Awakened Shrub",
+  "cr": "0",
+  "pg": 10,
+  "ca_fija": 9,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 3,
+   "DES": 8,
+   "CON": 11,
+   "INT": 10,
+   "SAB": 10,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Rake",
+    "bono": 1,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Plant"
+ },
+ "awakened_tree": {
+  "nombre": "Awakened Tree",
+  "cr": "2",
+  "pg": 59,
+  "ca_fija": 13,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 19,
+   "DES": 6,
+   "CON": 15,
+   "INT": 10,
+   "SAB": 10,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 6,
+    "danio": "3d6"
+   }
+  ],
+  "tipo_criatura": "Plant"
+ },
+ "axe_beak": {
+  "nombre": "Axe Beak",
+  "cr": "1/4",
+  "pg": 19,
+  "ca_fija": 11,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 14,
+   "DES": 12,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 4,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "azer": {
+  "nombre": "Azer",
+  "cr": "2",
+  "pg": 39,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 17,
+   "DES": 12,
+   "CON": 15,
+   "INT": 12,
+   "SAB": 13,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Warhammer",
+    "bono": 5,
+    "danio": "1d8+1"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "baboon": {
+  "nombre": "Baboon",
+  "cr": "0",
+  "pg": 3,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 8,
+   "DES": 14,
+   "CON": 11,
+   "INT": 4,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 1,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "badger": {
+  "nombre": "Badger",
+  "cr": "0",
+  "pg": 3,
+  "ca_fija": 10,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 4,
+   "DES": 11,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 5
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "bandit": {
+  "nombre": "Bandit",
+  "cr": "1/8",
+  "pg": 11,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 11,
+   "DES": 12,
+   "CON": 12,
+   "INT": 10,
+   "SAB": 10,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Scimitar",
+    "bono": 3,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Light Crossbow",
+    "bono": 3,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "bandit_captain": {
+  "nombre": "Bandit Captain",
+  "cr": "2",
+  "pg": 65,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 16,
+   "CON": 14,
+   "INT": 14,
+   "SAB": 11,
+   "CAR": 14
+  },
+  "ataques": [
+   {
+    "nombre": "Scimitar",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Dagger",
+    "bono": 5,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "barbed_devil": {
+  "nombre": "Barbed Devil",
+  "cr": "5",
+  "pg": 110,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 17,
+   "CON": 18,
+   "INT": 12,
+   "SAB": 14,
+   "CAR": 14
+  },
+  "ataques": [
+   {
+    "nombre": "Claw",
+    "bono": 6,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Tail",
+    "bono": 6,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Hurl Flame",
+    "bono": 5,
+    "danio": "3d6"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "basilisk": {
+  "nombre": "Basilisk",
+  "cr": "3",
+  "pg": 52,
+  "ca_fija": 12,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 16,
+   "DES": 8,
+   "CON": 15,
+   "INT": 2,
+   "SAB": 8,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "2d6+2"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "bat": {
+  "nombre": "Bat",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 12,
+  "velocidad_m": 2,
+  "atributos": {
+   "FUE": 2,
+   "DES": 15,
+   "CON": 8,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 4
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "bearded_devil": {
+  "nombre": "Bearded Devil",
+  "cr": "3",
+  "pg": 52,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 15,
+   "CON": 15,
+   "INT": 9,
+   "SAB": 11,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Beard",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Glaive",
+    "bono": 5,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "berserker": {
+  "nombre": "Berserker",
+  "cr": "2",
+  "pg": 67,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 12,
+   "CON": 17,
+   "INT": 9,
+   "SAB": 11,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "Greataxe",
+    "bono": 5,
+    "danio": "1d12"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "black_bear": {
+  "nombre": "Black Bear",
+  "cr": "1/2",
+  "pg": 19,
+  "ca_fija": 11,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 15,
+   "DES": 10,
+   "CON": 14,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 3,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "black_dragon_wyrmling": {
+  "nombre": "Black Dragon Wyrmling",
+  "cr": "2",
+  "pg": 33,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 14,
+   "CON": 13,
+   "INT": 10,
+   "SAB": 11,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Acid Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "5d8"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "black_pudding": {
+  "nombre": "Black Pudding",
+  "cr": "4",
+  "pg": 85,
+  "ca_fija": 7,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 16,
+   "DES": 5,
+   "CON": 16,
+   "INT": 1,
+   "SAB": 6,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Pseudopod",
+    "bono": 5,
+    "danio": "1d6+4"
+   }
+  ],
+  "tipo_criatura": "Ooze"
+ },
+ "blink_dog": {
+  "nombre": "Blink Dog",
+  "cr": "1/4",
+  "pg": 22,
+  "ca_fija": 13,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 12,
+   "DES": 17,
+   "CON": 12,
+   "INT": 10,
+   "SAB": 13,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Fey"
+ },
+ "blood_hawk": {
+  "nombre": "Blood Hawk",
+  "cr": "1/8",
+  "pg": 7,
+  "ca_fija": 12,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 6,
+   "DES": 14,
+   "CON": 10,
+   "INT": 3,
+   "SAB": 14,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "blue_dragon_wyrmling": {
+  "nombre": "Blue Dragon Wyrmling",
+  "cr": "3",
+  "pg": 52,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 17,
+   "DES": 10,
+   "CON": 15,
+   "INT": 12,
+   "SAB": 11,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d10+1"
+   },
+   {
+    "nombre": "Lightning Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "4d10"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "boar": {
+  "nombre": "Boar",
+  "cr": "1/4",
+  "pg": 11,
+  "ca_fija": 11,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 13,
+   "DES": 11,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 9,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Tusk",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "bone_devil": {
+  "nombre": "Bone Devil",
+  "cr": "9",
+  "pg": 142,
+  "ca_fija": 19,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 18,
+   "DES": 16,
+   "CON": 18,
+   "INT": 13,
+   "SAB": 14,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Claw",
+    "bono": 8,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Sting",
+    "bono": 8,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "brass_dragon_wyrmling": {
+  "nombre": "Brass Dragon Wyrmling",
+  "cr": "1",
+  "pg": 16,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 10,
+   "CON": 13,
+   "INT": 10,
+   "SAB": 11,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "4d6"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "bronze_dragon_wyrmling": {
+  "nombre": "Bronze Dragon Wyrmling",
+  "cr": "2",
+  "pg": 32,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 17,
+   "DES": 10,
+   "CON": 15,
+   "INT": 12,
+   "SAB": 11,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "3d10"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "brown_bear": {
+  "nombre": "Brown Bear",
+  "cr": "1",
+  "pg": 34,
+  "ca_fija": 11,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 19,
+   "DES": 10,
+   "CON": 16,
+   "INT": 2,
+   "SAB": 13,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "bugbear": {
+  "nombre": "Bugbear",
+  "cr": "1",
+  "pg": 27,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 14,
+   "CON": 13,
+   "INT": 8,
+   "SAB": 11,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "Morningstar",
+    "bono": 4,
+    "danio": "2d8"
+   },
+   {
+    "nombre": "Javelin",
+    "bono": 4,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "bulette": {
+  "nombre": "Bulette",
+  "cr": "5",
+  "pg": 94,
+  "ca_fija": 17,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 19,
+   "DES": 11,
+   "CON": 21,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "4d12"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "camel": {
+  "nombre": "Camel",
+  "cr": "1/8",
+  "pg": 15,
+  "ca_fija": 9,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 16,
+   "DES": 8,
+   "CON": 14,
+   "INT": 2,
+   "SAB": 8,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "cat": {
+  "nombre": "Cat",
+  "cr": "0",
+  "pg": 2,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 3,
+   "DES": 15,
+   "CON": 10,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "centaur": {
+  "nombre": "Centaur",
+  "cr": "2",
+  "pg": 45,
+  "ca_fija": 12,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 18,
+   "DES": 14,
+   "CON": 14,
+   "INT": 9,
+   "SAB": 13,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Pike",
+    "bono": 6,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Hooves",
+    "bono": 6,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Longbow",
+    "bono": 4,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "chimera": {
+  "nombre": "Chimera",
+  "cr": "6",
+  "pg": 114,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 11,
+   "CON": 19,
+   "INT": 3,
+   "SAB": 14,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Horns",
+    "bono": 7,
+    "danio": "1d12"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 7,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "chuul": {
+  "nombre": "Chuul",
+  "cr": "4",
+  "pg": 93,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 10,
+   "CON": 16,
+   "INT": 5,
+   "SAB": 11,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Pincer",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Aberration"
+ },
+ "clay_golem": {
+  "nombre": "Clay Golem",
+  "cr": "9",
+  "pg": 133,
+  "ca_fija": 14,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 20,
+   "DES": 9,
+   "CON": 18,
+   "INT": 3,
+   "SAB": 8,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 8,
+    "danio": "2d10"
+   }
+  ],
+  "tipo_criatura": "Construct"
+ },
+ "cloaker": {
+  "nombre": "Cloaker",
+  "cr": "8",
+  "pg": 78,
+  "ca_fija": 14,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 17,
+   "DES": 15,
+   "CON": 12,
+   "INT": 13,
+   "SAB": 12,
+   "CAR": 14
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Tail",
+    "bono": 6,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Aberration"
+ },
+ "cloud_giant": {
+  "nombre": "Cloud Giant",
+  "cr": "9",
+  "pg": 200,
+  "ca_fija": 14,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 27,
+   "DES": 10,
+   "CON": 22,
+   "INT": 12,
+   "SAB": 16,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Morningstar",
+    "bono": 12,
+    "danio": "3d8"
+   },
+   {
+    "nombre": "Rock",
+    "bono": 12,
+    "danio": "4d10"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "cockatrice": {
+  "nombre": "Cockatrice",
+  "cr": "1/2",
+  "pg": 27,
+  "ca_fija": 11,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 6,
+   "DES": 12,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 13,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "commoner": {
+  "nombre": "Commoner",
+  "cr": "0",
+  "pg": 4,
+  "ca_fija": 10,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 10,
+   "CON": 10,
+   "INT": 10,
+   "SAB": 10,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Club",
+    "bono": 2,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "constrictor_snake": {
+  "nombre": "Constrictor Snake",
+  "cr": "1/4",
+  "pg": 13,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 14,
+   "CON": 12,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Constrict",
+    "bono": 4,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "copper_dragon_wyrmling": {
+  "nombre": "Copper Dragon Wyrmling",
+  "cr": "1",
+  "pg": 22,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 12,
+   "CON": 13,
+   "INT": 14,
+   "SAB": 11,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "4d8"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "couatl": {
+  "nombre": "Couatl",
+  "cr": "4",
+  "pg": 97,
+  "ca_fija": 19,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 20,
+   "CON": 17,
+   "INT": 18,
+   "SAB": 20,
+   "CAR": 18
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 8,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Constrict",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Celestial"
+ },
+ "crab": {
+  "nombre": "Crab",
+  "cr": "0",
+  "pg": 2,
+  "ca_fija": 11,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 2,
+   "DES": 11,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 8,
+   "CAR": 2
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "crocodile": {
+  "nombre": "Crocodile",
+  "cr": "1/2",
+  "pg": 19,
+  "ca_fija": 12,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 15,
+   "DES": 10,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "cult_fanatic": {
+  "nombre": "Cult Fanatic",
+  "cr": "2",
+  "pg": 22,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 11,
+   "DES": 14,
+   "CON": 12,
+   "INT": 10,
+   "SAB": 13,
+   "CAR": 14
+  },
+  "ataques": [
+   {
+    "nombre": "Dagger",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "cultist": {
+  "nombre": "Cultist",
+  "cr": "1/8",
+  "pg": 9,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 11,
+   "DES": 12,
+   "CON": 10,
+   "INT": 10,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Scimitar",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "darkmantle": {
+  "nombre": "Darkmantle",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 11,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 16,
+   "DES": 12,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Crush",
+    "bono": 5,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "death_dog": {
+  "nombre": "Death Dog",
+  "cr": "1",
+  "pg": 39,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 15,
+   "DES": 14,
+   "CON": 14,
+   "INT": 3,
+   "SAB": 13,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "deep_gnome_svirfneblin": {
+  "nombre": "Deep Gnome (Svirfneblin)",
+  "cr": "1/2",
+  "pg": 16,
+  "ca_fija": 15,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 15,
+   "DES": 14,
+   "CON": 14,
+   "INT": 12,
+   "SAB": 10,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "War Pick",
+    "bono": 4,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Poisoned Dart",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "deer": {
+  "nombre": "Deer",
+  "cr": "0",
+  "pg": 4,
+  "ca_fija": 13,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 11,
+   "DES": 16,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 14,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 2,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "deva": {
+  "nombre": "Deva",
+  "cr": "10",
+  "pg": 136,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 18,
+   "CON": 18,
+   "INT": 17,
+   "SAB": 20,
+   "CAR": 20
+  },
+  "ataques": [
+   {
+    "nombre": "Mace",
+    "bono": 8,
+    "danio": "1d6+4"
+   }
+  ],
+  "tipo_criatura": "Celestial"
+ },
+ "dire_wolf": {
+  "nombre": "Dire Wolf",
+  "cr": "1",
+  "pg": 37,
+  "ca_fija": 14,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 17,
+   "DES": 15,
+   "CON": 15,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "doppelganger": {
+  "nombre": "Doppelganger",
+  "cr": "3",
+  "pg": 52,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 11,
+   "DES": 18,
+   "CON": 14,
+   "INT": 11,
+   "SAB": 12,
+   "CAR": 14
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 6,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "draft_horse": {
+  "nombre": "Draft Horse",
+  "cr": "1/4",
+  "pg": 19,
+  "ca_fija": 10,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 18,
+   "DES": 10,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 6,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "dretch": {
+  "nombre": "Dretch",
+  "cr": "1/4",
+  "pg": 18,
+  "ca_fija": 11,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 11,
+   "DES": 11,
+   "CON": 12,
+   "INT": 5,
+   "SAB": 8,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 2,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 2,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "drider": {
+  "nombre": "Drider",
+  "cr": "6",
+  "pg": 123,
+  "ca_fija": 19,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 16,
+   "CON": 18,
+   "INT": 13,
+   "SAB": 14,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "1d4"
+   },
+   {
+    "nombre": "Longsword",
+    "bono": 6,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Longbow",
+    "bono": 6,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "drow": {
+  "nombre": "Drow",
+  "cr": "1/4",
+  "pg": 13,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 14,
+   "CON": 10,
+   "INT": 11,
+   "SAB": 11,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Shortsword",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Hand Crossbow",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "druid": {
+  "nombre": "Druid",
+  "cr": "2",
+  "pg": 27,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 12,
+   "CON": 13,
+   "INT": 12,
+   "SAB": 15,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Quarterstaff",
+    "bono": 2,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "dryad": {
+  "nombre": "Dryad",
+  "cr": "1",
+  "pg": 22,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 12,
+   "CON": 11,
+   "INT": 14,
+   "SAB": 15,
+   "CAR": 18
+  },
+  "ataques": [
+   {
+    "nombre": "Club",
+    "bono": 2,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Fey"
+ },
+ "duergar": {
+  "nombre": "Duergar",
+  "cr": "1",
+  "pg": 26,
+  "ca_fija": 16,
+  "velocidad_m": 8,
+  "atributos": {
+   "FUE": 14,
+   "DES": 11,
+   "CON": 14,
+   "INT": 11,
+   "SAB": 10,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "War Pick",
+    "bono": 4,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Javelin",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "dust_mephit": {
+  "nombre": "Dust Mephit",
+  "cr": "1/2",
+  "pg": 17,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 5,
+   "DES": 14,
+   "CON": 10,
+   "INT": 9,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "eagle": {
+  "nombre": "Eagle",
+  "cr": "0",
+  "pg": 3,
+  "ca_fija": 12,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 6,
+   "DES": 15,
+   "CON": 10,
+   "INT": 2,
+   "SAB": 14,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Talons",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "earth_elemental": {
+  "nombre": "Earth Elemental",
+  "cr": "5",
+  "pg": 126,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 20,
+   "DES": 8,
+   "CON": 20,
+   "INT": 5,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 8,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "elephant": {
+  "nombre": "Elephant",
+  "cr": "4",
+  "pg": 76,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 22,
+   "DES": 9,
+   "CON": 17,
+   "INT": 3,
+   "SAB": 11,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Gore",
+    "bono": 8,
+    "danio": "3d8"
+   },
+   {
+    "nombre": "Stomp",
+    "bono": 8,
+    "danio": "3d10"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "elk": {
+  "nombre": "Elk",
+  "cr": "1/4",
+  "pg": 13,
+  "ca_fija": 10,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 16,
+   "DES": 10,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 6
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "ettercap": {
+  "nombre": "Ettercap",
+  "cr": "2",
+  "pg": 44,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 14,
+   "DES": 15,
+   "CON": 13,
+   "INT": 7,
+   "SAB": 12,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 4,
+    "danio": "2d4"
+   },
+   {
+    "nombre": "Variant: Web Garrote",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "ettin": {
+  "nombre": "Ettin",
+  "cr": "4",
+  "pg": 85,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 21,
+   "DES": 8,
+   "CON": 17,
+   "INT": 6,
+   "SAB": 10,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Battleaxe",
+    "bono": 7,
+    "danio": "2d8"
+   },
+   {
+    "nombre": "Morningstar",
+    "bono": 7,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "fire_elemental": {
+  "nombre": "Fire Elemental",
+  "cr": "5",
+  "pg": 102,
+  "ca_fija": 13,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 10,
+   "DES": 17,
+   "CON": 16,
+   "INT": 6,
+   "SAB": 10,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Touch",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "fire_giant": {
+  "nombre": "Fire Giant",
+  "cr": "9",
+  "pg": 162,
+  "ca_fija": 18,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 25,
+   "DES": 9,
+   "CON": 23,
+   "INT": 10,
+   "SAB": 14,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Greatsword",
+    "bono": 11,
+    "danio": "6d6"
+   },
+   {
+    "nombre": "Rock",
+    "bono": 11,
+    "danio": "4d10"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "flesh_golem": {
+  "nombre": "Flesh Golem",
+  "cr": "5",
+  "pg": 93,
+  "ca_fija": 9,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 9,
+   "CON": 18,
+   "INT": 6,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 7,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Construct"
+ },
+ "flying_snake": {
+  "nombre": "Flying Snake",
+  "cr": "1/8",
+  "pg": 5,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 4,
+   "DES": 18,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 5
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "flying_sword": {
+  "nombre": "Flying Sword",
+  "cr": "1/4",
+  "pg": 17,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 12,
+   "DES": 15,
+   "CON": 11,
+   "INT": 1,
+   "SAB": 5,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Longsword",
+    "bono": 3,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Construct"
+ },
+ "frog": {
+  "nombre": "Frog",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 11,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 1,
+   "DES": 13,
+   "CON": 8,
+   "INT": 1,
+   "SAB": 8,
+   "CAR": 3
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "frost_giant": {
+  "nombre": "Frost Giant",
+  "cr": "8",
+  "pg": 138,
+  "ca_fija": 15,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 23,
+   "DES": 9,
+   "CON": 21,
+   "INT": 9,
+   "SAB": 10,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Greataxe",
+    "bono": 9,
+    "danio": "3d12"
+   },
+   {
+    "nombre": "Rock",
+    "bono": 9,
+    "danio": "4d10"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "gargoyle": {
+  "nombre": "Gargoyle",
+  "cr": "2",
+  "pg": 52,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 11,
+   "CON": 16,
+   "INT": 6,
+   "SAB": 11,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "gelatinous_cube": {
+  "nombre": "Gelatinous Cube",
+  "cr": "2",
+  "pg": 84,
+  "ca_fija": 6,
+  "velocidad_m": 4,
+  "atributos": {
+   "FUE": 14,
+   "DES": 3,
+   "CON": 20,
+   "INT": 1,
+   "SAB": 6,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Pseudopod",
+    "bono": 4,
+    "danio": "3d6"
+   }
+  ],
+  "tipo_criatura": "Ooze"
+ },
+ "ghast": {
+  "nombre": "Ghast",
+  "cr": "2",
+  "pg": 36,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 17,
+   "CON": 10,
+   "INT": 11,
+   "SAB": 10,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "2d8"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "ghost": {
+  "nombre": "Ghost",
+  "cr": "4",
+  "pg": 45,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 7,
+   "DES": 13,
+   "CON": 10,
+   "INT": 10,
+   "SAB": 12,
+   "CAR": 17
+  },
+  "ataques": [
+   {
+    "nombre": "Withering Touch",
+    "bono": 5,
+    "danio": "4d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "ghoul": {
+  "nombre": "Ghoul",
+  "cr": "1",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 13,
+   "DES": 15,
+   "CON": 10,
+   "INT": 7,
+   "SAB": 10,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 2,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "giant_ape": {
+  "nombre": "Giant Ape",
+  "cr": "7",
+  "pg": 157,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 23,
+   "DES": 14,
+   "CON": 18,
+   "INT": 7,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Fist",
+    "bono": 9,
+    "danio": "3d10"
+   },
+   {
+    "nombre": "Rock",
+    "bono": 9,
+    "danio": "7d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_badger": {
+  "nombre": "Giant Badger",
+  "cr": "1/4",
+  "pg": 13,
+  "ca_fija": 10,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 13,
+   "DES": 10,
+   "CON": 15,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 3,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_bat": {
+  "nombre": "Giant Bat",
+  "cr": "1/4",
+  "pg": 22,
+  "ca_fija": 13,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 15,
+   "DES": 16,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_boar": {
+  "nombre": "Giant Boar",
+  "cr": "2",
+  "pg": 42,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 17,
+   "DES": 10,
+   "CON": 16,
+   "INT": 2,
+   "SAB": 7,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Tusk",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_centipede": {
+  "nombre": "Giant Centipede",
+  "cr": "1/4",
+  "pg": 4,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 5,
+   "DES": 14,
+   "CON": 12,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_constrictor_snake": {
+  "nombre": "Giant Constrictor Snake",
+  "cr": "2",
+  "pg": 60,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 14,
+   "CON": 12,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Constrict",
+    "bono": 6,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_crab": {
+  "nombre": "Giant Crab",
+  "cr": "1/8",
+  "pg": 13,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 13,
+   "DES": 15,
+   "CON": 11,
+   "INT": 1,
+   "SAB": 9,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Claw",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_crocodile": {
+  "nombre": "Giant Crocodile",
+  "cr": "5",
+  "pg": 85,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 21,
+   "DES": 9,
+   "CON": 17,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 8,
+    "danio": "3d10"
+   },
+   {
+    "nombre": "Tail",
+    "bono": 8,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_eagle": {
+  "nombre": "Giant Eagle",
+  "cr": "1",
+  "pg": 26,
+  "ca_fija": 13,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 16,
+   "DES": 17,
+   "CON": 13,
+   "INT": 8,
+   "SAB": 14,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Talons",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_elk": {
+  "nombre": "Giant Elk",
+  "cr": "2",
+  "pg": 42,
+  "ca_fija": 15,
+  "velocidad_m": 18,
+  "atributos": {
+   "FUE": 19,
+   "DES": 16,
+   "CON": 14,
+   "INT": 7,
+   "SAB": 14,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Ram",
+    "bono": 6,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Hooves",
+    "bono": 6,
+    "danio": "4d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_fire_beetle": {
+  "nombre": "Giant Fire Beetle",
+  "cr": "0",
+  "pg": 4,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 8,
+   "DES": 10,
+   "CON": 12,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 1,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_frog": {
+  "nombre": "Giant Frog",
+  "cr": "1/4",
+  "pg": 18,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 12,
+   "DES": 13,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_goat": {
+  "nombre": "Giant Goat",
+  "cr": "1/2",
+  "pg": 19,
+  "ca_fija": 11,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 17,
+   "DES": 11,
+   "CON": 12,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Ram",
+    "bono": 5,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_hyena": {
+  "nombre": "Giant Hyena",
+  "cr": "1",
+  "pg": 45,
+  "ca_fija": 12,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 16,
+   "DES": 14,
+   "CON": 14,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_lizard": {
+  "nombre": "Giant Lizard",
+  "cr": "1/4",
+  "pg": 19,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 12,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_octopus": {
+  "nombre": "Giant Octopus",
+  "cr": "1",
+  "pg": 52,
+  "ca_fija": 11,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 17,
+   "DES": 13,
+   "CON": 13,
+   "INT": 4,
+   "SAB": 10,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Tentacles",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_owl": {
+  "nombre": "Giant Owl",
+  "cr": "1/4",
+  "pg": 19,
+  "ca_fija": 12,
+  "velocidad_m": 2,
+  "atributos": {
+   "FUE": 13,
+   "DES": 15,
+   "CON": 12,
+   "INT": 8,
+   "SAB": 13,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Talons",
+    "bono": 3,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_poisonous_snake": {
+  "nombre": "Giant Poisonous Snake",
+  "cr": "1/4",
+  "pg": 11,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 18,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_rat": {
+  "nombre": "Giant Rat",
+  "cr": "1/8",
+  "pg": 7,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 7,
+   "DES": 15,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_rat_diseased": {
+  "nombre": "Giant Rat (Diseased)",
+  "cr": "1/8",
+  "pg": 7,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 7,
+   "DES": 15,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_scorpion": {
+  "nombre": "Giant Scorpion",
+  "cr": "3",
+  "pg": 52,
+  "ca_fija": 15,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 15,
+   "DES": 13,
+   "CON": 15,
+   "INT": 1,
+   "SAB": 9,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Claw",
+    "bono": 4,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Sting",
+    "bono": 4,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_sea_horse": {
+  "nombre": "Giant Sea Horse",
+  "cr": "1/2",
+  "pg": 16,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 12,
+   "DES": 15,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Ram",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_shark": {
+  "nombre": "Giant Shark",
+  "cr": "5",
+  "pg": 126,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 23,
+   "DES": 11,
+   "CON": 21,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 9,
+    "danio": "3d10"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_spider": {
+  "nombre": "Giant Spider",
+  "cr": "1",
+  "pg": 26,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 14,
+   "DES": 16,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_toad": {
+  "nombre": "Giant Toad",
+  "cr": "1",
+  "pg": 39,
+  "ca_fija": 11,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 15,
+   "DES": 13,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_vulture": {
+  "nombre": "Giant Vulture",
+  "cr": "1",
+  "pg": 22,
+  "ca_fija": 10,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 15,
+   "DES": 10,
+   "CON": 15,
+   "INT": 6,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 4,
+    "danio": "2d4"
+   },
+   {
+    "nombre": "Talons",
+    "bono": 4,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_wasp": {
+  "nombre": "Giant Wasp",
+  "cr": "1/2",
+  "pg": 13,
+  "ca_fija": 12,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 10,
+   "DES": 14,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Sting",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_weasel": {
+  "nombre": "Giant Weasel",
+  "cr": "1/8",
+  "pg": 9,
+  "ca_fija": 13,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 11,
+   "DES": 16,
+   "CON": 10,
+   "INT": 4,
+   "SAB": 12,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "giant_wolf_spider": {
+  "nombre": "Giant Wolf Spider",
+  "cr": "1/4",
+  "pg": 11,
+  "ca_fija": 13,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 12,
+   "DES": 16,
+   "CON": 13,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "gibbering_mouther": {
+  "nombre": "Gibbering Mouther",
+  "cr": "2",
+  "pg": 67,
+  "ca_fija": 9,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 10,
+   "DES": 8,
+   "CON": 16,
+   "INT": 3,
+   "SAB": 10,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 2,
+    "danio": "5d6"
+   }
+  ],
+  "tipo_criatura": "Aberration"
+ },
+ "glabrezu": {
+  "nombre": "Glabrezu",
+  "cr": "9",
+  "pg": 157,
+  "ca_fija": 17,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 20,
+   "DES": 15,
+   "CON": 21,
+   "INT": 19,
+   "SAB": 17,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Pincer",
+    "bono": 9,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Fist",
+    "bono": 9,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "gladiator": {
+  "nombre": "Gladiator",
+  "cr": "5",
+  "pg": 112,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 15,
+   "CON": 16,
+   "INT": 10,
+   "SAB": 12,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Spear",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Shield Bash",
+    "bono": 7,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "gnoll": {
+  "nombre": "Gnoll",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 14,
+   "DES": 12,
+   "CON": 11,
+   "INT": 6,
+   "SAB": 10,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d4"
+   },
+   {
+    "nombre": "Spear",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Longbow",
+    "bono": 3,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "goat": {
+  "nombre": "Goat",
+  "cr": "0",
+  "pg": 4,
+  "ca_fija": 10,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 12,
+   "DES": 10,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Ram",
+    "bono": 3,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "goblin": {
+  "nombre": "Goblin",
+  "cr": "1/4",
+  "pg": 7,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 8,
+   "DES": 14,
+   "CON": 10,
+   "INT": 10,
+   "SAB": 8,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Scimitar",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Shortbow",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "gold_dragon_wyrmling": {
+  "nombre": "Gold Dragon Wyrmling",
+  "cr": "3",
+  "pg": 60,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 14,
+   "CON": 17,
+   "INT": 14,
+   "SAB": 11,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "4d10"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "gorgon": {
+  "nombre": "Gorgon",
+  "cr": "5",
+  "pg": 114,
+  "ca_fija": 19,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 20,
+   "DES": 11,
+   "CON": 18,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Gore",
+    "bono": 8,
+    "danio": "2d12"
+   },
+   {
+    "nombre": "Hooves",
+    "bono": 8,
+    "danio": "2d10"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "gray_ooze": {
+  "nombre": "Gray Ooze",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 8,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 12,
+   "DES": 6,
+   "CON": 16,
+   "INT": 1,
+   "SAB": 6,
+   "CAR": 2
+  },
+  "ataques": [
+   {
+    "nombre": "Pseudopod",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Ooze"
+ },
+ "green_dragon_wyrmling": {
+  "nombre": "Green Dragon Wyrmling",
+  "cr": "2",
+  "pg": 38,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 12,
+   "CON": 13,
+   "INT": 14,
+   "SAB": 11,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d10+1"
+   },
+   {
+    "nombre": "Poison Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "6d6"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "green_hag": {
+  "nombre": "Green Hag",
+  "cr": "3",
+  "pg": 82,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 12,
+   "CON": 16,
+   "INT": 13,
+   "SAB": 14,
+   "CAR": 14
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 6,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Fey"
+ },
+ "grick": {
+  "nombre": "Grick",
+  "cr": "2",
+  "pg": 27,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 14,
+   "DES": 14,
+   "CON": 11,
+   "INT": 3,
+   "SAB": 14,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Tentacles",
+    "bono": 4,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Beak",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "griffon": {
+  "nombre": "Griffon",
+  "cr": "2",
+  "pg": 59,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 15,
+   "CON": 16,
+   "INT": 2,
+   "SAB": 13,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 6,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "grimlock": {
+  "nombre": "Grimlock",
+  "cr": "1/4",
+  "pg": 11,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 12,
+   "CON": 12,
+   "INT": 9,
+   "SAB": 8,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Spiked Bone Club",
+    "bono": 5,
+    "danio": "1d4+1"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "guard": {
+  "nombre": "Guard",
+  "cr": "1/8",
+  "pg": 11,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 13,
+   "DES": 12,
+   "CON": 12,
+   "INT": 10,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Spear",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "guardian_naga": {
+  "nombre": "Guardian Naga",
+  "cr": "10",
+  "pg": 127,
+  "ca_fija": 18,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 19,
+   "DES": 18,
+   "CON": 16,
+   "INT": 16,
+   "SAB": 19,
+   "CAR": 18
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 8,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Spit Poison",
+    "bono": 8,
+    "danio": "10d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "half_red_dragon_veteran": {
+  "nombre": "Half-Red Dragon Veteran",
+  "cr": "5",
+  "pg": 65,
+  "ca_fija": 18,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 13,
+   "CON": 14,
+   "INT": 10,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Longsword",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Shortsword",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Heavy Crossbow",
+    "bono": 3,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "harpy": {
+  "nombre": "Harpy",
+  "cr": "1",
+  "pg": 38,
+  "ca_fija": 11,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 12,
+   "DES": 13,
+   "CON": 12,
+   "INT": 7,
+   "SAB": 10,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 3,
+    "danio": "2d4"
+   },
+   {
+    "nombre": "Club",
+    "bono": 3,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "hawk": {
+  "nombre": "Hawk",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 13,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 5,
+   "DES": 16,
+   "CON": 8,
+   "INT": 2,
+   "SAB": 14,
+   "CAR": 6
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "hell_hound": {
+  "nombre": "Hell Hound",
+  "cr": "3",
+  "pg": 45,
+  "ca_fija": 15,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 17,
+   "DES": 12,
+   "CON": 14,
+   "INT": 6,
+   "SAB": 13,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Fire Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "6d6"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "hezrou": {
+  "nombre": "Hezrou",
+  "cr": "8",
+  "pg": 136,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 17,
+   "CON": 20,
+   "INT": 5,
+   "SAB": 12,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 7,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "hill_giant": {
+  "nombre": "Hill Giant",
+  "cr": "5",
+  "pg": 105,
+  "ca_fija": 13,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 21,
+   "DES": 8,
+   "CON": 19,
+   "INT": 5,
+   "SAB": 9,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Greatclub",
+    "bono": 8,
+    "danio": "3d8"
+   },
+   {
+    "nombre": "Rock",
+    "bono": 8,
+    "danio": "3d10"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "hippogriff": {
+  "nombre": "Hippogriff",
+  "cr": "1",
+  "pg": 19,
+  "ca_fija": 11,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 17,
+   "DES": 13,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 5,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "hobgoblin": {
+  "nombre": "Hobgoblin",
+  "cr": "1/2",
+  "pg": 11,
+  "ca_fija": 18,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 13,
+   "DES": 12,
+   "CON": 12,
+   "INT": 10,
+   "SAB": 10,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "Longsword",
+    "bono": 3,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Longbow",
+    "bono": 3,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "homunculus": {
+  "nombre": "Homunculus",
+  "cr": "0",
+  "pg": 5,
+  "ca_fija": 13,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 4,
+   "DES": 15,
+   "CON": 11,
+   "INT": 10,
+   "SAB": 10,
+   "CAR": 7
+  },
+  "ataques": [],
+  "tipo_criatura": "Construct"
+ },
+ "hunter_shark": {
+  "nombre": "Hunter Shark",
+  "cr": "2",
+  "pg": 45,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 13,
+   "CON": 15,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "hydra": {
+  "nombre": "Hydra",
+  "cr": "8",
+  "pg": 172,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 20,
+   "DES": 12,
+   "CON": 20,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 8,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "hyena": {
+  "nombre": "Hyena",
+  "cr": "0",
+  "pg": 5,
+  "ca_fija": 11,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 11,
+   "DES": 13,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 2,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "ice_mephit": {
+  "nombre": "Ice Mephit",
+  "cr": "1/2",
+  "pg": 21,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 7,
+   "DES": 13,
+   "CON": 10,
+   "INT": 9,
+   "SAB": 11,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 3,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "imp": {
+  "nombre": "Imp",
+  "cr": "1",
+  "pg": 10,
+  "ca_fija": 13,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 6,
+   "DES": 17,
+   "CON": 13,
+   "INT": 11,
+   "SAB": 12,
+   "CAR": 14
+  },
+  "ataques": [
+   {
+    "nombre": "Sting (Bite in Beast Form)",
+    "bono": 5,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "invisible_stalker": {
+  "nombre": "Invisible Stalker",
+  "cr": "6",
+  "pg": 104,
+  "ca_fija": 14,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 16,
+   "DES": 19,
+   "CON": 14,
+   "INT": 10,
+   "SAB": 15,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "jackal": {
+  "nombre": "Jackal",
+  "cr": "0",
+  "pg": 3,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 8,
+   "DES": 15,
+   "CON": 11,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 1,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "killer_whale": {
+  "nombre": "Killer Whale",
+  "cr": "3",
+  "pg": 90,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 10,
+   "CON": 13,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "knight": {
+  "nombre": "Knight",
+  "cr": "3",
+  "pg": 52,
+  "ca_fija": 18,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 11,
+   "CON": 14,
+   "INT": 11,
+   "SAB": 11,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Greatsword",
+    "bono": 5,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Heavy Crossbow",
+    "bono": 2,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "kobold": {
+  "nombre": "Kobold",
+  "cr": "1/8",
+  "pg": 5,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 7,
+   "DES": 15,
+   "CON": 9,
+   "INT": 8,
+   "SAB": 7,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Dagger",
+    "bono": 4,
+    "danio": "1d4"
+   },
+   {
+    "nombre": "Sling",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "lamia": {
+  "nombre": "Lamia",
+  "cr": "4",
+  "pg": 97,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 13,
+   "CON": 15,
+   "INT": 14,
+   "SAB": 15,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 5,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Dagger",
+    "bono": 5,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "lemure": {
+  "nombre": "Lemure",
+  "cr": "0",
+  "pg": 13,
+  "ca_fija": 7,
+  "velocidad_m": 4,
+  "atributos": {
+   "FUE": 10,
+   "DES": 5,
+   "CON": 11,
+   "INT": 1,
+   "SAB": 11,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Fist",
+    "bono": 3,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "lion": {
+  "nombre": "Lion",
+  "cr": "1",
+  "pg": 26,
+  "ca_fija": 12,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 17,
+   "DES": 15,
+   "CON": 13,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 5,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "lizard": {
+  "nombre": "Lizard",
+  "cr": "0",
+  "pg": 2,
+  "ca_fija": 10,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 2,
+   "DES": 11,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 8,
+   "CAR": 3
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "lizardfolk": {
+  "nombre": "Lizardfolk",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 10,
+   "CON": 13,
+   "INT": 7,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Heavy Club",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Javelin",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "mage": {
+  "nombre": "Mage",
+  "cr": "6",
+  "pg": 40,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 9,
+   "DES": 14,
+   "CON": 11,
+   "INT": 17,
+   "SAB": 12,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Dagger",
+    "bono": 5,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "magma_mephit": {
+  "nombre": "Magma Mephit",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 8,
+   "DES": 12,
+   "CON": 12,
+   "INT": 7,
+   "SAB": 10,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 3,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "magmin": {
+  "nombre": "Magmin",
+  "cr": "1/2",
+  "pg": 9,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 7,
+   "DES": 15,
+   "CON": 12,
+   "INT": 8,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Touch",
+    "bono": 4,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "mammoth": {
+  "nombre": "Mammoth",
+  "cr": "6",
+  "pg": 126,
+  "ca_fija": 13,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 24,
+   "DES": 9,
+   "CON": 21,
+   "INT": 3,
+   "SAB": 11,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Gore",
+    "bono": 10,
+    "danio": "4d8"
+   },
+   {
+    "nombre": "Stomp",
+    "bono": 10,
+    "danio": "4d10"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "manticore": {
+  "nombre": "Manticore",
+  "cr": "3",
+  "pg": 68,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 17,
+   "DES": 16,
+   "CON": 17,
+   "INT": 7,
+   "SAB": 12,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Tail Spike",
+    "bono": 5,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "mastiff": {
+  "nombre": "Mastiff",
+  "cr": "1/8",
+  "pg": 5,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 13,
+   "DES": 14,
+   "CON": 12,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "medusa": {
+  "nombre": "Medusa",
+  "cr": "6",
+  "pg": 127,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 15,
+   "CON": 16,
+   "INT": 12,
+   "SAB": 13,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Snake Hair",
+    "bono": 5,
+    "danio": "1d4"
+   },
+   {
+    "nombre": "Shortsword",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Longbow",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "merfolk": {
+  "nombre": "Merfolk",
+  "cr": "1/8",
+  "pg": 11,
+  "ca_fija": 11,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 10,
+   "DES": 13,
+   "CON": 12,
+   "INT": 11,
+   "SAB": 11,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Spear",
+    "bono": 2,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "merrow": {
+  "nombre": "Merrow",
+  "cr": "2",
+  "pg": 45,
+  "ca_fija": 13,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 18,
+   "DES": 10,
+   "CON": 15,
+   "INT": 8,
+   "SAB": 10,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 6,
+    "danio": "2d4"
+   },
+   {
+    "nombre": "Harpoon",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "mimic": {
+  "nombre": "Mimic",
+  "cr": "2",
+  "pg": 58,
+  "ca_fija": 12,
+  "velocidad_m": 4,
+  "atributos": {
+   "FUE": 17,
+   "DES": 12,
+   "CON": 15,
+   "INT": 5,
+   "SAB": 13,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Pseudopod",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d8+1"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "minotaur": {
+  "nombre": "Minotaur",
+  "cr": "3",
+  "pg": 76,
+  "ca_fija": 14,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 18,
+   "DES": 11,
+   "CON": 16,
+   "INT": 6,
+   "SAB": 16,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "Greataxe",
+    "bono": 6,
+    "danio": "2d12"
+   },
+   {
+    "nombre": "Gore",
+    "bono": 6,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "minotaur_skeleton": {
+  "nombre": "Minotaur Skeleton",
+  "cr": "2",
+  "pg": 67,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 18,
+   "DES": 11,
+   "CON": 15,
+   "INT": 6,
+   "SAB": 8,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Greataxe",
+    "bono": 6,
+    "danio": "2d12"
+   },
+   {
+    "nombre": "Gore",
+    "bono": 6,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "mule": {
+  "nombre": "Mule",
+  "cr": "1/8",
+  "pg": 11,
+  "ca_fija": 10,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 14,
+   "DES": 10,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "mummy": {
+  "nombre": "Mummy",
+  "cr": "3",
+  "pg": 58,
+  "ca_fija": 11,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 16,
+   "DES": 8,
+   "CON": 15,
+   "INT": 6,
+   "SAB": 10,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Rotting Fist",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "night_hag": {
+  "nombre": "Night Hag",
+  "cr": "5",
+  "pg": 112,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 15,
+   "CON": 16,
+   "INT": 16,
+   "SAB": 14,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Claws (Hag Form Only)",
+    "bono": 7,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "nightmare": {
+  "nombre": "Nightmare",
+  "cr": "3",
+  "pg": 68,
+  "ca_fija": 13,
+  "velocidad_m": 18,
+  "atributos": {
+   "FUE": 18,
+   "DES": 15,
+   "CON": 16,
+   "INT": 10,
+   "SAB": 13,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 6,
+    "danio": "2d8+2"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "noble": {
+  "nombre": "Noble",
+  "cr": "1/8",
+  "pg": 9,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 11,
+   "DES": 12,
+   "CON": 11,
+   "INT": 12,
+   "SAB": 14,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Rapier",
+    "bono": 3,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "ochre_jelly": {
+  "nombre": "Ochre Jelly",
+  "cr": "2",
+  "pg": 45,
+  "ca_fija": 8,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 15,
+   "DES": 6,
+   "CON": 14,
+   "INT": 2,
+   "SAB": 6,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Pseudopod",
+    "bono": 4,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Ooze"
+ },
+ "octopus": {
+  "nombre": "Octopus",
+  "cr": "0",
+  "pg": 3,
+  "ca_fija": 12,
+  "velocidad_m": 2,
+  "atributos": {
+   "FUE": 4,
+   "DES": 15,
+   "CON": 11,
+   "INT": 3,
+   "SAB": 10,
+   "CAR": 4
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "ogre": {
+  "nombre": "Ogre",
+  "cr": "2",
+  "pg": 59,
+  "ca_fija": 11,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 19,
+   "DES": 8,
+   "CON": 16,
+   "INT": 5,
+   "SAB": 7,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Greatclub",
+    "bono": 6,
+    "danio": "2d8"
+   },
+   {
+    "nombre": "Javelin",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "ogre_zombie": {
+  "nombre": "Ogre Zombie",
+  "cr": "2",
+  "pg": 85,
+  "ca_fija": 8,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 6,
+   "CON": 18,
+   "INT": 3,
+   "SAB": 6,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Morningstar",
+    "bono": 6,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "oni": {
+  "nombre": "Oni",
+  "cr": "7",
+  "pg": 110,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 11,
+   "CON": 16,
+   "INT": 14,
+   "SAB": 12,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Claw (Oni Form Only)",
+    "bono": 7,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Glaive",
+    "bono": 7,
+    "danio": "2d10"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "orc": {
+  "nombre": "Orc",
+  "cr": "1/2",
+  "pg": 15,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 12,
+   "CON": 16,
+   "INT": 7,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Greataxe",
+    "bono": 5,
+    "danio": "1d12"
+   },
+   {
+    "nombre": "Javelin",
+    "bono": 5,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "otyugh": {
+  "nombre": "Otyugh",
+  "cr": "5",
+  "pg": 114,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 11,
+   "CON": 19,
+   "INT": 6,
+   "SAB": 13,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "2d8"
+   },
+   {
+    "nombre": "Tentacle",
+    "bono": 6,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Aberration"
+ },
+ "owl": {
+  "nombre": "Owl",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 11,
+  "velocidad_m": 2,
+  "atributos": {
+   "FUE": 3,
+   "DES": 13,
+   "CON": 8,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "owlbear": {
+  "nombre": "Owlbear",
+  "cr": "3",
+  "pg": 59,
+  "ca_fija": 13,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 20,
+   "DES": 12,
+   "CON": 17,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 7,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 7,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "panther": {
+  "nombre": "Panther",
+  "cr": "1/4",
+  "pg": 13,
+  "ca_fija": 12,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 14,
+   "DES": 15,
+   "CON": 10,
+   "INT": 3,
+   "SAB": 14,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "pegasus": {
+  "nombre": "Pegasus",
+  "cr": "2",
+  "pg": 59,
+  "ca_fija": 12,
+  "velocidad_m": 18,
+  "atributos": {
+   "FUE": 18,
+   "DES": 15,
+   "CON": 16,
+   "INT": 10,
+   "SAB": 15,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Celestial"
+ },
+ "phase_spider": {
+  "nombre": "Phase Spider",
+  "cr": "3",
+  "pg": 32,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 15,
+   "CON": 12,
+   "INT": 6,
+   "SAB": 10,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "plesiosaurus": {
+  "nombre": "Plesiosaurus",
+  "cr": "2",
+  "pg": 68,
+  "ca_fija": 13,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 18,
+   "DES": 15,
+   "CON": 16,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "3d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "poisonous_snake": {
+  "nombre": "Poisonous Snake",
+  "cr": "1/8",
+  "pg": 2,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 2,
+   "DES": 16,
+   "CON": 11,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "polar_bear": {
+  "nombre": "Polar Bear",
+  "cr": "2",
+  "pg": 42,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 20,
+   "DES": 10,
+   "CON": 16,
+   "INT": 2,
+   "SAB": 13,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 7,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "pony": {
+  "nombre": "Pony",
+  "cr": "1/8",
+  "pg": 11,
+  "ca_fija": 10,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 15,
+   "DES": 10,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 4,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "priest": {
+  "nombre": "Priest",
+  "cr": "2",
+  "pg": 27,
+  "ca_fija": 13,
+  "velocidad_m": 8,
+  "atributos": {
+   "FUE": 10,
+   "DES": 10,
+   "CON": 12,
+   "INT": 13,
+   "SAB": 16,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Mace",
+    "bono": 2,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "pseudodragon": {
+  "nombre": "Pseudodragon",
+  "cr": "1/4",
+  "pg": 7,
+  "ca_fija": 13,
+  "velocidad_m": 4,
+  "atributos": {
+   "FUE": 6,
+   "DES": 15,
+   "CON": 13,
+   "INT": 10,
+   "SAB": 12,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d4"
+   },
+   {
+    "nombre": "Sting",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "quasit": {
+  "nombre": "Quasit",
+  "cr": "1",
+  "pg": 7,
+  "ca_fija": 13,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 5,
+   "DES": 17,
+   "CON": 10,
+   "INT": 7,
+   "SAB": 10,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Claw (Bite in Beast Form)",
+    "bono": 4,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "quipper": {
+  "nombre": "Quipper",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 2,
+   "DES": 16,
+   "CON": 9,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 2
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "rat": {
+  "nombre": "Rat",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 10,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 2,
+   "DES": 11,
+   "CON": 9,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 4
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "raven": {
+  "nombre": "Raven",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 12,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 2,
+   "DES": 14,
+   "CON": 8,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "red_dragon_wyrmling": {
+  "nombre": "Red Dragon Wyrmling",
+  "cr": "4",
+  "pg": 75,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 10,
+   "CON": 17,
+   "INT": 12,
+   "SAB": 11,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "1d10+1"
+   },
+   {
+    "nombre": "Fire Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "7d6"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "reef_shark": {
+  "nombre": "Reef Shark",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 14,
+   "DES": 13,
+   "CON": 13,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "rhinoceros": {
+  "nombre": "Rhinoceros",
+  "cr": "2",
+  "pg": 45,
+  "ca_fija": 11,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 21,
+   "DES": 8,
+   "CON": 15,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Gore",
+    "bono": 7,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "riding_horse": {
+  "nombre": "Riding Horse",
+  "cr": "1/4",
+  "pg": 13,
+  "ca_fija": 10,
+  "velocidad_m": 18,
+  "atributos": {
+   "FUE": 16,
+   "DES": 10,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 5,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "roper": {
+  "nombre": "Roper",
+  "cr": "5",
+  "pg": 93,
+  "ca_fija": 20,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 18,
+   "DES": 8,
+   "CON": 17,
+   "INT": 7,
+   "SAB": 16,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "4d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "rug_of_smothering": {
+  "nombre": "Rug of Smothering",
+  "cr": "2",
+  "pg": 33,
+  "ca_fija": 12,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 17,
+   "DES": 14,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 3,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Smother",
+    "bono": 0,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Construct"
+ },
+ "rust_monster": {
+  "nombre": "Rust Monster",
+  "cr": "1/2",
+  "pg": 27,
+  "ca_fija": 14,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 13,
+   "DES": 12,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 13,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "saber_toothed_tiger": {
+  "nombre": "Saber-Toothed Tiger",
+  "cr": "2",
+  "pg": 52,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 18,
+   "DES": 14,
+   "CON": 15,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "sahuagin": {
+  "nombre": "Sahuagin",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 13,
+   "DES": 11,
+   "CON": 12,
+   "INT": 12,
+   "SAB": 13,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 3,
+    "danio": "1d4"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 3,
+    "danio": "1d4"
+   },
+   {
+    "nombre": "Spear",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "salamander": {
+  "nombre": "Salamander",
+  "cr": "5",
+  "pg": 90,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 14,
+   "CON": 15,
+   "INT": 11,
+   "SAB": 10,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Spear",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Tail",
+    "bono": 7,
+    "danio": "2d6+2"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "satyr": {
+  "nombre": "Satyr",
+  "cr": "1/2",
+  "pg": 31,
+  "ca_fija": 14,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 12,
+   "DES": 16,
+   "CON": 11,
+   "INT": 12,
+   "SAB": 10,
+   "CAR": 14
+  },
+  "ataques": [
+   {
+    "nombre": "Ram",
+    "bono": 3,
+    "danio": "2d4"
+   },
+   {
+    "nombre": "Shortsword",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Shortbow",
+    "bono": 5,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Fey"
+ },
+ "scorpion": {
+  "nombre": "Scorpion",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 11,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 2,
+   "DES": 11,
+   "CON": 8,
+   "INT": 1,
+   "SAB": 8,
+   "CAR": 2
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "scout": {
+  "nombre": "Scout",
+  "cr": "1/2",
+  "pg": 16,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 11,
+   "DES": 14,
+   "CON": 12,
+   "INT": 11,
+   "SAB": 13,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Shortsword",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Longbow",
+    "bono": 4,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "sea_hag": {
+  "nombre": "Sea Hag",
+  "cr": "2",
+  "pg": 52,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 13,
+   "CON": 16,
+   "INT": 12,
+   "SAB": 12,
+   "CAR": 13
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Fey"
+ },
+ "sea_horse": {
+  "nombre": "Sea Horse",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 1,
+   "DES": 12,
+   "CON": 8,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 2
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "shadow": {
+  "nombre": "Shadow",
+  "cr": "1/2",
+  "pg": 16,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 6,
+   "DES": 14,
+   "CON": 13,
+   "INT": 6,
+   "SAB": 10,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Strength Drain",
+    "bono": 4,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "shambling_mound": {
+  "nombre": "Shambling Mound",
+  "cr": "5",
+  "pg": 136,
+  "ca_fija": 15,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 18,
+   "DES": 8,
+   "CON": 16,
+   "INT": 5,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 7,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Plant"
+ },
+ "shield_guardian": {
+  "nombre": "Shield Guardian",
+  "cr": "7",
+  "pg": 142,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 8,
+   "CON": 18,
+   "INT": 7,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Fist",
+    "bono": 7,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Construct"
+ },
+ "shrieker": {
+  "nombre": "Shrieker",
+  "cr": "0",
+  "pg": 13,
+  "ca_fija": 5,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 1,
+   "DES": 1,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 3,
+   "CAR": 1
+  },
+  "ataques": [],
+  "tipo_criatura": "Plant"
+ },
+ "silver_dragon_wyrmling": {
+  "nombre": "Silver Dragon Wyrmling",
+  "cr": "2",
+  "pg": 45,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 10,
+   "CON": 17,
+   "INT": 12,
+   "SAB": 11,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "4d8"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "skeleton": {
+  "nombre": "Skeleton",
+  "cr": "1/4",
+  "pg": 13,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 14,
+   "CON": 15,
+   "INT": 6,
+   "SAB": 8,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Shortsword",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Shortbow",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "specter": {
+  "nombre": "Specter",
+  "cr": "1",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 1,
+   "DES": 14,
+   "CON": 11,
+   "INT": 10,
+   "SAB": 10,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Life Drain",
+    "bono": 4,
+    "danio": "3d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "spider": {
+  "nombre": "Spider",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 12,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 2,
+   "DES": 14,
+   "CON": 8,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 2
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "spirit_naga": {
+  "nombre": "Spirit Naga",
+  "cr": "8",
+  "pg": 75,
+  "ca_fija": 15,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 18,
+   "DES": 17,
+   "CON": 14,
+   "INT": 16,
+   "SAB": 15,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "sprite": {
+  "nombre": "Sprite",
+  "cr": "1/4",
+  "pg": 2,
+  "ca_fija": 15,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 3,
+   "DES": 18,
+   "CON": 10,
+   "INT": 14,
+   "SAB": 13,
+   "CAR": 11
+  },
+  "ataques": [],
+  "tipo_criatura": "Fey"
+ },
+ "spy": {
+  "nombre": "Spy",
+  "cr": "1",
+  "pg": 27,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 15,
+   "CON": 10,
+   "INT": 12,
+   "SAB": 14,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Shortsword",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Hand Crossbow",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "steam_mephit": {
+  "nombre": "Steam Mephit",
+  "cr": "1/4",
+  "pg": 21,
+  "ca_fija": 10,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 5,
+   "DES": 11,
+   "CON": 10,
+   "INT": 11,
+   "SAB": 10,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 2,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "stirge": {
+  "nombre": "Stirge",
+  "cr": "1/8",
+  "pg": 2,
+  "ca_fija": 14,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 4,
+   "DES": 16,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 8,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Blood Drain",
+    "bono": 5,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "stone_giant": {
+  "nombre": "Stone Giant",
+  "cr": "7",
+  "pg": 126,
+  "ca_fija": 17,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 23,
+   "DES": 15,
+   "CON": 20,
+   "INT": 10,
+   "SAB": 12,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "Greatclub",
+    "bono": 9,
+    "danio": "3d8"
+   },
+   {
+    "nombre": "Rock",
+    "bono": 9,
+    "danio": "4d10"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "stone_golem": {
+  "nombre": "Stone Golem",
+  "cr": "10",
+  "pg": 178,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 22,
+   "DES": 9,
+   "CON": 20,
+   "INT": 3,
+   "SAB": 11,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 10,
+    "danio": "3d8"
+   }
+  ],
+  "tipo_criatura": "Construct"
+ },
+ "succubus_incubus": {
+  "nombre": "Succubus/Incubus",
+  "cr": "4",
+  "pg": 66,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 8,
+   "DES": 17,
+   "CON": 13,
+   "INT": 15,
+   "SAB": 12,
+   "CAR": 20
+  },
+  "ataques": [
+   {
+    "nombre": "Claw (Fiend Form Only)",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Draining Kiss",
+    "bono": 0,
+    "danio": "5d10"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "swarm_of_bats": {
+  "nombre": "Swarm of Bats",
+  "cr": "1/4",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 5,
+   "DES": 15,
+   "CON": 10,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 4,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_beetles": {
+  "nombre": "Swarm of Beetles",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 3,
+   "DES": 13,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 3,
+    "danio": "4d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_centipedes": {
+  "nombre": "Swarm of Centipedes",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 3,
+   "DES": 13,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 3,
+    "danio": "4d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_insects": {
+  "nombre": "Swarm of Insects",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 3,
+   "DES": 13,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 3,
+    "danio": "4d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_poisonous_snakes": {
+  "nombre": "Swarm of Poisonous Snakes",
+  "cr": "2",
+  "pg": 36,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 8,
+   "DES": 18,
+   "CON": 11,
+   "INT": 1,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_quippers": {
+  "nombre": "Swarm of Quippers",
+  "cr": "1",
+  "pg": 28,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 13,
+   "DES": 16,
+   "CON": 9,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 2
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 5,
+    "danio": "4d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_rats": {
+  "nombre": "Swarm of Rats",
+  "cr": "1/4",
+  "pg": 24,
+  "ca_fija": 10,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 9,
+   "DES": 11,
+   "CON": 9,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 3
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 2,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_ravens": {
+  "nombre": "Swarm of Ravens",
+  "cr": "1/4",
+  "pg": 24,
+  "ca_fija": 12,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 6,
+   "DES": 14,
+   "CON": 8,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Beaks",
+    "bono": 4,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_spiders": {
+  "nombre": "Swarm of Spiders",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 3,
+   "DES": 13,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 3,
+    "danio": "4d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "swarm_of_wasps": {
+  "nombre": "Swarm of Wasps",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 12,
+  "velocidad_m": 2,
+  "atributos": {
+   "FUE": 3,
+   "DES": 13,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 7,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Bites",
+    "bono": 3,
+    "danio": "4d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "thug": {
+  "nombre": "Thug",
+  "cr": "1/2",
+  "pg": 32,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 11,
+   "CON": 14,
+   "INT": 10,
+   "SAB": 10,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Mace",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Heavy Crossbow",
+    "bono": 2,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "tiger": {
+  "nombre": "Tiger",
+  "cr": "1",
+  "pg": 37,
+  "ca_fija": 12,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 17,
+   "DES": 15,
+   "CON": 14,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "treant": {
+  "nombre": "Treant",
+  "cr": "9",
+  "pg": 138,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 23,
+   "DES": 8,
+   "CON": 21,
+   "INT": 12,
+   "SAB": 16,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 10,
+    "danio": "3d6"
+   },
+   {
+    "nombre": "Rock",
+    "bono": 10,
+    "danio": "4d10"
+   }
+  ],
+  "tipo_criatura": "Plant"
+ },
+ "tribal_warrior": {
+  "nombre": "Tribal Warrior",
+  "cr": "1/8",
+  "pg": 11,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 13,
+   "DES": 11,
+   "CON": 12,
+   "INT": 8,
+   "SAB": 11,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Spear",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "triceratops": {
+  "nombre": "Triceratops",
+  "cr": "5",
+  "pg": 95,
+  "ca_fija": 13,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 22,
+   "DES": 9,
+   "CON": 17,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Gore",
+    "bono": 9,
+    "danio": "4d8"
+   },
+   {
+    "nombre": "Stomp",
+    "bono": 9,
+    "danio": "3d10"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "troll": {
+  "nombre": "Troll",
+  "cr": "5",
+  "pg": 84,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 13,
+   "CON": 20,
+   "INT": 7,
+   "SAB": 9,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 7,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Giant"
+ },
+ "tyrannosaurus_rex": {
+  "nombre": "Tyrannosaurus Rex",
+  "cr": "8",
+  "pg": 136,
+  "ca_fija": 13,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 25,
+   "DES": 10,
+   "CON": 19,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 9
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 10,
+    "danio": "4d12"
+   },
+   {
+    "nombre": "Tail",
+    "bono": 10,
+    "danio": "3d8"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "unicorn": {
+  "nombre": "Unicorn",
+  "cr": "5",
+  "pg": 67,
+  "ca_fija": 12,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 18,
+   "DES": 14,
+   "CON": 15,
+   "INT": 11,
+   "SAB": 17,
+   "CAR": 16
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Horn",
+    "bono": 7,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Celestial"
+ },
+ "vampire_spawn": {
+  "nombre": "Vampire Spawn",
+  "cr": "5",
+  "pg": 82,
+  "ca_fija": 15,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 16,
+   "CON": 16,
+   "INT": 11,
+   "SAB": 10,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Claws",
+    "bono": 6,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "veteran": {
+  "nombre": "Veteran",
+  "cr": "3",
+  "pg": 58,
+  "ca_fija": 17,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 16,
+   "DES": 13,
+   "CON": 14,
+   "INT": 10,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Longsword",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Shortsword",
+    "bono": 5,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Heavy Crossbow",
+    "bono": 3,
+    "danio": "1d10"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "violet_fungus": {
+  "nombre": "Violet Fungus",
+  "cr": "1/4",
+  "pg": 18,
+  "ca_fija": 5,
+  "velocidad_m": 2,
+  "atributos": {
+   "FUE": 3,
+   "DES": 1,
+   "CON": 10,
+   "INT": 1,
+   "SAB": 3,
+   "CAR": 1
+  },
+  "ataques": [
+   {
+    "nombre": "Rotting Touch",
+    "bono": 2,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Plant"
+ },
+ "vrock": {
+  "nombre": "Vrock",
+  "cr": "6",
+  "pg": 104,
+  "ca_fija": 15,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 17,
+   "DES": 15,
+   "CON": 18,
+   "INT": 8,
+   "SAB": 13,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 6,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Talons",
+    "bono": 6,
+    "danio": "2d10"
+   }
+  ],
+  "tipo_criatura": "Fiend"
+ },
+ "vulture": {
+  "nombre": "Vulture",
+  "cr": "0",
+  "pg": 5,
+  "ca_fija": 10,
+  "velocidad_m": 3,
+  "atributos": {
+   "FUE": 7,
+   "DES": 10,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 4
+  },
+  "ataques": [
+   {
+    "nombre": "Beak",
+    "bono": 2,
+    "danio": "1d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "warhorse": {
+  "nombre": "Warhorse",
+  "cr": "1/2",
+  "pg": 19,
+  "ca_fija": 11,
+  "velocidad_m": 18,
+  "atributos": {
+   "FUE": 18,
+   "DES": 12,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "warhorse_skeleton": {
+  "nombre": "Warhorse Skeleton",
+  "cr": "1/2",
+  "pg": 22,
+  "ca_fija": 13,
+  "velocidad_m": 18,
+  "atributos": {
+   "FUE": 18,
+   "DES": 12,
+   "CON": 15,
+   "INT": 2,
+   "SAB": 8,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Hooves",
+    "bono": 6,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "water_elemental": {
+  "nombre": "Water Elemental",
+  "cr": "5",
+  "pg": 114,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 18,
+   "DES": 14,
+   "CON": 18,
+   "INT": 5,
+   "SAB": 10,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 7,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "weasel": {
+  "nombre": "Weasel",
+  "cr": "0",
+  "pg": 1,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 3,
+   "DES": 16,
+   "CON": 8,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 3
+  },
+  "ataques": [],
+  "tipo_criatura": "Beast"
+ },
+ "werebear": {
+  "nombre": "Werebear",
+  "cr": "5",
+  "pg": 135,
+  "ca_fija": 10,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 19,
+   "DES": 10,
+   "CON": 17,
+   "INT": 11,
+   "SAB": 12,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Bite (Bear or Hybrid Form Only)",
+    "bono": 7,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Claw (Bear or Hybrid Form Only)",
+    "bono": 7,
+    "danio": "2d8"
+   },
+   {
+    "nombre": "Greataxe (Humanoid or Hybrid Form Only)",
+    "bono": 7,
+    "danio": "1d12"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "wereboar": {
+  "nombre": "Wereboar",
+  "cr": "4",
+  "pg": 78,
+  "ca_fija": 10,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 17,
+   "DES": 10,
+   "CON": 15,
+   "INT": 10,
+   "SAB": 11,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Maul (Humanoid or Hybrid Form Only)",
+    "bono": 5,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Tusks (Boar or Hybrid Form Only)",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "wererat": {
+  "nombre": "Wererat",
+  "cr": "2",
+  "pg": 33,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 10,
+   "DES": 15,
+   "CON": 12,
+   "INT": 11,
+   "SAB": 10,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite (Rat or Hybrid Form Only).",
+    "bono": 4,
+    "danio": "1d4"
+   },
+   {
+    "nombre": "Shortsword (Humanoid or Hybrid Form Only)",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Hand Crossbow (Humanoid or Hybrid Form Only)",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "weretiger": {
+  "nombre": "Weretiger",
+  "cr": "4",
+  "pg": 120,
+  "ca_fija": 12,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 17,
+   "DES": 15,
+   "CON": 16,
+   "INT": 10,
+   "SAB": 13,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Bite (Tiger or Hybrid Form Only)",
+    "bono": 5,
+    "danio": "1d10"
+   },
+   {
+    "nombre": "Claw (Tiger or Hybrid Form Only)",
+    "bono": 5,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Scimitar (Humanoid or Hybrid Form Only)",
+    "bono": 5,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "werewolf": {
+  "nombre": "Werewolf",
+  "cr": "3",
+  "pg": 58,
+  "ca_fija": 11,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 13,
+   "CON": 14,
+   "INT": 10,
+   "SAB": 11,
+   "CAR": 10
+  },
+  "ataques": [
+   {
+    "nombre": "Bite (Wolf or Hybrid Form Only)",
+    "bono": 4,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Claws (Hybrid Form Only)",
+    "bono": 4,
+    "danio": "2d4"
+   },
+   {
+    "nombre": "Spear (Humanoid Form Only)",
+    "bono": 4,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Humanoid"
+ },
+ "white_dragon_wyrmling": {
+  "nombre": "White Dragon Wyrmling",
+  "cr": "2",
+  "pg": 32,
+  "ca_fija": 16,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 14,
+   "DES": 10,
+   "CON": 14,
+   "INT": 5,
+   "SAB": 10,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "1d10+1"
+   },
+   {
+    "nombre": "Cold Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "5d8"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "wight": {
+  "nombre": "Wight",
+  "cr": "3",
+  "pg": 45,
+  "ca_fija": 14,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 15,
+   "DES": 14,
+   "CON": 16,
+   "INT": 10,
+   "SAB": 13,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Life Drain",
+    "bono": 4,
+    "danio": "1d6"
+   },
+   {
+    "nombre": "Longsword",
+    "bono": 4,
+    "danio": "1d8"
+   },
+   {
+    "nombre": "Longbow",
+    "bono": 4,
+    "danio": "1d8"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "will_o_wisp": {
+  "nombre": "Will-o'-Wisp",
+  "cr": "2",
+  "pg": 22,
+  "ca_fija": 19,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 1,
+   "DES": 28,
+   "CON": 10,
+   "INT": 13,
+   "SAB": 14,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Shock",
+    "bono": 4,
+    "danio": "2d8"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "winter_wolf": {
+  "nombre": "Winter Wolf",
+  "cr": "3",
+  "pg": 75,
+  "ca_fija": 13,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 18,
+   "DES": 13,
+   "CON": 14,
+   "INT": 7,
+   "SAB": 12,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Cold Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "4d8"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "wolf": {
+  "nombre": "Wolf",
+  "cr": "1/4",
+  "pg": 11,
+  "ca_fija": 13,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 12,
+   "DES": 15,
+   "CON": 12,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 4,
+    "danio": "2d4"
+   }
+  ],
+  "tipo_criatura": "Beast"
+ },
+ "worg": {
+  "nombre": "Worg",
+  "cr": "1/2",
+  "pg": 26,
+  "ca_fija": 13,
+  "velocidad_m": 15,
+  "atributos": {
+   "FUE": 16,
+   "DES": 13,
+   "CON": 13,
+   "INT": 7,
+   "SAB": 11,
+   "CAR": 8
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 5,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Monstrosity"
+ },
+ "wraith": {
+  "nombre": "Wraith",
+  "cr": "5",
+  "pg": 67,
+  "ca_fija": 13,
+  "velocidad_m": 9,
+  "atributos": {
+   "FUE": 6,
+   "DES": 16,
+   "CON": 16,
+   "INT": 12,
+   "SAB": 14,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Life Drain",
+    "bono": 6,
+    "danio": "4d8"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ },
+ "wyvern": {
+  "nombre": "Wyvern",
+  "cr": "6",
+  "pg": 110,
+  "ca_fija": 13,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 19,
+   "DES": 10,
+   "CON": 16,
+   "INT": 5,
+   "SAB": 12,
+   "CAR": 6
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Claws",
+    "bono": 7,
+    "danio": "2d8"
+   },
+   {
+    "nombre": "Stinger",
+    "bono": 7,
+    "danio": "2d6"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "xorn": {
+  "nombre": "Xorn",
+  "cr": "5",
+  "pg": 73,
+  "ca_fija": 19,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 17,
+   "DES": 10,
+   "CON": 22,
+   "INT": 11,
+   "SAB": 10,
+   "CAR": 11
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 6,
+    "danio": "3d6"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 6,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Elemental"
+ },
+ "young_black_dragon": {
+  "nombre": "Young Black Dragon",
+  "cr": "7",
+  "pg": 127,
+  "ca_fija": 18,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 19,
+   "DES": 14,
+   "CON": 17,
+   "INT": 12,
+   "SAB": 11,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "2d10+1"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Acid Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "11d8"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_blue_dragon": {
+  "nombre": "Young Blue Dragon",
+  "cr": "9",
+  "pg": 152,
+  "ca_fija": 18,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 21,
+   "DES": 10,
+   "CON": 19,
+   "INT": 14,
+   "SAB": 13,
+   "CAR": 17
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 9,
+    "danio": "2d10+1"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 9,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Lightning Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "10d10"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_brass_dragon": {
+  "nombre": "Young Brass Dragon",
+  "cr": "6",
+  "pg": 110,
+  "ca_fija": 17,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 19,
+   "DES": 10,
+   "CON": 17,
+   "INT": 12,
+   "SAB": 11,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "12d6"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_bronze_dragon": {
+  "nombre": "Young Bronze Dragon",
+  "cr": "8",
+  "pg": 142,
+  "ca_fija": 18,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 21,
+   "DES": 10,
+   "CON": 19,
+   "INT": 14,
+   "SAB": 13,
+   "CAR": 17
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 8,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 8,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "10d10"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_copper_dragon": {
+  "nombre": "Young Copper Dragon",
+  "cr": "7",
+  "pg": 119,
+  "ca_fija": 17,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 19,
+   "DES": 12,
+   "CON": 17,
+   "INT": 16,
+   "SAB": 13,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "9d8"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_gold_dragon": {
+  "nombre": "Young Gold Dragon",
+  "cr": "10",
+  "pg": 178,
+  "ca_fija": 18,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 23,
+   "DES": 14,
+   "CON": 21,
+   "INT": 16,
+   "SAB": 13,
+   "CAR": 20
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 10,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 10,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "10d10"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_green_dragon": {
+  "nombre": "Young Green Dragon",
+  "cr": "8",
+  "pg": 136,
+  "ca_fija": 18,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 19,
+   "DES": 12,
+   "CON": 17,
+   "INT": 16,
+   "SAB": 13,
+   "CAR": 15
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "2d10+2"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Poison Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "12d6"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_red_dragon": {
+  "nombre": "Young Red Dragon",
+  "cr": "10",
+  "pg": 178,
+  "ca_fija": 18,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 23,
+   "DES": 10,
+   "CON": 21,
+   "INT": 14,
+   "SAB": 11,
+   "CAR": 19
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 10,
+    "danio": "2d10+1"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 10,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Fire Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "16d6"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_silver_dragon": {
+  "nombre": "Young Silver Dragon",
+  "cr": "9",
+  "pg": 168,
+  "ca_fija": 18,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 23,
+   "DES": 10,
+   "CON": 21,
+   "INT": 14,
+   "SAB": 11,
+   "CAR": 19
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 10,
+    "danio": "2d10"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 10,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Breath Weapons (Recharge 5-6)",
+    "bono": 0,
+    "danio": "12d8"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "young_white_dragon": {
+  "nombre": "Young White Dragon",
+  "cr": "6",
+  "pg": 133,
+  "ca_fija": 17,
+  "velocidad_m": 12,
+  "atributos": {
+   "FUE": 18,
+   "DES": 10,
+   "CON": 18,
+   "INT": 6,
+   "SAB": 11,
+   "CAR": 12
+  },
+  "ataques": [
+   {
+    "nombre": "Bite",
+    "bono": 7,
+    "danio": "2d10+1"
+   },
+   {
+    "nombre": "Claw",
+    "bono": 7,
+    "danio": "2d6"
+   },
+   {
+    "nombre": "Cold Breath (Recharge 5-6)",
+    "bono": 0,
+    "danio": "10d8"
+   }
+  ],
+  "tipo_criatura": "Dragon"
+ },
+ "zombie": {
+  "nombre": "Zombie",
+  "cr": "1/4",
+  "pg": 22,
+  "ca_fija": 8,
+  "velocidad_m": 6,
+  "atributos": {
+   "FUE": 13,
+   "DES": 6,
+   "CON": 16,
+   "INT": 3,
+   "SAB": 6,
+   "CAR": 5
+  },
+  "ataques": [
+   {
+    "nombre": "Slam",
+    "bono": 3,
+    "danio": "1d6"
+   }
+  ],
+  "tipo_criatura": "Undead"
+ }
+}

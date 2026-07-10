@@ -30,7 +30,9 @@ from pathlib import Path
 
 import httpx
 
-API = "https://api.open5e.com"
+# Open5e deprecó la v1: ahora requiere el prefijo /v1/ explícito.
+# (La v2 cambió el formato de campos; nos quedamos en v1 que sigue online.)
+API = "https://api.open5e.com/v1"
 RAIZ = Path(__file__).resolve().parent.parent
 DATA = RAIZ / "data"
 
@@ -78,18 +80,14 @@ def importar_monstruos(cliente: httpx.Client, cr_max: str) -> dict:
         ataques = []
         for a in m.get("actions") or []:
             if a.get("attack_bonus") is not None and a.get("damage_dice"):
-                # "1d6+2" o "2d8" → separamos dados y modificador
-                dd = a["damage_dice"].replace(" ", "")
-                mm = re.fullmatch(r"(\d+d\d+)([+-]\d+)?", dd.split("+", 1)[0]
-                                  + ("+" + dd.split("+", 1)[1]
-                                     if "+" in dd else ""))
-                if not mm:
-                    mm = re.match(r"(\d+d\d+)([+-]\d+)?", dd)
+                # formatos vistos: "1d6+2", "2d8", "4d4 + 4", "1d8+4+2d6"
+                dd = str(a["damage_dice"]).replace(" ", "")
+                mm = re.match(r"(\d+d\d+)([+-]\d+)?", dd)
                 if not mm:
                     continue
                 ataques.append({
                     "nombre": a["name"],
-                    "bono": a["attack_bonus"],
+                    "bono": int(a["attack_bonus"]),
                     "danio": mm.group(1) + (mm.group(2) or ""),
                 })
         clave = slug(m["name"])
