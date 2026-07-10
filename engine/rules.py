@@ -419,3 +419,38 @@ def nivel_por_xp(xp: int) -> int:
         if xp >= req:
             nivel = nv
     return nivel
+
+
+def ataque_statblock(atacante: Criatura, objetivo: Criatura, nombre: str,
+                     bono: int, danio_expr: str,
+                     tipo_danio: str = "?") -> dict:
+    """Ataque de monstruo con números de stat block (importados del SRD):
+    bono de ataque fijo y expresión de daño con modificador incluido."""
+    bonos = penal = 0
+    if objetivo.tiene_condicion("esquivando"):
+        penal += 1
+    if objetivo.tiene_condicion("derribado"):
+        bonos += 1  # asumimos melé para monstruos v1
+    if objetivo.tiene_condicion("cegado"):
+        bonos += 1
+    t = d20(_ventaja_neta(bonos, penal))
+    ca = calcular_ca(objetivo)
+    total = t["natural"] + bono
+    impacta = t["critico"] or (not t["pifia"] and total >= ca)
+    resultado = {"tipo": "ataque", "atacante_id": atacante.id,
+                 "objetivo_id": objetivo.id, "arma": nombre, **t,
+                 "bono_ataque": bono, "total": total, "ca_objetivo": ca,
+                 "impacta": impacta, "critico": t["critico"],
+                 "danio": None, "efectos": [], "inspiracion": None}
+    if impacta:
+        d = roll(danio_expr)
+        if t["critico"]:
+            extra = roll(danio_expr)
+            d = {"expr": f"{danio_expr} x2 (crítico)",
+                 "dados": d["dados"] + extra["dados"], "mod": d["mod"],
+                 "total": d["total"] + extra["total"] - extra["mod"]}
+        danio_total = max(1, d["total"])
+        resultado["danio"] = {**d, "total_final": danio_total,
+                              "tipo_danio": tipo_danio, "extras": []}
+        resultado["efectos"] = aplicar_danio(objetivo, danio_total)["eventos"]
+    return resultado

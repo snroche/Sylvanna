@@ -152,6 +152,7 @@ async def chequear_timeout_turno(db: AsyncSession, camp: Campaign) -> list[dict]
 
 class AccionNarrativa(BaseModel):
     texto: str
+    entre_jugadores: bool = False    # True: charla de party, el DM no interviene
 
 
 @router.post("/say")
@@ -161,6 +162,12 @@ async def accion_narrativa(campaign_id: int, body: AccionNarrativa,
                            db: AsyncSession = Depends(get_db)):
     char = await _mi_personaje(campaign_id, player, db)
     camp = await db.get(Campaign, campaign_id)
+    if body.entre_jugadores:
+        # canal de party: se registra (y el DM lo ve en su contexto como
+        # charla entre jugadores) pero NO dispara narración
+        _msg(db, campaign_id, "party", char.nombre, body.texto)
+        await db.commit()
+        return {"ok": True, "narrando": False}
     if camp.estado == "combate":
         raise HTTPException(409, "Estás en combate: usá attack o cast")
     _msg(db, campaign_id, "jugador", char.nombre, body.texto)
@@ -563,11 +570,18 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
             return eventos
 
         objetivo = min(objetivos, key=lambda c: c.pg_actual)
-        arma_nombre = (npc.stats or {}).get("armas", ["garrote"])[0]
-        arma = ARMAS.get(arma_nombre, ARMAS["garrote"])
         cr_npc = hidratar_npc(npc)
         cr_pj = hidratar_personaje(objetivo)
-        r = resolver_ataque(cr_npc, cr_pj, arma)
+        ataques_sb = (npc.stats or {}).get("ataques") or []
+        if ataques_sb:
+            from engine.rules import ataque_statblock
+            a = ataques_sb[0]
+            r = ataque_statblock(cr_npc, cr_pj, a["nombre"], a["bono"],
+                                 a["danio"])
+        else:
+            arma_nombre = (npc.stats or {}).get("armas", ["garrote"])[0]
+            arma = ARMAS.get(arma_nombre, ARMAS["garrote"])
+            r = resolver_ataque(cr_npc, cr_pj, arma)
         if "requiere_check_concentracion" in r.get("efectos", []):
             conc = check_concentracion(cr_pj, r["danio"]["total_final"])
             eventos.append({"actor": objetivo.nombre, "concentracion": conc})

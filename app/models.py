@@ -30,6 +30,7 @@ class Campaign(Base):
     __tablename__ = "campaigns"
     id: Mapped[int] = mapped_column(primary_key=True)
     nombre: Mapped[str] = mapped_column(String(120))
+    descripcion: Mapped[str] = mapped_column(Text, default="")
     estado: Mapped[str] = mapped_column(String(20), default="exploracion")
     resumen_actual: Mapped[str] = mapped_column(Text, default="")
     tiempo_juego_min: Mapped[int] = mapped_column(Integer, default=0)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -89,7 +89,7 @@ def _inventario_inicial(body: "CrearPersonaje") -> list[dict]:
 
 
 @router.post("")
-async def crear_personaje(body: CrearPersonaje,
+async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
                           player: Player = Depends(jugador_actual),
                           db: AsyncSession = Depends(get_db)):
     _validar(body)
@@ -168,7 +168,31 @@ async def crear_personaje(body: CrearPersonaje,
     # el monje pelea con artes marciales por defecto
     if body.clase == "monje" and not body.arma_equipada:
         char.arma_equipada = "artes_marciales"
+    # ¿es el primer personaje de la campaña? → el DM abre la escena
+    otros = await db.execute(select(Character).where(
+        Character.campaign_id == player.campaign_id))
+    es_primero = otros.scalars().first() is None
+
     db.add(char)
+    await db.flush()
+    if es_primero:
+        from ..models import Campaign
+        from .actions import encolar_narracion
+        camp = await db.get(Campaign, player.campaign_id)
+        encolar_narracion(
+            bg, camp,
+            f"APERTURA DE CAMPAÑA. Es el primer momento de juego. "
+            f"Presentá la escena inicial: dónde se encuentra {char.nombre} "
+            f"({char.raza} {char.clase}), qué ve, qué se siente en el aire, y "
+            f"un gancho concreto que invite a actuar. Respetá la ambientación. "
+            f"Podés declarar nueva_ubicacion en el bloque JSON.",
+            char.id)
+    else:
+        db.add(__import__("app.models", fromlist=["Message"]).Message(
+            campaign_id=player.campaign_id, autor="sistema",
+            autor_nombre="Sistema",
+            contenido=f"🚪 {char.nombre} ({char.raza} {char.clase}) "
+                      f"se une a la party."))
     await db.commit()
     return {"character_id": char.id, "pg_max": char.pg_max,
             "ca": calcular_ca(hidratar_personaje(char)),

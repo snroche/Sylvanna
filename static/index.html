@@ -21,6 +21,10 @@
       <label>Nombre de la campaña
         <input id="inp-camp-nombre" placeholder="La cripta de Valdengrís" maxlength="120">
       </label>
+      <label>Ambientación <span class="nota-inline">(el DM la respeta siempre)</span>
+        <textarea id="inp-camp-desc" rows="3" maxlength="2000"
+          placeholder="Transcurre en Baldur's Gate. Tono oscuro, intriga entre gremios. La party empieza en el puerto…"></textarea>
+      </label>
       <label>Tu nombre
         <input id="inp-jugador-1" placeholder="Santi" maxlength="80">
       </label>
@@ -150,6 +154,7 @@
             <textarea id="inp-accion" rows="2"
               placeholder="Qué hacés o decís… (Enter envía, Shift+Enter salto de línea)"></textarea>
             <button class="btn btn-ambar" id="btn-say">Actuar</button>
+            <button class="btn" id="btn-party" title="Hablar con los demás jugadores sin que el DM intervenga">💬 Party</button>
           </div>
           <details class="tirada-detalle">
             <summary>🎲 Tirada de habilidad</summary>

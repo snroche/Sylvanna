@@ -40,6 +40,7 @@ MIGRACIONES = [
     "ALTER TABLE characters ADD COLUMN estilo_combate VARCHAR(30)",
     "ALTER TABLE characters ADD COLUMN recursos_clase JSON",
     "ALTER TABLE characters ADD COLUMN feats JSON",
+    "ALTER TABLE campaigns ADD COLUMN descripcion TEXT DEFAULT ''",
 ]
 
 

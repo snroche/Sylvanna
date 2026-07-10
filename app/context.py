@@ -27,6 +27,8 @@ async def construir_contexto(db: AsyncSession, camp: Campaign) -> str:
 
     # --- resumen rodante
     partes.append(f"## CAMPAÑA: {camp.nombre}")
+    if camp.descripcion:
+        partes.append(f"## AMBIENTACIÓN (respetarla siempre)\n{camp.descripcion}")
     partes.append(f"Estado: {camp.estado}. "
                   f"Ubicación: {camp.ubicacion_actual or 'sin definir'}. "
                   f"Tiempo de juego: {camp.tiempo_juego_min} min.")
@@ -88,9 +90,13 @@ async def construir_contexto(db: AsyncSession, camp: Campaign) -> str:
                            .limit(MENSAJES_RECIENTES))
     recientes = list(reversed(res.scalars().all()))
     if recientes:
+        def _linea(m):
+            if m.autor == "party":
+                return (f"[charla entre jugadores — NO respondas por ellos] "
+                        f"{m.autor_nombre}: {m.contenido[:300]}")
+            return f"[{m.autor_nombre or m.autor}] {m.contenido[:400]}"
         partes.append("## ÚLTIMOS MENSAJES\n" + "\n".join(
-            f"[{m.autor_nombre or m.autor}] {m.contenido[:400]}"
-            for m in recientes))
+            _linea(m) for m in recientes))
 
     return "\n\n".join(partes)
 

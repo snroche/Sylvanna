@@ -42,13 +42,20 @@ ARMAS: dict[str, Arma] = {
 ARMADURAS: dict[str, Armadura] = {
     "cuero": Armadura("cuero", "ligera", 11, des_max=None),
     "cuero_tachonado": Armadura("cuero_tachonado", "ligera", 12, des_max=None),
-    "cota_de_malla_camisa": Armadura("cota_de_malla_camisa", "media", 13, des_max=2),
+    "camisa_de_mallas": Armadura("camisa_de_mallas", "media", 13, des_max=2),
     "coraza": Armadura("coraza", "media", 14, des_max=2),
     "media_armadura": Armadura("media_armadura", "media", 15, des_max=2),
-    "cota_de_anillas": Armadura("cota_de_anillas", "pesada", 14, des_max=0),
-    "cota_de_malla": Armadura("cota_de_malla", "pesada", 16, des_max=0),
-    "cota_de_placas": Armadura("cota_de_placas", "pesada", 18, des_max=0),
+    "ring_mail": Armadura("ring_mail", "pesada", 14, des_max=0),
+    "cota_de_mallas": Armadura("cota_de_mallas", "pesada", 16, des_max=0),
+    "armadura_de_placas": Armadura("armadura_de_placas", "pesada", 18, des_max=0),
 }
+
+# Aliases de compatibilidad: nombres viejos → misma armadura (personajes
+# existentes en DB siguen funcionando; la UI solo lista los nuevos).
+ARMADURAS["cota_de_malla_camisa"] = ARMADURAS["camisa_de_mallas"]
+ARMADURAS["cota_de_anillas"] = ARMADURAS["ring_mail"]
+ARMADURAS["cota_de_malla"] = ARMADURAS["cota_de_mallas"]
+ARMADURAS["cota_de_placas"] = ARMADURAS["armadura_de_placas"]
 
 # ---------------------------------------------------------------- clases
 
@@ -382,12 +389,13 @@ RAZAS: dict[str, dict] = {
         "rasgo": "Aliento de dragón (narrativo v1), resistencia elemental",
         "subrazas": {},
     },
-    "tiflin": {
+    "tiefling": {
         "bonos": {"CAR": 2, "INT": 1}, "velocidad_m": 9,
         "rasgo": "Resistencia al fuego, visión en la oscuridad",
         "subrazas": {},
     },
 }
+RAZAS["tiflin"] = RAZAS["tiefling"]  # alias de compatibilidad
 
 # ---------------------------------------------------------------- point buy
 
@@ -532,3 +540,27 @@ FEATS: dict[str, dict] = {
     #                 "pasivo": "Competencia en salvaciones de CON"},
     # },
 }
+
+
+# ---------------------------------------------------------------- contenido importado
+# scripts/importar_srd.py genera data/*.json desde Open5e (SRD, CC-BY).
+# Se mergean sin pisar el contenido curado de arriba.
+
+import json as _json
+import pathlib as _pathlib
+
+_DATA = _pathlib.Path(__file__).resolve().parent.parent / "data"
+for _archivo, _destino in (("monstruos_srd.json", MONSTRUOS),
+                           ("conjuros_srd.json", CONJUROS)):
+    _p = _DATA / _archivo
+    if _p.exists():
+        try:
+            for _k, _v in _json.loads(_p.read_text()).items():
+                _destino.setdefault(_k, _v)
+        except Exception as _e:  # un JSON roto no debe tirar el server
+            print(f"[content] no pude cargar {_archivo}: {_e}")
+
+# XP por CR extendida (para monstruos importados de CR alto)
+XP_POR_CR.update({
+    "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900,
+})

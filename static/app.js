@@ -48,8 +48,8 @@ const HABILIDADES = ["atletismo","acrobacias","juego_de_manos","sigilo","arcanos
 const ARMAS = ["daga","espada_corta","espada_larga","hacha_de_mano","hacha_de_batalla",
   "arco_corto","arco_largo","ballesta_de_mano","lanza","mazo","mandoble","baston","cimitarra"];
 
-const ARMADURAS = ["cuero","cuero_tachonado","cota_de_malla_camisa","coraza",
-  "media_armadura","cota_de_anillas","cota_de_malla","cota_de_placas"];
+const ARMADURAS = ["cuero","cuero_tachonado","camisa_de_mallas","coraza",
+  "media_armadura","ring_mail","cota_de_mallas","armadura_de_placas"];
 
 const CONJUROS_V1 = ["rayo_de_escarcha","llama_sagrada","toque_helado","luz",
   "proyectil_magico","curar_heridas","palabra_de_curacion","manos_ardientes",
@@ -57,6 +57,7 @@ const CONJUROS_V1 = ["rayo_de_escarcha","llama_sagrada","toque_helado","luz",
   "hechizar_persona","marca_del_cazador","rociada_de_color","rayo_abrasador",
   "inmovilizar_persona","invisibilidad","paso_brumoso"];
 
+let CONJUROS_SERVER = null;  // {clave: {nivel, nombre}} desde /api/content
 const RAZAS = {
   humano:   {bonos:{FUE:1,DES:1,CON:1,INT:1,SAB:1,CAR:1}, sub:{}, info:"+1 a todo · 9m"},
   elfo:     {bonos:{DES:2}, sub:{alto_elfo:{INT:1}, elfo_de_los_bosques:{SAB:1}, drow:{CAR:1}}, info:"+2 DES · visión nocturna"},
@@ -135,6 +136,7 @@ $("btn-crear-camp").onclick = async () => {
   try {
     const d = await api("POST","/campaigns",{
       nombre: $("inp-camp-nombre").value.trim() || "Campaña sin nombre",
+      descripcion: $("inp-camp-desc").value.trim(),
       nombre_jugador: $("inp-jugador-1").value.trim() || "Jugador"});
     guardarSesion(d);
     alert("Guardá tu llave de jugador (sirve para retomar la campaña en "
@@ -233,7 +235,7 @@ function prepararCreacionPJ() {
   setModo("puntos");
 
   montarChips("pj-habilidades", HABILIDADES, 4);
-  montarChips("pj-conjuros", CONJUROS_V1, 4, "chip-arcano");
+  cargarConjurosCreacion();
 
   const sa = $("pj-armadura");
   for (const a of ARMADURAS) sa.add(new Option(a.replaceAll("_"," "), a));
@@ -288,6 +290,35 @@ function actualizarPB() {
   } else {
     info.textContent = "Modo libre: valores 3–18 a criterio de la mesa.";
     info.style.color = "";
+  }
+}
+
+async function cargarConjurosCreacion() {
+  let lista = CONJUROS_V1;
+  try {
+    if (!CONJUROS_SERVER) {
+      const r = await fetch("/api/content");
+      CONJUROS_SERVER = (await r.json()).conjuros;
+    }
+    // en creación (nivel 1): trucos y nivel 1
+    lista = Object.entries(CONJUROS_SERVER)
+      .filter(([,v]) => v.nivel <= 1)
+      .sort((a,b) => a[1].nivel - b[1].nivel || a[0].localeCompare(b[0]))
+      .map(([k]) => k);
+  } catch {}
+  montarChips("pj-conjuros", lista, 4, "chip-arcano");
+  // filtro de texto si hay muchos
+  if (lista.length > 30 && !$("filtro-conjuros")) {
+    const inp = document.createElement("input");
+    inp.id = "filtro-conjuros"; inp.placeholder = "Filtrar conjuros…";
+    inp.style.marginBottom = ".4rem";
+    $("pj-conjuros").before(inp);
+    inp.oninput = () => {
+      const q = inp.value.toLowerCase();
+      $("pj-conjuros").querySelectorAll(".chip").forEach(c =>
+        c.style.display = c.dataset.valor.includes(q) ||
+                          c.classList.contains("activo") ? "" : "none");
+    };
   }
 }
 
@@ -620,18 +651,21 @@ async function accionCombate(tipo, body) {
 
 // ---------- exploración
 
-$("btn-say").onclick = enviarAccion;
+$("btn-say").onclick = () => enviarAccion(false);
+$("btn-party").onclick = () => enviarAccion(true);
 $("inp-accion").addEventListener("keydown",(e)=>{
-  if (e.key==="Enter" && !e.shiftKey){ e.preventDefault(); enviarAccion(); }
+  if (e.key==="Enter" && !e.shiftKey){ e.preventDefault(); enviarAccion(false); }
 });
 
-async function enviarAccion() {
+async function enviarAccion(entreJugadores) {
   const texto = $("inp-accion").value.trim();
   if (!texto) return;
   $("inp-accion").value = "";
   try {
-    await api("POST", `/campaigns/${S.campaignId}/say`, { texto });
-    S.narrando = true; pintarEscribiendo(); acelerarPolling();
+    await api("POST", `/campaigns/${S.campaignId}/say`,
+              { texto, entre_jugadores: entreJugadores });
+    if (!entreJugadores) { S.narrando = true; pintarEscribiendo(); }
+    acelerarPolling(8);
     await pintarMensajes();
   } catch(e){ avisoSistema(e.message); }
 }

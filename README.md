@@ -146,6 +146,40 @@ de juego ≈ 1 request, más 1 de resumen cada 40 mensajes.
 
 **Contenido:** 12 monstruos (goblin→ogro), armas naturales, consumibles.
 
+## Ambientación, party chat, nomenclatura e importador SRD
+
+**Ambientación de campaña:** al crearla podés describir el setting
+("transcurre en Baldur's Gate…"). Queda fija en el contexto de TODAS las
+llamadas al narrador, y al crearse el primer personaje el DM genera la
+escena de apertura basada en ella.
+
+**Charla entre jugadores:** botón "💬 Party" — el mensaje llega a la mesa
+(con estilo propio) pero el DM no interviene ni responde por nadie. Además
+el prompt del narrador ahora prohíbe explícitamente hablar o decidir por
+los personajes de los jugadores.
+
+**Nomenclatura:** tiefling (no "tiflin"), camisa_de_mallas, ring_mail,
+cota_de_mallas, armadura_de_placas. Los nombres viejos siguen funcionando
+como aliases (personajes existentes no se rompen). El narrador tiene
+instrucción de usar los nombres de juego tal cual, sin traducciones
+rebuscadas.
+
+**Importador del SRD (Open5e):**
+```bash
+python scripts/importar_srd.py                 # monstruos hasta CR 10 + conjuros hasta nv 5
+python scripts/importar_srd.py --cr-max 5 --solo monstruos
+```
+Genera `data/monstruos_srd.json` y `data/conjuros_srd.json`, que
+`engine/content.py` mergea automáticamente al arrancar (sin pisar lo
+curado). Los monstruos vienen con mecánica completa: PG, CA, atributos y
+**ataques de stat block** (bono y dados reales) que el motor usa en los
+turnos de NPC. Los conjuros traen nivel/concentración seguros y resolución
+mecánica deducida por heurística del texto (ataque/salvación/daño); los no
+deducibles quedan como narrativos con su descripción. La UI carga el
+catálogo desde `GET /api/content` (creación muestra trucos y nivel 1, con
+filtro de texto). Corré el script en tu máquina (necesita internet) y
+comiteá los JSON al repo para que Render los sirva.
+
 ## Rasgos de clase, acciones de combate y party (SRD 5.1)
 
 **Rasgos de clase mecánicos (niveles 1-4):**

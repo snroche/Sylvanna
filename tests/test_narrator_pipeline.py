@@ -332,3 +332,42 @@ async def test_asi_nivel_4(client):
     assert ficha["nivel"] == 4
     assert ficha["atributos"]["FUE"]["valor"] == 17  # 14+2 racial +1 ASI
     assert ficha["atributos"]["CON"]["valor"] == 17
+
+
+@pytest.mark.anyio
+async def test_party_say_no_narra(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s",
+        "descripcion": "Transcurre en Baldur's Gate."})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    await c.post("/api/characters", json=GUERRERO2, headers=h)
+    r = await c.post(f"/api/campaigns/{cid}/say",
+                     json={"texto": "che, ¿vamos por la izquierda?",
+                           "entre_jugadores": True}, headers=h)
+    assert r.status_code == 200 and r.json()["narrando"] is False
+    msgs = (await c.get(f"/api/campaigns/{cid}/messages?since=0",
+                        headers=h)).json()
+    party = [m for m in msgs if m["autor"] == "party"]
+    assert len(party) == 1
+    # el DM (dummy en tests) NO respondió a la charla de party
+    dm_sobre_party = [m for m in msgs if m["autor"] == "dm"
+                      and "izquierda" in m["contenido"]]
+    assert not dm_sobre_party
+
+
+@pytest.mark.anyio
+async def test_apertura_de_campania(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "BG", "nombre_jugador": "s",
+        "descripcion": "Baldur's Gate, tono oscuro."})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    await c.post("/api/characters", json=GUERRERO2, headers=h)
+    msgs = (await c.get(f"/api/campaigns/{cid}/messages?since=0",
+                        headers=h)).json()
+    # con narrador dummy la apertura llega como mensaje del dm
+    assert any(m["autor"] == "dm" and "APERTURA" in m["contenido"]
+               for m in msgs)

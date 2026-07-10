@@ -276,3 +276,7 @@ label input, label select { margin-top: .25rem; color: var(--pergamino); }
 .recurso-linea { display:flex; justify-content:space-between; align-items:center;
   font-size:.88rem; padding:.2rem 0; }
 .recurso-linea .btn { padding:.15rem .55rem; font-size:.78rem; }
+
+.msg-party .msg-autor { color: var(--arcano); }
+.msg-party .msg-autor::after { content: " (a la party)"; font-size: .78em; font-style: italic; }
+.msg-party .msg-texto { color: #b9cfcb; font-style: italic; }

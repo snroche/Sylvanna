@@ -540,3 +540,27 @@ def test_estilo_arqueria():
     a = pj(estilo_combate="arqueria")
     r = _ra(a, goblin(), _ARMAS["arco_largo"])
     assert r["bono_ataque"] == mod(a.atributos["DES"]) + 2 + 2  # DES+BC+estilo
+
+
+# ---------------------------------------------------------------- statblock
+
+from engine.rules import ataque_statblock
+
+
+def test_ataque_statblock():
+    o = pj()
+    o.pg_actual = 100; o.pg_max = 100
+    for _ in range(100):
+        a = goblin()
+        r = ataque_statblock(a, o, "Mordida", bono=4, danio_expr="1d6+2")
+        assert r["total"] == r["natural"] + 4
+        if r["impacta"]:
+            assert r["danio"]["total_final"] >= 1
+            return
+    pytest.skip("no impactó en 100 (improbable)")
+
+
+def test_statblock_respeta_esquivar():
+    o = pj(condiciones=[{"tipo": "esquivando", "origen": "t"}])
+    r = ataque_statblock(goblin(), o, "Mordida", 4, "1d6+2")
+    assert r["ventaja"] == -1

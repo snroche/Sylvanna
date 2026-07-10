@@ -25,6 +25,23 @@ app.include_router(characters.router)
 app.include_router(actions.router)
 
 
+@app.get("/api/content")
+async def catalogo():
+    """Catálogo para la UI: conjuros (con nivel), monstruos, armas, armaduras."""
+    from engine.content import ARMADURAS, ARMAS, CONJUROS, MONSTRUOS
+    oficiales = ["cuero", "cuero_tachonado", "camisa_de_mallas", "coraza",
+                 "media_armadura", "ring_mail", "cota_de_mallas",
+                 "armadura_de_placas"]
+    return {
+        "conjuros": {k: {"nivel": v["nivel"],
+                         "nombre": v.get("nombre", k.replace("_", " "))}
+                     for k, v in CONJUROS.items()},
+        "monstruos": sorted(MONSTRUOS),
+        "armas": sorted(set(ARMAS)),
+        "armaduras": oficiales,
+    }
+
+
 @app.get("/api/health/narrator")
 async def health_narrator():
     """Test unitario del narrador: una llamada real mínima a OpenRouter.

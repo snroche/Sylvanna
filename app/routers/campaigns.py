@@ -13,6 +13,7 @@ router = APIRouter(prefix="/api/campaigns", tags=["campaigns"])
 class CrearCampania(BaseModel):
     nombre: str
     nombre_jugador: str
+    descripcion: str = ""    # ambientación: "transcurre en Baldur's Gate..."
 
 
 class Unirse(BaseModel):
@@ -22,7 +23,7 @@ class Unirse(BaseModel):
 
 @router.post("")
 async def crear_campania(body: CrearCampania, db: AsyncSession = Depends(get_db)):
-    camp = Campaign(nombre=body.nombre)
+    camp = Campaign(nombre=body.nombre, descripcion=body.descripcion[:2000])
     db.add(camp)
     await db.flush()
     player = Player(campaign_id=camp.id, nombre=body.nombre_jugador)
