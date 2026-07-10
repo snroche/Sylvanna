@@ -70,6 +70,20 @@ const RAZAS = {
 };
 const COSTO_PB = {8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
 
+const ALINEAMIENTOS = ["legal_bueno","neutral_bueno","caotico_bueno",
+  "legal_neutral","neutral","caotico_neutral",
+  "legal_malvado","neutral_malvado","caotico_malvado"];
+const ESTILOS = {defensa:"+1 CA con armadura", duelo:"+2 daño melé a una mano",
+  arqueria:"+2 ataque a distancia"};
+const HABILIDADES_CLASE_UI = {
+  furia:            {icono:"💢", label:"Furia", combate:true},
+  nuevo_aliento:    {icono:"❤️", label:"Nuevo aliento", combate:false},
+  oleada_de_accion: {icono:"⚡", label:"Oleada de acción", combate:true},
+  canalizar_divinidad:{icono:"✝️", label:"Canalizar divinidad", combate:false, aliado:true},
+  imposicion_de_manos:{icono:"🙏", label:"Imposición de manos", combate:false, aliado:true, cantidad:true},
+  inspiracion_bardica:{icono:"🎵", label:"Inspiración", combate:false, aliado:true, requiere_aliado:true},
+};
+
 const CONSUMIBLES_USABLES = new Set(["pocion_de_curacion","pocion_de_curacion_mayor"]);
 const ATRS = ["FUE","DES","CON","INT","SAB","CAR"];
 const TIMEOUT_TURNO = 120;
@@ -165,7 +179,16 @@ function prepararCreacionPJ() {
   sel.onchange = () => {
     $("pj-clase-info").textContent = CLASES[sel.value];
     $("pj-magia").hidden = !CON_MAGIA_NV1.includes(sel.value);
+    $("lbl-estilo").hidden = sel.value !== "guerrero";
+    $("pj-estilo-info").textContent = sel.value === "guerrero"
+      ? ESTILOS[$("pj-estilo").value] : "";
   };
+  const sal = $("pj-alineamiento");
+  for (const a of ALINEAMIENTOS) sal.add(new Option(a.replaceAll("_"," "), a));
+  sal.value = "neutral";
+  const se = $("pj-estilo");
+  for (const e of Object.keys(ESTILOS)) se.add(new Option(e, e));
+  se.onchange = () => $("pj-estilo-info").textContent = ESTILOS[se.value];
   sel.onchange();
 
   // razas
@@ -297,6 +320,8 @@ $("btn-crear-pj").onclick = async () => {
       bonos_eleccion: razaSel.eleccion
         ? [$("pj-eleccion-1").value, $("pj-eleccion-2").value] : [],
       metodo: modoAtributos,
+      alineamiento: $("pj-alineamiento").value,
+      estilo_combate: $("pj-clase").value === "guerrero" ? $("pj-estilo").value : null,
       clase: $("pj-clase").value, atributos,
       habilidades: chipsElegidos("pj-habilidades"),
       armadura: $("pj-armadura").value || null,
@@ -545,8 +570,8 @@ function pintarCombate(c) {
   }
 
   const miTurno = orden[idx]?.id === "pj_" + S.characterId;
-  $("btn-atacar").disabled = !miTurno;
-  $("btn-cast").disabled = !miTurno;
+  for (const id of ["btn-atacar","btn-cast","btn-dodge","btn-help","btn-shove","btn-flee"])
+    $(id).disabled = !miTurno;
   $("ui-turno-info").textContent = miTurno
     ? "Es tu turno. Elegí objetivo y actuá."
     : "Esperando el turno de los demás…";
@@ -554,12 +579,28 @@ function pintarCombate(c) {
 
 $("btn-atacar").onclick = () => accionCombate("attack",
   { objetivo_npc_id: +$("inp-objetivo").value });
+$("btn-dodge").onclick = () => accionCombate("dodge", {});
+$("btn-shove").onclick = () => accionCombate("shove",
+  { objetivo_npc_id: +$("inp-objetivo").value });
+$("btn-flee").onclick = () => {
+  if (confirm("¿Intentar huir? (Acrobacias CD 12; si fallás te castigan)"))
+    accionCombate("flee", {});
+};
+$("btn-help").onclick = () => {
+  const aliados = S.campania.personajes.filter(p =>
+    p.vivo && p.pg_actual > 0 && p.id !== S.characterId);
+  if (!aliados.length) return avisoSistema("No hay aliados para ayudar");
+  const nombres = aliados.map((a,i)=>`${i+1}. ${a.nombre}`).join("\n");
+  const n = prompt("¿A quién ayudás? (número)\n" + nombres);
+  const el = aliados[+n - 1];
+  if (el) accionCombate("help", { aliado_character_id: el.id });
+};
 $("btn-cast").onclick = () => accionCombate("cast", {
   conjuro: $("inp-conjuro").value,
   objetivo_npc_id: +$("inp-objetivo").value || null });
 
 async function accionCombate(tipo, body) {
-  const btns = [$("btn-atacar"), $("btn-cast")];
+  const btns = ["btn-atacar","btn-cast","btn-dodge","btn-help","btn-shove","btn-flee"].map($);
   btns.forEach(b=>b.disabled=true);
   try {
     const d = await api("POST", `/campaigns/${S.campaignId}/combat/${tipo}`, body);
@@ -652,6 +693,19 @@ function pintarFicha(f) {
     <div class="linea-dato"><span>Monedas</span><span>${f.monedas?.mo ?? 0} mo</span></div>
     ${slotsHTML ? "<h3 style='margin:.8rem 0 .2rem'>Espacios de conjuro</h3>"+slotsHTML : ""}
     ${f.concentracion ? `<div class="linea-dato"><span>Concentración</span><span>${esc(f.concentracion.hechizo)}</span></div>` : ""}
+    ${Object.keys(f.recursos_clase||{}).length ?
+      "<h3 style='margin:.8rem 0 .2rem'>Rasgos de clase</h3>" +
+      Object.entries(f.recursos_clase).map(([n,rec])=>{
+        const ui = HABILIDADES_CLASE_UI[n];
+        const estado = "pool" in rec ? `${rec.pool}/${rec.pool_max}`
+                     : `${rec.max - rec.usados}/${rec.max}`;
+        const agotado = "pool" in rec ? rec.pool <= 0 : rec.usados >= rec.max;
+        const boton = ui ? `<button class="btn" data-clase-hab="${n}"
+          ${agotado ? "disabled" : ""}>${ui.icono} Usar</button>` : "";
+        return `<div class="recurso-linea">
+          <span>${ui ? ui.label : esc(n.replaceAll("_"," "))}
+          <span class="party-pg">${estado}</span></span>${boton}</div>`;
+      }).join("") : ""}
     <div class="ficha-acciones">
       <button class="btn" id="btn-rest-short" ${enCombate||!f.dados_golpe_disp?"disabled":""}>🔥 Descanso corto (1 dado)</button>
       <button class="btn" id="btn-rest-long" ${enCombate?"disabled":""}>🌙 Descanso largo</button>
@@ -676,11 +730,43 @@ function pintarFicha(f) {
   });
   $("btn-subir-nivel")?.addEventListener("click", async ()=>{
     const tirar = confirm("¿Tirar el dado de golpe para los PG? (Aceptar = tirar, Cancelar = valor fijo)");
+    const body = {metodo: tirar ? "tirar" : "fijo"};
+    if ([4, 8].includes(f.nivel + 1)) {
+      const rep = prompt("Mejora de atributos: +2 puntos a repartir.\n" +
+        'Formato: "FUE" (para +2) o "DES,CON" (+1 y +1)');
+      if (!rep) return;
+      const partes = rep.toUpperCase().split(",").map(s=>s.trim()).filter(Boolean);
+      body.asi = partes.length === 1 ? {[partes[0]]: 2}
+               : {[partes[0]]: 1, [partes[1]]: 1};
+    }
     try {
-      const r = await api("POST", `/campaigns/${S.campaignId}/level-up`,
-                          {metodo: tirar ? "tirar" : "fijo"});
+      const r = await api("POST", `/campaigns/${S.campaignId}/level-up`, body);
       avisoSistema(`¡Nivel ${r.nivel}! +${r.pg_ganados} PG máx.`);
       await refrescarTodo(false);
+    } catch(e){ avisoSistema(e.message); }
+  });
+  document.querySelectorAll("[data-clase-hab]").forEach(b=>b.onclick = async ()=>{
+    const nombre = b.dataset.claseHab;
+    const ui = HABILIDADES_CLASE_UI[nombre] || {};
+    const body = { nombre };
+    if (ui.aliado) {
+      const candidatos = S.campania.personajes.filter(p =>
+        p.vivo && (ui.requiere_aliado ? p.id !== S.characterId : true));
+      const lista = candidatos.map((a,i)=>`${i+1}. ${a.nombre} (${a.pg_actual}/${a.pg_max})`).join("\n");
+      const n = prompt(`¿Objetivo de ${ui.label}? (número)\n` + lista);
+      const el = candidatos[+n - 1];
+      if (!el) return;
+      body.objetivo_character_id = el.id;
+    }
+    if (ui.cantidad) {
+      const c = prompt("¿Cuántos PG curás del pool?");
+      if (!c || +c <= 0) return;
+      body.cantidad = +c;
+    }
+    try {
+      const r = await api("POST", `/campaigns/${S.campaignId}/class-ability`, body);
+      if (r.curado !== undefined) sellarResolucion({tipo:"curacion", curado:r.curado});
+      acelerarPolling(); await refrescarTodo(false);
     } catch(e){ avisoSistema(e.message); }
   });
   document.querySelectorAll("[data-usar]").forEach(b=>b.onclick = async ()=>{
@@ -705,7 +791,17 @@ function pintarFicha(f) {
 function pintarMundo(st) {
   const quests = st.quests.filter(q=>q.estado==="activa");
   const hechas = st.quests.filter(q=>q.estado!=="activa");
+  const party = (S.campania?.personajes || []).map(p => {
+    const conds = p.condiciones?.length ? " · " + p.condiciones.join(", ") : "";
+    return `<div class="party-linea">
+      <span><b>${esc(p.nombre)}</b>${p.vivo ? "" : " 💀"}
+        <div class="party-meta">${esc(p.raza)} ${esc(p.clase)} nv${p.nivel} ·
+        ${esc((p.alineamiento||"").replaceAll("_"," "))}${conds}</div></span>
+      <span class="party-pg">${p.pg_actual}/${p.pg_max} PG</span>
+    </div>`;
+  }).join("");
   $("ui-mundo").innerHTML = `
+    <h3>La party</h3>${party || '<p class="nota">Nadie en la mesa.</p>'}` + `
     <h3>Misiones</h3>
     ${quests.length ? "<ul>"+quests.map(q=>
       `<li class="${q.principal?"q-principal":""}"><b>${esc(q.titulo)}</b>

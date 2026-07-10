@@ -45,13 +45,22 @@ def calcular_ca(c: Criatura) -> int:
     des = mod(c.atributos["DES"])
     if c.armadura is None:
         base = 10 + des
+        # Defensa sin armadura (rasgo de clase)
+        if c.ca_alternativa == "barbaro":
+            base = 10 + des + mod(c.atributos["CON"])
+        elif c.ca_alternativa == "monje" and not c.escudo:
+            base = 10 + des + mod(c.atributos["SAB"])
     elif c.armadura.des_max == 0:      # pesada: DES no aplica
         base = c.armadura.ca_base
     elif c.armadura.des_max is None:   # ligera: DES completa
         base = c.armadura.ca_base + des
     else:                              # media: DES con tope (+2)
         base = c.armadura.ca_base + min(des, c.armadura.des_max)
-    return base + (2 if c.escudo else 0)
+    total = base + (2 if c.escudo else 0)
+    # Estilo de combate Defensa: +1 CA usando armadura
+    if c.estilo_combate == "defensa" and c.armadura is not None:
+        total += 1
+    return total
 
 
 def _ventaja_neta(bonos: int, penal: int) -> int:
@@ -78,6 +87,12 @@ def tirada_habilidad(c: Criatura, habilidad: str, cd: int, ventaja: int = 0) -> 
     penal = 1 if c.tiene_condicion("envenenado") or c.tiene_condicion("asustado") else 0
     t = d20(_ventaja_neta(1 if ventaja > 0 else 0, penal + (1 if ventaja < 0 else 0)))
     total = t["natural"] + bono
+    inspiracion = None
+    if c.tiene_condicion("inspirado"):
+        insp = roll("1d6")
+        inspiracion = insp["dados"][0]
+        total += inspiracion
+        c.quitar_condicion("inspirado")
     exito = (total >= cd and not t["pifia"]) or t["critico"]
     margen = cd - total
     if exito:
@@ -95,7 +110,7 @@ def tirada_habilidad(c: Criatura, habilidad: str, cd: int, ventaja: int = 0) -> 
     return {
         "tipo": "habilidad", "habilidad": habilidad, "atributo": atributo,
         **t, "bono": bono, "total": total, "cd": cd,
-        "exito": exito, "grado": grado,
+        "exito": exito, "grado": grado, "inspiracion": inspiracion,
     }
 
 
@@ -128,8 +143,17 @@ def iniciativa(c: Criatura) -> dict:
 
 
 def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
-                    ventaja: int = 0, dos_manos: bool = False) -> dict:
-    """Ataque completo: impacto + daño. Muta pg del objetivo si impacta."""
+                    ventaja: int = 0, dos_manos: bool = False,
+                    furtivo: bool = False) -> dict:
+    """Ataque completo: impacto + daño. Muta pg del objetivo si impacta.
+
+    Rasgos que se aplican solos (condiciones/campos del atacante):
+    - "ayudado": ventaja en este ataque (se consume)
+    - "inspirado": +1d6 al total de ataque (se consume)
+    - "furia": +2 daño melé
+    - estilo "duelo": +2 daño melé a una mano; "arqueria": +2 ataque a distancia
+    - furtivo=True (lo decide la capa de juego): +Nd6 de daño del pícaro
+    """
     # atributo de ataque
     if arma.distancia:
         atr = "DES"
@@ -141,9 +165,14 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
     competente = arma.categoria in atacante.competencias.get("armas", []) \
         or arma.nombre in atacante.competencias.get("armas", [])
     bono_ataque = m + (bc(atacante.nivel) if competente else 0)
+    if atacante.estilo_combate == "arqueria" and arma.distancia:
+        bono_ataque += 2
 
     # ventaja/desventaja situacional + condiciones
     bonos = 1 if ventaja > 0 else 0
+    if atacante.tiene_condicion("ayudado"):
+        bonos += 1
+        atacante.quitar_condicion("ayudado")
     penal = 1 if ventaja < 0 else 0
     if atacante.tiene_condicion("envenenado") or atacante.tiene_condicion("cegado") \
             or atacante.tiene_condicion("asustado"):
@@ -162,6 +191,12 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
     t = d20(_ventaja_neta(bonos, penal))
     ca = calcular_ca(objetivo)
     total = t["natural"] + bono_ataque
+    inspiracion = None
+    if atacante.tiene_condicion("inspirado"):
+        insp = roll("1d6")
+        inspiracion = insp["dados"][0]
+        total += inspiracion
+        atacante.quitar_condicion("inspirado")
     impacta = t["critico"] or (not t["pifia"] and total >= ca)
     critico = t["critico"] or (impacta and critico_auto)
 
@@ -170,6 +205,7 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
         "arma": arma.nombre, "atributo": atr, **t,
         "bono_ataque": bono_ataque, "total": total, "ca_objetivo": ca,
         "impacta": impacta, "critico": critico, "danio": None, "efectos": [],
+        "inspiracion": inspiracion,
     }
     if impacta:
         dado = arma.dos_manos if (dos_manos and arma.dos_manos) else arma.dado_danio
@@ -179,9 +215,25 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
             d = {"expr": f"{dado} x2 (crítico)",
                  "dados": d["dados"] + extra["dados"], "mod": 0,
                  "total": d["total"] + extra["total"]}
-        danio_total = max(1, d["total"] + m)
+        extras: list[dict] = []
+        # Furia del bárbaro: +2 daño melé
+        if atacante.tiene_condicion("furia") and not arma.distancia:
+            extras.append({"motivo": "furia", "valor": 2})
+        # Estilo Duelo: +2 daño melé a una mano
+        if atacante.estilo_combate == "duelo" and not arma.distancia \
+                and not dos_manos:
+            extras.append({"motivo": "duelo", "valor": 2})
+        # Ataque furtivo del pícaro (dobla dados en crítico)
+        if furtivo and atacante.nivel_furtivo > 0 \
+                and (arma.finura or arma.distancia):
+            n = atacante.nivel_furtivo * (2 if critico else 1)
+            f = roll(f"{n}d6")
+            extras.append({"motivo": "furtivo", "valor": f["total"],
+                           "dados": f["dados"]})
+        danio_total = max(1, d["total"] + m + sum(e["valor"] for e in extras))
         resultado["danio"] = {**d, "mod_atributo": m, "total_final": danio_total,
-                              "tipo_danio": arma.tipo_danio}
+                              "tipo_danio": arma.tipo_danio,
+                              "extras": extras}
         resultado["efectos"] = aplicar_danio(objetivo, danio_total)["eventos"]
     return resultado
 

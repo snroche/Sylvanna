@@ -230,3 +230,105 @@ async def test_state_endpoint(client):
     d = r.json()
     assert d["quests"] == [] and d["npcs_conocidos"] == []
     assert d["consecuencias_pendientes"] == 0
+
+
+# ---------------------------------------------------------------- clase + party (API)
+
+GUERRERO2 = {
+    "nombre": "Borin", "raza": "enano", "subraza": "enano_de_las_montanas",
+    "clase": "guerrero", "metodo": "libre", "estilo_combate": "duelo",
+    "alineamiento": "legal_bueno",
+    "atributos": {"FUE": 14, "DES": 12, "CON": 14, "INT": 8, "SAB": 10, "CAR": 10},
+    "habilidades": ["atletismo"], "armadura": "coraza",
+    "arma_equipada": "espada_larga",
+}
+
+
+@pytest.mark.anyio
+async def test_habilidades_clase_y_party(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    r = await c.post("/api/characters", json=GUERRERO2, headers=h)
+    assert r.status_code == 200, r.text
+
+    # party info en el GET de campaña
+    est = (await c.get(f"/api/campaigns/{cid}", headers=h)).json()
+    p = est["personajes"][0]
+    assert p["alineamiento"] == "legal_bueno"
+    assert "enano" in p["raza"]
+
+    # recursos de clase en la ficha
+    ficha = (await c.get(f"/api/characters/{p['id']}/sheet", headers=h)).json()
+    assert "nuevo_aliento" in ficha["recursos_clase"]
+    assert ficha["estilo_combate"] == "duelo"
+
+    # nuevo aliento fuera de combate
+    r = await c.post(f"/api/campaigns/{cid}/class-ability",
+                     json={"nombre": "nuevo_aliento"}, headers=h)
+    assert r.status_code == 200 and r.json()["curado"] >= 0
+    r = await c.post(f"/api/campaigns/{cid}/class-ability",
+                     json={"nombre": "nuevo_aliento"}, headers=h)
+    assert r.status_code == 400  # agotado hasta descanso corto
+
+    # descanso corto lo resetea
+    r = await c.post(f"/api/campaigns/{cid}/rest/short",
+                     json={"dados": 0}, headers=h)
+    assert r.status_code == 200
+    r = await c.post(f"/api/campaigns/{cid}/class-ability",
+                     json={"nombre": "nuevo_aliento"}, headers=h)
+    assert r.status_code == 200
+
+    # habilidad de otra clase rebota
+    r = await c.post(f"/api/campaigns/{cid}/class-ability",
+                     json={"nombre": "furia"}, headers=h)
+    assert r.status_code == 400
+
+
+@pytest.mark.anyio
+async def test_guerrero_sin_estilo_rebota(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    body = {**GUERRERO2}
+    del body["estilo_combate"]
+    r = await c.post("/api/characters", json=body, headers=h)
+    assert r.status_code == 400 and "estilo" in r.text
+
+
+@pytest.mark.anyio
+async def test_asi_nivel_4(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    r = await c.post("/api/characters", json=GUERRERO2, headers=h)
+    char_id = r.json()["character_id"]
+
+    # forzar XP de nivel 4 directo en DB
+    from app.db import SessionLocal
+    from app.models import Character
+    async with SessionLocal() as db:
+        ch = await db.get(Character, char_id)
+        ch.xp = 2700
+        ch.nivel = 3
+        await db.commit()
+
+    # subir a 4 sin ASI → rebota pidiendo el reparto
+    r = await c.post(f"/api/campaigns/{cid}/level-up",
+                     json={"metodo": "fijo"}, headers=h)
+    assert r.status_code == 400 and "asi" in r.text.lower()
+
+    # con ASI válido
+    r = await c.post(f"/api/campaigns/{cid}/level-up",
+                     json={"metodo": "fijo", "asi": {"FUE": 1, "CON": 1}},
+                     headers=h)
+    assert r.status_code == 200
+    ficha = (await c.get(f"/api/characters/{char_id}/sheet", headers=h)).json()
+    assert ficha["nivel"] == 4
+    assert ficha["atributos"]["FUE"]["valor"] == 17  # 14+2 racial +1 ASI
+    assert ficha["atributos"]["CON"]["valor"] == 17

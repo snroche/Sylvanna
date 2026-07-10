@@ -106,6 +106,7 @@ async def ver_campania(campaign_id: int, player: Player = Depends(jugador_actual
         "combate": camp.combate,
         "personajes": [
             {"id": c.id, "nombre": c.nombre, "clase": c.clase, "nivel": c.nivel,
+             "raza": c.raza, "alineamiento": c.alineamiento,
              "pg_actual": c.pg_actual, "pg_max": c.pg_max, "vivo": c.vivo,
              "condiciones": [x["tipo"] for x in c.condiciones],
              "player_id": c.player_id}

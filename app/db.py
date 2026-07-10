@@ -36,6 +36,10 @@ async def get_db():
 MIGRACIONES = [
     "ALTER TABLE campaigns ADD COLUMN narrando BOOLEAN DEFAULT FALSE",
     "ALTER TABLE campaigns ADD COLUMN ultimo_descanso_largo_min INTEGER DEFAULT -10000",
+    "ALTER TABLE characters ADD COLUMN alineamiento VARCHAR(30) DEFAULT 'neutral'",
+    "ALTER TABLE characters ADD COLUMN estilo_combate VARCHAR(30)",
+    "ALTER TABLE characters ADD COLUMN recursos_clase JSON",
+    "ALTER TABLE characters ADD COLUMN feats JSON",
 ]
 
 

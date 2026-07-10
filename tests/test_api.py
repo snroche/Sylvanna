@@ -14,7 +14,7 @@ from httpx import ASGITransport, AsyncClient
 # atributos BASE: el server aplica bonos raciales (enano +2 CON → CON 16)
 GUERRERO = {
     "nombre": "Thorin", "raza": "enano", "subraza": "enano_de_las_montanas",
-    "clase": "guerrero", "metodo": "libre",
+    "clase": "guerrero", "metodo": "libre", "estilo_combate": "duelo",
     "atributos": {"FUE": 14, "DES": 12, "CON": 14, "INT": 8, "SAB": 10, "CAR": 13},
     "habilidades": ["atletismo", "intimidacion"],
     "armadura": "coraza", "escudo": True, "arma_equipada": "espada_larga",

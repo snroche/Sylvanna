@@ -30,6 +30,8 @@ class CrearPersonaje(BaseModel):
     armadura: str | None = None
     escudo: bool = False
     arma_equipada: str | None = None
+    alineamiento: str = "neutral"
+    estilo_combate: str | None = None   # solo guerrero
     inventario: list[dict] = []
 
 
@@ -56,6 +58,15 @@ def _validar(body: CrearPersonaje):
         raise HTTPException(400, f"Armadura inválida. Opciones: {list(ARMADURAS)}")
     if body.arma_equipada and body.arma_equipada not in ARMAS:
         raise HTTPException(400, f"Arma inválida. Opciones: {list(ARMAS)}")
+    from engine.content import ALINEAMIENTOS, ESTILOS_COMBATE
+    if body.alineamiento not in ALINEAMIENTOS:
+        raise HTTPException(400, f"Alineamiento inválido: {ALINEAMIENTOS}")
+    if body.clase == "guerrero":
+        if body.estilo_combate not in ESTILOS_COMBATE:
+            raise HTTPException(400, "El guerrero elige estilo de combate: "
+                                     f"{list(ESTILOS_COMBATE)}")
+    elif body.estilo_combate:
+        raise HTTPException(400, "Solo el guerrero tiene estilo de combate (v1)")
 
 
 def _inventario_inicial(body: "CrearPersonaje") -> list[dict]:
@@ -148,7 +159,15 @@ async def crear_personaje(body: CrearPersonaje,
         inventario=_inventario_inicial(body),
         slots=slots_iniciales(body.clase, 1),
         conocidos=body.conocidos, preparados=body.preparados,
+        alineamiento=body.alineamiento,
+        estilo_combate=body.estilo_combate,
+        recursos_clase=__import__("engine.content", fromlist=["x"])
+            .recursos_clase_iniciales(body.clase, 1,
+                                      mod(atributos_finales["CAR"])),
     )
+    # el monje pelea con artes marciales por defecto
+    if body.clase == "monje" and not body.arma_equipada:
+        char.arma_equipada = "artes_marciales"
     db.add(char)
     await db.commit()
     return {"character_id": char.id, "pg_max": char.pg_max,
@@ -180,5 +199,9 @@ async def ficha(character_id: int, player: Player = Depends(jugador_actual),
         "inventario": c.inventario, "monedas": c.monedas,
         "slots": c.slots, "conocidos": c.conocidos, "preparados": c.preparados,
         "concentracion": c.concentracion,
+        "alineamiento": c.alineamiento,
+        "estilo_combate": c.estilo_combate,
+        "recursos_clase": c.recursos_clase or {},
+        "feats": c.feats or [],
         "vivo": c.vivo,
     }

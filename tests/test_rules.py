@@ -457,3 +457,86 @@ def test_tope_20():
     base = {"FUE": 18, "DES": 10, "CON": 18, "INT": 10, "SAB": 10, "CAR": 10}
     finales, _, _ = aplicar_bonos_raciales(base, "enano", "enano_de_las_montanas")
     assert finales["FUE"] == 20  # 18+2 topea en 20
+
+
+# ---------------------------------------------------------------- rasgos de clase
+
+from engine.content import ARMAS as _ARMAS
+from engine.rules import resolver_ataque as _ra, calcular_ca as _ca
+
+
+def test_ca_barbaro_sin_armadura():
+    c = pj(atributos={"FUE": 16, "DES": 14, "CON": 16, "INT": 8, "SAB": 10,
+                      "CAR": 10})
+    c.ca_alternativa = "barbaro"
+    assert _ca(c) == 15  # 10 + DES(+2) + CON(+3)
+
+
+def test_ca_monje_no_aplica_con_escudo():
+    c = pj(atributos={"FUE": 10, "DES": 16, "CON": 10, "INT": 10, "SAB": 16,
+                      "CAR": 10})
+    c.ca_alternativa = "monje"
+    assert _ca(c) == 16  # 10 + 3 + 3
+    c.escudo = True
+    assert _ca(c) == 15  # vuelve a 10 + DES + escudo
+
+
+def test_estilo_defensa_solo_con_armadura():
+    c = pj(estilo_combate="defensa")
+    ca_sin = _ca(c)
+    c.armadura = ARMADURAS["cuero"]
+    assert _ca(c) == 11 + 1 + 1  # cuero + DES(+1) + estilo
+
+
+def test_furia_suma_2_melee_no_distancia():
+    for arma, espera_extra in ((_ARMAS["mazo"], True), (_ARMAS["arco_corto"], False)):
+        for _ in range(200):
+            a = pj(condiciones=[{"tipo": "furia", "origen": "t"}])
+            o = goblin(); o.ca_fija = 1; o.pg_actual = 100; o.pg_max = 100
+            r = _ra(a, o, arma)
+            if r["impacta"]:
+                motivos = [e["motivo"] for e in r["danio"]["extras"]]
+                assert ("furia" in motivos) == espera_extra
+                break
+
+
+def test_furtivo_agrega_dados_y_dobla_en_critico():
+    vio_normal = vio_critico = False
+    for _ in range(2000):
+        a = pj(nivel=3)
+        a.nivel_furtivo = 2  # nivel 3 → 2d6
+        o = goblin(); o.ca_fija = 1; o.pg_actual = 999; o.pg_max = 999
+        r = _ra(a, o, _ARMAS["daga"], furtivo=True)
+        if not r["impacta"]:
+            continue
+        f = next((e for e in r["danio"]["extras"] if e["motivo"] == "furtivo"), None)
+        assert f is not None
+        if r["critico"]:
+            assert len(f["dados"]) == 4; vio_critico = True
+        else:
+            assert len(f["dados"]) == 2; vio_normal = True
+        if vio_normal and vio_critico:
+            return
+    assert vio_normal  # crítico puede no salir; normal sí o sí
+
+
+def test_inspirado_suma_d6_y_se_consume():
+    for _ in range(50):
+        a = pj(condiciones=[{"tipo": "inspirado", "origen": "bardo"}])
+        r = _ra(a, goblin(), _ARMAS["mazo"])
+        assert r["inspiracion"] is not None and 1 <= r["inspiracion"] <= 6
+        assert r["total"] == r["natural"] + r["bono_ataque"] + r["inspiracion"]
+        assert not a.tiene_condicion("inspirado")
+
+
+def test_ayudado_da_ventaja_y_se_consume():
+    a = pj(condiciones=[{"tipo": "ayudado", "origen": "x"}])
+    r = _ra(a, goblin(), _ARMAS["mazo"])
+    assert len(r["tiradas"]) == 2 and r["natural"] == max(r["tiradas"])
+    assert not a.tiene_condicion("ayudado")
+
+
+def test_estilo_arqueria():
+    a = pj(estilo_combate="arqueria")
+    r = _ra(a, goblin(), _ARMAS["arco_largo"])
+    assert r["bono_ataque"] == mod(a.atributos["DES"]) + 2 + 2  # DES+BC+estilo

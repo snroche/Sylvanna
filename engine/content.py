@@ -35,6 +35,8 @@ ARMAS: dict[str, Arma] = {
     "garra": Arma("garra", "1d6", "cortante", "simple"),
     "mordida_grande": Arma("mordida_grande", "2d4", "perforante", "simple"),
     "clava_grande": Arma("clava_grande", "2d8", "contundente", "simple"),
+    "artes_marciales": Arma("artes_marciales", "1d4", "contundente", "simple",
+                            finura=True),
 }
 
 ARMADURAS: dict[str, Armadura] = {
@@ -220,6 +222,10 @@ CONJUROS: dict[str, dict] = {
         "concentracion": False, "efecto_extra": "no puede recuperar PG 1 turno",
     },
     "luz": {"nivel": 0, "resolucion": "auto", "concentracion": False},
+    "explosion_sobrenatural": {  # eldritch blast (SRD)
+        "nivel": 0, "resolucion": "ataque", "danio": "1d10",
+        "tipo_danio": "fuerza", "concentracion": False,
+    },
     "prestidigitacion": {"nivel": 0, "resolucion": "auto", "concentracion": False},
 
     # Nivel 1
@@ -442,3 +448,87 @@ def aplicar_bonos_raciales(base: dict, raza: str, subraza: str | None,
     for atr, v in finales.items():
         finales[atr] = min(20, v)
     return finales, velocidad, "; ".join(rasgos)
+
+
+# ---------------------------------------------------------------- alineamientos
+
+ALINEAMIENTOS = [
+    "legal_bueno", "neutral_bueno", "caotico_bueno",
+    "legal_neutral", "neutral", "caotico_neutral",
+    "legal_malvado", "neutral_malvado", "caotico_malvado",
+]
+
+# ---------------------------------------------------------------- estilos de combate (guerrero, SRD)
+
+ESTILOS_COMBATE = {
+    "defensa": "+1 CA mientras usás armadura",
+    "duelo": "+2 al daño con arma melé a una mano",
+    "arqueria": "+2 a las tiradas de ataque a distancia",
+}
+
+# ---------------------------------------------------------------- recursos de clase (SRD, niveles 1-4)
+# tipo: "corto" se recupera con descanso corto; "largo" con descanso largo.
+
+def recursos_clase_iniciales(clase: str, nivel: int, mod_car: int = 0) -> dict:
+    """Recursos activos de clase para clase/nivel. Se guarda en Character."""
+    r: dict = {}
+    if clase == "barbaro":
+        r["furia"] = {"usados": 0, "max": 3 if nivel >= 3 else 2,
+                      "reset": "largo"}
+    if clase == "guerrero":
+        r["nuevo_aliento"] = {"usados": 0, "max": 1, "reset": "corto"}
+        if nivel >= 2:
+            r["oleada_de_accion"] = {"usados": 0, "max": 1, "reset": "corto"}
+    if clase == "clerigo" and nivel >= 2:
+        r["canalizar_divinidad"] = {"usados": 0, "max": 1, "reset": "corto"}
+    if clase == "paladin":
+        r["imposicion_de_manos"] = {"pool": 5 * nivel, "pool_max": 5 * nivel,
+                                    "reset": "largo"}
+    if clase == "bardo":
+        r["inspiracion_bardica"] = {"usados": 0, "max": max(1, mod_car),
+                                    "reset": "largo"}
+    if clase == "mago":
+        r["recuperacion_arcana"] = {"usados": 0, "max": 1, "reset": "largo"}
+    return r
+
+
+# Descripciones para UI y para el contexto del narrador
+HABILIDADES_CLASE_INFO = {
+    "furia": "Bárbaro — Acción adicional. +2 daño melé y aguante hasta que "
+             "termine el combate.",
+    "nuevo_aliento": "Guerrero — Acción adicional. Recuperás 1d10+nivel PG.",
+    "oleada_de_accion": "Guerrero nv2 — Este turno hacés UNA acción de "
+                        "ataque extra.",
+    "canalizar_divinidad": "Clérigo nv2 — Preservar Vida: curás 5×nivel PG "
+                           "a un aliado.",
+    "imposicion_de_manos": "Paladín — Curás X PG de tu reserva de 5×nivel.",
+    "inspiracion_bardica": "Bardo — Acción adicional. Un aliado suma 1d6 a "
+                           "su próxima tirada de ataque o habilidad.",
+    "recuperacion_arcana": "Mago — En un descanso corto recuperás espacios "
+                           "de conjuro (total de niveles = mitad de tu nivel, "
+                           "redondeado arriba). Se aplica solo.",
+}
+
+# ---------------------------------------------------------------- feats
+# El SRD 5.1 solo incluye UN feat (Grappler). Los demás (PHB, Tasha's,
+# Xanathar's) son contenido con copyright: cargalos vos como data acá,
+# siguiendo el formato. Efectos soportados por el motor v1:
+#   {"asi": {"ATR": 1}}                      → suma al atributo (tope 20)
+#   {"pasivo": "texto"}                      → narrativo (va al contexto del DM)
+# Los efectos mecánicos complejos requieren código; empezá por los simples.
+
+FEATS: dict[str, dict] = {
+    "luchador_agarrador": {  # Grappler (SRD)
+        "nombre": "Luchador agarrador",
+        "requisito": {"FUE": 13},
+        "efectos": {"pasivo": "Ventaja en ataques contra criaturas que "
+                              "agarraste; podés intentar inmovilizarlas."},
+    },
+    # ejemplo de formato para que agregues los tuyos:
+    # "resistente": {
+    #     "nombre": "Resistente",
+    #     "requisito": {},
+    #     "efectos": {"asi": {"CON": 1},
+    #                 "pasivo": "Competencia en salvaciones de CON"},
+    # },
+}

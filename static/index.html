@@ -76,6 +76,11 @@
         <select id="pj-clase"></select>
       </label>
       <p class="nota" id="pj-clase-info"></p>
+      <div class="fila-2">
+        <label>Alineamiento <select id="pj-alineamiento"></select></label>
+        <label id="lbl-estilo" hidden>Estilo de combate <select id="pj-estilo"></select></label>
+      </div>
+      <p class="nota" id="pj-estilo-info"></p>
 
       <h3>Atributos</h3>
       <div class="chips" style="margin:.2rem 0 .5rem">
@@ -165,6 +170,12 @@
           <div class="composer-fila" id="fila-conjuro" hidden>
             <select id="inp-conjuro"></select>
             <button class="btn btn-arcano" id="btn-cast">✦ Lanzar</button>
+          </div>
+          <div class="composer-fila acciones-combate">
+            <button class="btn" id="btn-dodge" title="Los ataques en tu contra tienen desventaja hasta tu próximo turno">🛡 Esquivar</button>
+            <button class="btn" id="btn-help" title="Un aliado gana ventaja en su próximo ataque">🤝 Ayudar</button>
+            <button class="btn" id="btn-shove" title="Atletismo para derribar al objetivo">💥 Empujar</button>
+            <button class="btn" id="btn-flee" title="Acrobacias CD 12 para escapar del combate">🏃 Huir</button>
           </div>
           <p class="nota" id="ui-turno-info"></p>
         </div>

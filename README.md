@@ -146,6 +146,43 @@ de juego ≈ 1 request, más 1 de resumen cada 40 mensajes.
 
 **Contenido:** 12 monstruos (goblin→ogro), armas naturales, consumibles.
 
+## Rasgos de clase, acciones de combate y party (SRD 5.1)
+
+**Rasgos de clase mecánicos (niveles 1-4):**
+- Bárbaro: Furia (+2 daño melé todo el combate, 2-3 usos/día) y Defensa sin
+  armadura (CA 10+DES+CON).
+- Guerrero: estilo de combate a elección (Defensa +1 CA / Duelo +2 daño /
+  Arquería +2 ataque), Nuevo Aliento (1d10+nivel, 1/corto) y Oleada de
+  Acción nv2 (ataque extra en el turno, 1/corto).
+- Pícaro: Ataque Furtivo (+1d6 nv1, +2d6 nv3; con arma de finura/distancia
+  y un aliado consciente en combate o ventaja; dobla dados en crítico).
+- Monje: Artes Marciales (1d4 DES) y Defensa sin armadura (10+DES+SAB, sin
+  escudo).
+- Clérigo: Canalizar Divinidad nv2 (Preservar Vida: cura 5×nivel, 1/corto).
+- Paladín: Imposición de Manos (reserva de 5×nivel PG por día).
+- Bardo: Inspiración Bárdica (un aliado suma 1d6 a su próxima tirada de
+  ataque o habilidad; usos = mod CAR por día).
+- Mago: Recuperación Arcana (recupera slots en el descanso corto, automática).
+- Brujo: truco Explosión Sobrenatural (eldritch blast, 1d10).
+Los recursos se muestran en la ficha con botón de uso y se resetean con el
+descanso que corresponde.
+
+**Acciones de combate:** además de atacar y lanzar: Esquivar (desventaja a
+los ataques en tu contra), Ayudar (ventaja al próximo ataque de un aliado),
+Empujar (Atletismo vs 10+DES para derribar) y Huir (Acrobacias CD 12; el
+fallo cuesta un golpe de oportunidad).
+
+**Panel de party:** en la pestaña Mundo, todos los personajes con nombre,
+raza, clase/nivel, alineamiento, PG y condiciones.
+
+**Mejora de atributos (ASI):** en los niveles 4 y 8 el level-up exige
+repartir +2 puntos (+2 a uno o +1/+1), validado server-side con tope 20.
+
+**Feats:** el SRD solo libera uno (Grappler, incluido). Los de PHB/Tasha's/
+Xanathar's son contenido con copyright y no vienen precargados: la
+estructura `FEATS` en `engine/content.py` está lista para que cargues los
+de tu mesa como data (formato documentado ahí mismo).
+
 ## Razas, point buy y administración
 
 **Razas y subrazas (9):** humano, elfo (alto/bosques/drow), enano

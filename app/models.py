@@ -92,6 +92,11 @@ class Character(Base):
     preparados: Mapped[list] = mapped_column(JSON, default=list)
     concentracion: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
+    alineamiento: Mapped[str] = mapped_column(String(30), default="neutral")
+    estilo_combate: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    recursos_clase: Mapped[dict] = mapped_column(JSON, default=dict)
+    feats: Mapped[list] = mapped_column(JSON, default=list)
+
     muerte_exitos: Mapped[int] = mapped_column(Integer, default=0)
     muerte_fallos: Mapped[int] = mapped_column(Integer, default=0)
     vivo: Mapped[bool] = mapped_column(Boolean, default=True)
