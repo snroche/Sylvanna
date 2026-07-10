@@ -124,7 +124,8 @@ async def test_efectos_inicia_combate_valida_monstruos(db_session):
 # ---------------------------------------------------------------- API: conjuros
 
 MAGO = {
-    "nombre": "Elara", "raza": "elfa", "clase": "mago",
+    "nombre": "Elara", "raza": "elfo", "subraza": "alto_elfo",
+    "clase": "mago", "metodo": "libre",
     "atributos": {"FUE": 8, "DES": 14, "CON": 12, "INT": 16, "SAB": 10, "CAR": 10},
     "habilidades": ["arcanos"], "arma_equipada": "daga",
     "preparados": ["proyectil_magico", "manos_ardientes", "curar_heridas",

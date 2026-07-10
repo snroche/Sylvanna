@@ -11,15 +11,19 @@ from httpx import ASGITransport, AsyncClient
 # fixtures client/db_session: ver conftest.py
 
 
+# atributos BASE: el server aplica bonos raciales (enano +2 CON → CON 16)
 GUERRERO = {
-    "nombre": "Thorin", "raza": "enano", "clase": "guerrero",
-    "atributos": {"FUE": 16, "DES": 12, "CON": 14, "INT": 8, "SAB": 10, "CAR": 13},
+    "nombre": "Thorin", "raza": "enano", "subraza": "enano_de_las_montanas",
+    "clase": "guerrero", "metodo": "libre",
+    "atributos": {"FUE": 14, "DES": 12, "CON": 14, "INT": 8, "SAB": 10, "CAR": 13},
     "habilidades": ["atletismo", "intimidacion"],
     "armadura": "coraza", "escudo": True, "arma_equipada": "espada_larga",
 }
+# elfo +2 DES → DES 16
 MAGO = {
-    "nombre": "Elara", "raza": "elfa", "clase": "mago",
-    "atributos": {"FUE": 8, "DES": 14, "CON": 12, "INT": 16, "SAB": 10, "CAR": 10},
+    "nombre": "Elara", "raza": "elfo", "subraza": "alto_elfo",
+    "clase": "mago", "metodo": "libre",
+    "atributos": {"FUE": 8, "DES": 14, "CON": 12, "INT": 15, "SAB": 10, "CAR": 10},
     "habilidades": ["arcanos", "investigacion"],
     "arma_equipada": "daga",
     "preparados": ["proyectil_magico", "escudo"],
@@ -51,13 +55,13 @@ async def test_flujo_completo(client):
     # 3. crear personajes
     r = await client.post("/api/characters", json=GUERRERO, headers=h1)
     assert r.status_code == 200, r.text
-    assert r.json()["pg_max"] == 12   # d10 máx + CON+2
-    assert r.json()["ca"] == 17       # coraza 14 + DES(cap 2→+1) + escudo 2
+    assert r.json()["pg_max"] == 13   # d10 máx + CON 16 (+2 racial) = +3
+    assert r.json()["ca"] == 17       # coraza 14 + DES+1 + escudo 2
     char1 = r.json()["character_id"]
 
     r = await client.post("/api/characters", json=MAGO, headers=h2)
     assert r.status_code == 200
-    assert r.json()["pg_max"] == 7    # d6 máx + CON+1
+    assert r.json()["pg_max"] == 7    # d6 máx + CON+1 (elfo no toca CON)
 
     # no puede crear dos personajes
     r = await client.post("/api/characters", json=GUERRERO, headers=h1)
@@ -72,7 +76,7 @@ async def test_flujo_completo(client):
     r = await client.get(f"/api/characters/{char1}/sheet", headers=h1)
     assert r.status_code == 200
     ficha = r.json()
-    assert ficha["atributos"]["FUE"] == {"valor": 16, "mod": 3}
+    assert ficha["atributos"]["FUE"] == {"valor": 16, "mod": 3}  # 14 base +2 montañas
     assert ficha["slots"] == {}  # guerrero no tiene magia
 
     # token inválido rechazado

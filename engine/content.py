@@ -311,3 +311,134 @@ CONJUROS: dict[str, dict] = {
         "efecto": "+5 PG max y actuales a 3 criaturas por 8 horas",
     },
 }
+
+
+# ---------------------------------------------------------------- razas
+
+# bonos: se suman a los atributos base elegidos por el jugador.
+# velocidad_m: sobreescribe la base de 9m si difiere.
+RAZAS: dict[str, dict] = {
+    "humano": {
+        "bonos": {"FUE": 1, "DES": 1, "CON": 1, "INT": 1, "SAB": 1, "CAR": 1},
+        "velocidad_m": 9, "rasgo": "Versátil: +1 a todos los atributos",
+        "subrazas": {},
+    },
+    "elfo": {
+        "bonos": {"DES": 2}, "velocidad_m": 9,
+        "rasgo": "Visión en la oscuridad, ventaja contra encantamientos",
+        "subrazas": {
+            "alto_elfo": {"bonos": {"INT": 1}, "rasgo": "Un truco de mago extra"},
+            "elfo_de_los_bosques": {"bonos": {"SAB": 1}, "velocidad_m": 10,
+                                    "rasgo": "Pies ligeros: velocidad 10m"},
+            "drow": {"bonos": {"CAR": 1},
+                     "rasgo": "Visión superior en la oscuridad"},
+        },
+    },
+    "enano": {
+        "bonos": {"CON": 2}, "velocidad_m": 7,
+        "rasgo": "Resistencia al veneno, visión en la oscuridad",
+        "subrazas": {
+            "enano_de_las_colinas": {"bonos": {"SAB": 1},
+                                     "rasgo": "+1 PG por nivel"},
+            "enano_de_las_montanas": {"bonos": {"FUE": 2},
+                                      "rasgo": "Competencia con armadura ligera y media"},
+        },
+    },
+    "mediano": {
+        "bonos": {"DES": 2}, "velocidad_m": 7,
+        "rasgo": "Suertudo: repite los 1 naturales (narrativo v1)",
+        "subrazas": {
+            "piesligeros": {"bonos": {"CAR": 1}, "rasgo": "Sigilo natural"},
+            "fornido": {"bonos": {"CON": 1}, "rasgo": "Resistencia al veneno"},
+        },
+    },
+    "gnomo": {
+        "bonos": {"INT": 2}, "velocidad_m": 7,
+        "rasgo": "Astucia gnoma: ventaja en salvaciones mentales vs magia",
+        "subrazas": {
+            "gnomo_del_bosque": {"bonos": {"DES": 1}, "rasgo": "Habla con animales pequeños"},
+            "gnomo_de_las_rocas": {"bonos": {"CON": 1}, "rasgo": "Saber artificiero"},
+        },
+    },
+    "semielfo": {
+        "bonos": {"CAR": 2}, "velocidad_m": 9,
+        "rasgo": "+1 a DOS atributos a elección (además del +2 CAR)",
+        "bonos_a_eleccion": 2,   # el jugador elige 2 atributos distintos de CAR
+        "subrazas": {},
+    },
+    "semiorco": {
+        "bonos": {"FUE": 2, "CON": 1}, "velocidad_m": 9,
+        "rasgo": "Aguante implacable: 1 vez por descanso largo, queda a 1 PG en vez de 0",
+        "subrazas": {},
+    },
+    "draconido": {
+        "bonos": {"FUE": 2, "CAR": 1}, "velocidad_m": 9,
+        "rasgo": "Aliento de dragón (narrativo v1), resistencia elemental",
+        "subrazas": {},
+    },
+    "tiflin": {
+        "bonos": {"CAR": 2, "INT": 1}, "velocidad_m": 9,
+        "rasgo": "Resistencia al fuego, visión en la oscuridad",
+        "subrazas": {},
+    },
+}
+
+# ---------------------------------------------------------------- point buy
+
+PUNTOS_COMPRA = 27
+COSTO_PUNTOS = {8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9}
+
+
+def validar_point_buy(atributos: dict) -> tuple[bool, str]:
+    """Valida una asignación base (SIN bonos raciales) contra point buy 27."""
+    total = 0
+    for atr, v in atributos.items():
+        if v not in COSTO_PUNTOS:
+            return False, f"{atr}={v} fuera de rango point buy (8-15)"
+        total += COSTO_PUNTOS[v]
+    if total > PUNTOS_COMPRA:
+        return False, f"Gastaste {total} puntos (máximo {PUNTOS_COMPRA})"
+    return True, f"{total}/{PUNTOS_COMPRA} puntos usados"
+
+
+def aplicar_bonos_raciales(base: dict, raza: str, subraza: str | None,
+                           bonos_eleccion: list[str] | None = None) -> tuple[dict, int, str]:
+    """Devuelve (atributos_finales, velocidad_m, rasgos_texto).
+
+    Lanza ValueError si raza/subraza/elección son inválidas.
+    """
+    if raza not in RAZAS:
+        raise ValueError(f"Raza desconocida: {raza}. Opciones: {list(RAZAS)}")
+    r = RAZAS[raza]
+    if r["subrazas"] and not subraza:
+        raise ValueError(f"La raza {raza} requiere subraza: {list(r['subrazas'])}")
+    if subraza and subraza not in r["subrazas"]:
+        raise ValueError(f"Subraza inválida para {raza}: {subraza}")
+
+    finales = dict(base)
+    rasgos = [r["rasgo"]]
+    for atr, b in r["bonos"].items():
+        finales[atr] = finales.get(atr, 10) + b
+    velocidad = r.get("velocidad_m", 9)
+
+    if subraza:
+        sr = r["subrazas"][subraza]
+        for atr, b in sr.get("bonos", {}).items():
+            finales[atr] = finales.get(atr, 10) + b
+        velocidad = sr.get("velocidad_m", velocidad)
+        rasgos.append(sr["rasgo"])
+
+    n_eleccion = r.get("bonos_a_eleccion", 0)
+    if n_eleccion:
+        elegidos = bonos_eleccion or []
+        if len(set(elegidos)) != n_eleccion or                 any(a not in ("FUE", "DES", "CON", "INT", "SAB", "CAR")
+                    for a in elegidos) or                 any(a in r["bonos"] for a in elegidos):
+            raise ValueError(
+                f"{raza}: elegí {n_eleccion} atributos distintos "
+                f"(que no sean {list(r['bonos'])}) para el +1")
+        for a in elegidos:
+            finales[a] += 1
+
+    for atr, v in finales.items():
+        finales[atr] = min(20, v)
+    return finales, velocidad, "; ".join(rasgos)

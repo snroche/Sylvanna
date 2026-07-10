@@ -25,6 +25,25 @@ app.include_router(characters.router)
 app.include_router(actions.router)
 
 
+@app.get("/api/health/narrator")
+async def health_narrator():
+    """Test unitario del narrador: una llamada real mínima a OpenRouter.
+    Devuelve la causa exacta si falla. No requiere auth (no expone la key)."""
+    from app.config import get_settings
+    from app.narrator import NarradorError, completar
+    s = get_settings()
+    if not s.openrouter_api_key:
+        return {"ok": False, "narrador": "dummy",
+                "detalle": "OPENROUTER_API_KEY no configurada"}
+    try:
+        r = await completar("Respondé exactamente: OK", max_tokens=10,
+                            reintentos=0)
+        return {"ok": True, "modelos": s.modelos, "respuesta": (r or "")[:50]}
+    except NarradorError as e:
+        return {"ok": False, "status": e.status, "modelos": s.modelos,
+                "detalle": e.mensaje_humano(), "crudo": e.detalle[:300]}
+
+
 @app.get("/api/health")
 async def health():
     from app.config import get_settings

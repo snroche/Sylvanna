@@ -45,9 +45,47 @@ Campos permitidos (todos opcionales):
 No declares efectos que no correspondan a lo que acaba de pasar."""
 
 
+class NarradorError(Exception):
+    """Error real del narrador (la key existe pero la llamada falló)."""
+
+    def __init__(self, status: int | None, detalle: str):
+        self.status = status
+        self.detalle = detalle
+        super().__init__(f"{status}: {detalle}")
+
+    def mensaje_humano(self) -> str:
+        if self.status == 401:
+            return "API key de OpenRouter inválida (revisá OPENROUTER_API_KEY)."
+        if self.status == 402:
+            return "Sin créditos en OpenRouter (o balance negativo)."
+        if self.status == 404:
+            return ("El modelo no existe o no está disponible "
+                    "(revisá OPENROUTER_MODEL, incluido el sufijo :free).")
+        if self.status == 429:
+            if "rpd" in self.detalle or "per day" in self.detalle:
+                return ("Límite DIARIO del free tier de OpenRouter alcanzado "
+                        "(50 requests/día sin créditos; comprar USD 10 una vez "
+                        "lo sube a 1000/día para siempre). Se resetea a "
+                        "medianoche UTC.")
+            return ("Modelo gratuito saturado o límite de 20 req/min alcanzado. "
+                    "Reintentá en un rato, o configurá modelos fallback "
+                    "separados por coma en OPENROUTER_MODEL.")
+        return f"Error del narrador ({self.status}): {self.detalle[:200]}"
+
+
 async def completar(prompt: str, modelo: str | None = None,
-                    system: str | None = None, max_tokens: int = 700) -> str | None:
-    """Llamada genérica a OpenRouter. None si no hay key o falla."""
+                    system: str | None = None, max_tokens: int = 700,
+                    reintentos: int = 2) -> str | None:
+    """Llamada a OpenRouter con reintentos y fallback de modelos.
+
+    - None solo si NO hay API key (modo dummy explícito).
+    - NarradorError si la key existe pero la llamada falla (el caller decide
+      cómo mostrarlo; nunca más errores silenciosos).
+    - Reintenta en 429 por minuto / 5xx con backoff. NO reintenta el límite
+      diario (rpd): los intentos fallidos también consumen cuota.
+    """
+    import asyncio
+
     s = get_settings()
     if not s.openrouter_api_key:
         return None
@@ -55,19 +93,51 @@ async def completar(prompt: str, modelo: str | None = None,
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
-    try:
-        async with httpx.AsyncClient(timeout=90) as client:
-            r = await client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={"Authorization": f"Bearer {s.openrouter_api_key}"},
-                json={"model": modelo or s.openrouter_model,
-                      "max_tokens": max_tokens, "messages": messages},
-            )
-            r.raise_for_status()
-            return r.json()["choices"][0]["message"]["content"]
-    except (httpx.HTTPError, KeyError, IndexError, json.JSONDecodeError) as e:
-        print(f"[narrador] error OpenRouter: {e}")
-        return None
+
+    modelos = [modelo] if modelo else s.modelos
+    payload: dict = {"max_tokens": max_tokens, "messages": messages,
+                     "model": modelos[0]}
+    if len(modelos) > 1:
+        payload["models"] = modelos  # routing con fallback de OpenRouter
+
+    ultimo_error: NarradorError | None = None
+    for intento in range(reintentos + 1):
+        try:
+            async with httpx.AsyncClient(timeout=90) as client:
+                r = await client.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {s.openrouter_api_key}"},
+                    json=payload)
+            cuerpo = r.text
+            if r.status_code != 200:
+                ultimo_error = NarradorError(r.status_code, cuerpo[:400])
+                print(f"[narrador] HTTP {r.status_code}: {cuerpo[:200]}")
+                es_diario = "rpd" in cuerpo or "per day" in cuerpo
+                if r.status_code in (429, 500, 502, 503) and not es_diario \
+                        and intento < reintentos:
+                    await asyncio.sleep(3 * (intento + 1))
+                    continue
+                raise ultimo_error
+            data = r.json()
+            # OpenRouter a veces devuelve 200 con {"error": {...}}
+            if "error" in data:
+                err = data["error"]
+                raise NarradorError(err.get("code"), str(err.get("message", err)))
+            contenido = data["choices"][0]["message"]["content"]
+            if not contenido or not contenido.strip():
+                raise NarradorError(200, "respuesta vacía del modelo")
+            return contenido
+        except NarradorError:
+            raise
+        except (httpx.HTTPError, KeyError, IndexError,
+                json.JSONDecodeError) as e:
+            ultimo_error = NarradorError(None, f"{type(e).__name__}: {e}")
+            print(f"[narrador] {ultimo_error}")
+            if intento < reintentos:
+                await asyncio.sleep(3 * (intento + 1))
+                continue
+            raise ultimo_error
+    raise ultimo_error  # inalcanzable, por claridad
 
 
 CAMPOS_PERMITIDOS = {
@@ -102,7 +172,11 @@ def parsear_salida(texto: str) -> tuple[str, dict]:
 
 
 async def narrar(contexto: str, accion: str) -> tuple[str, dict]:
-    """Devuelve (narración, efectos). Con dummy: narración mínima, sin efectos."""
+    """Devuelve (narración, efectos).
+
+    - Sin API key → narración dummy (modo desarrollo).
+    - Con API key y error → propaga NarradorError (el caller lo muestra).
+    """
     crudo = await completar(f"{contexto}\n\n---\nACCIÓN A NARRAR:\n{accion}",
                             system=SYSTEM_PROMPT)
     if crudo is None:

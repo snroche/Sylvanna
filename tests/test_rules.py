@@ -388,3 +388,72 @@ def test_descanso_largo_restaura_todo():
     assert m.dados_golpe_disp == 2  # nivel 4 // 2
     assert m.spell_state.slots["1"]["usados"] == 0
     assert m.spell_state.concentracion_activa is None
+
+
+# ---------------------------------------------------------------- razas y point buy
+
+from engine.content import (COSTO_PUNTOS, RAZAS, aplicar_bonos_raciales,
+                            validar_point_buy)
+
+
+def test_point_buy_valido():
+    ok, msg = validar_point_buy(
+        {"FUE": 15, "DES": 14, "CON": 13, "INT": 12, "SAB": 10, "CAR": 8})
+    assert ok, msg  # 9+7+5+4+2+0 = 27
+
+
+def test_point_buy_excedido():
+    # tres 15 = 27 puntos justos: válido
+    ok, _ = validar_point_buy(
+        {"FUE": 15, "DES": 15, "CON": 15, "INT": 8, "SAB": 8, "CAR": 8})
+    assert ok
+    # subir un 8 a 9 lo pasa a 28: inválido
+    ok2, _ = validar_point_buy(
+        {"FUE": 15, "DES": 15, "CON": 15, "INT": 9, "SAB": 8, "CAR": 8})
+    assert not ok2
+
+
+def test_point_buy_fuera_de_rango():
+    ok, msg = validar_point_buy(
+        {"FUE": 16, "DES": 8, "CON": 8, "INT": 8, "SAB": 8, "CAR": 8})
+    assert not ok and "16" in msg
+
+
+def test_bonos_raciales_enano_montanas():
+    base = {"FUE": 14, "DES": 10, "CON": 14, "INT": 10, "SAB": 10, "CAR": 10}
+    finales, vel, rasgos = aplicar_bonos_raciales(base, "enano",
+                                                  "enano_de_las_montanas")
+    assert finales["CON"] == 16 and finales["FUE"] == 16
+    assert vel == 7
+    assert "veneno" in rasgos
+
+
+def test_raza_con_subrazas_la_requiere():
+    base = {a: 10 for a in ("FUE", "DES", "CON", "INT", "SAB", "CAR")}
+    with pytest.raises(ValueError):
+        aplicar_bonos_raciales(base, "elfo", None)
+
+
+def test_semielfo_eleccion():
+    base = {a: 10 for a in ("FUE", "DES", "CON", "INT", "SAB", "CAR")}
+    finales, _, _ = aplicar_bonos_raciales(base, "semielfo", None,
+                                           bonos_eleccion=["FUE", "INT"])
+    assert finales["CAR"] == 12 and finales["FUE"] == 11 and finales["INT"] == 11
+    with pytest.raises(ValueError):  # no puede elegir CAR (ya lo tiene)
+        aplicar_bonos_raciales(base, "semielfo", None,
+                               bonos_eleccion=["CAR", "FUE"])
+    with pytest.raises(ValueError):  # deben ser dos distintos
+        aplicar_bonos_raciales(base, "semielfo", None,
+                               bonos_eleccion=["FUE", "FUE"])
+
+
+def test_raza_desconocida():
+    base = {a: 10 for a in ("FUE", "DES", "CON", "INT", "SAB", "CAR")}
+    with pytest.raises(ValueError):
+        aplicar_bonos_raciales(base, "tabaxi", None)
+
+
+def test_tope_20():
+    base = {"FUE": 18, "DES": 10, "CON": 18, "INT": 10, "SAB": 10, "CAR": 10}
+    finales, _, _ = aplicar_bonos_raciales(base, "enano", "enano_de_las_montanas")
+    assert finales["FUE"] == 20  # 18+2 topea en 20

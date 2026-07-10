@@ -105,10 +105,15 @@ async def _narrar_bg(campaign_id: int, accion: str, actor_id: int | None):
                 await _iniciar_combate(db, camp, log["inicia_combate"])
             await actualizar_resumen_si_corresponde(db, camp)
         except Exception as e:  # nunca dejar narrando=True colgado
+            from ..narrator import NarradorError
             print(f"[narrador-bg] error: {e}")
+            if isinstance(e, NarradorError):
+                detalle = e.mensaje_humano()
+            else:
+                detalle = f"error interno del narrador ({type(e).__name__})"
             _msg(db, campaign_id, "sistema", "Sistema",
-                 "⚠ El DM se quedó sin palabras (error del narrador). "
-                 "La mecánica ya está aplicada; continúen.")
+                 f"⚠ El DM no pudo narrar: {detalle} "
+                 f"La mecánica ya está aplicada; pueden continuar.")
         finally:
             camp.narrando = False
             await db.commit()

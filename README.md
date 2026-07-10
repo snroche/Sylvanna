@@ -123,11 +123,53 @@ para copiarla, endpoint GET /api/campaigns/me).
 **Muerte con reemplazo:** si tu personaje muere podés forjar uno nuevo y
 seguir en la misma campaña; el caído queda en el historial.
 
-**Narrador visible:** la cabecera muestra qué modelo narra, o "DM dummy
-(falta API key)" en rojo si OPENROUTER_API_KEY no está configurada. Hay un
-.env.example para desarrollo local.
+**Narrador visible y diagnosticable:** la cabecera muestra qué modelo narra
+("DM dummy" en rojo si falta la key). Click en esa pastilla = test unitario
+real del narrador (también en GET /api/health/narrator): hace una llamada
+mínima a OpenRouter y devuelve OK o la causa exacta del fallo.
+
+**Errores del narrador visibles:** si OpenRouter falla, el chat muestra la
+causa real ("límite diario del free tier alcanzado", "modelo saturado",
+"key inválida") en vez de caer silenciosamente al dummy. Reintentos con
+backoff en 429 por minuto / 5xx; el límite DIARIO no se reintenta (los
+fallos también consumen cuota).
+
+**Fallback de modelos:** OPENROUTER_MODEL acepta una lista separada por
+comas; el primero es el principal y el resto fallbacks automáticos (routing
+de OpenRouter). Ej:
+`meta-llama/llama-3.3-70b-instruct:free,deepseek/deepseek-chat:free`
+
+**Límites del free tier de OpenRouter (importante):** 20 req/min y 50
+req/día sin créditos — y los intentos fallidos cuentan. Comprar USD 10 una
+única vez (no expiran) sube el límite a 1000/día para siempre. Cada acción
+de juego ≈ 1 request, más 1 de resumen cada 40 mensajes.
 
 **Contenido:** 12 monstruos (goblin→ogro), armas naturales, consumibles.
+
+## Razas, point buy y administración
+
+**Razas y subrazas (9):** humano, elfo (alto/bosques/drow), enano
+(colinas/montañas), mediano (piesligeros/fornido), gnomo (bosque/rocas),
+semielfo (+1 a dos atributos a elección), semiorco, dracónido, tiflin.
+Los bonos raciales y la velocidad los aplica EL SERVIDOR sobre los valores
+base: el cliente solo muestra el preview. El enano de las colinas suma su
++1 PG por nivel. Las razas con subrazas la exigen.
+
+**Métodos de atributos:** point buy 27 (validado server-side con la tabla
+estándar: 8=0 … 15=9, máx 15 base) o libre (3–18, a criterio de la mesa).
+Contador de puntos en vivo en la UI.
+
+**Salir al menú:** botón en la cabecera (recuerda guardar la llave 🔑).
+
+**Administración de campañas** (`scripts/admin.py`, usa el mismo
+DATABASE_URL que la app):
+```bash
+python scripts/admin.py list
+python scripts/admin.py delete 3 7
+python scripts/admin.py wipe --yes
+# contra Neon desde tu máquina:
+DATABASE_URL="postgresql://..." python scripts/admin.py wipe --yes
+```
 
 ## Frontend — La Mesa
 

@@ -119,10 +119,16 @@ async def actualizar_resumen_si_corresponde(db: AsyncSession,
         f"Descartá: descripciones ambientales y combates sin consecuencia. "
         f"Respondé SOLO con el resumen, sin preámbulo.")
 
-    from .narrator import completar  # import tardío para evitar ciclo
+    from .narrator import NarradorError, completar  # import tardío (ciclo)
     s = get_settings()
-    modelo = s.openrouter_model_summarizer or s.openrouter_model
-    nuevo = await completar(prompt, modelo=modelo, max_tokens=900)
+    modelo = s.openrouter_model_summarizer or s.modelos[0]
+    try:
+        nuevo = await completar(prompt, modelo=modelo, max_tokens=900,
+                                reintentos=0)
+    except NarradorError as e:
+        # sin drama: los mensajes quedan sin resumir y se reintenta la próxima
+        print(f"[resumen] pospuesto: {e}")
+        return False
     if nuevo:
         camp.resumen_actual = nuevo.strip()
         for m in lote:

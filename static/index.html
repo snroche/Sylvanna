@@ -61,15 +61,30 @@
     <div class="tarjeta">
       <div class="fila-2">
         <label>Nombre <input id="pj-nombre" placeholder="Thorin" maxlength="80"></label>
-        <label>Raza <input id="pj-raza" placeholder="Enano" maxlength="40"></label>
+        <label>Raza <select id="pj-raza"></select></label>
       </div>
+      <div class="fila-2">
+        <label id="lbl-subraza" hidden>Subraza <select id="pj-subraza"></select></label>
+        <label id="lbl-eleccion" hidden>+1 a dos atributos
+          <div style="display:flex;gap:.4rem">
+            <select id="pj-eleccion-1"></select><select id="pj-eleccion-2"></select>
+          </div>
+        </label>
+      </div>
+      <p class="nota" id="pj-raza-info"></p>
       <label>Clase
         <select id="pj-clase"></select>
       </label>
       <p class="nota" id="pj-clase-info"></p>
 
-      <h3>Atributos <span class="nota-inline">(8–15 en creación; sumá bonos raciales a mano si querés)</span></h3>
+      <h3>Atributos</h3>
+      <div class="chips" style="margin:.2rem 0 .5rem">
+        <button type="button" class="chip activo" id="modo-puntos">Point buy (27 pts)</button>
+        <button type="button" class="chip" id="modo-libre">Libre (3–18)</button>
+      </div>
+      <p class="nota" id="pj-puntos-info"></p>
       <div class="grilla-atributos" id="pj-atributos"></div>
+      <p class="nota">Los bonos raciales los suma el servidor: acá cargás los valores base.</p>
 
       <h3>Habilidades <span class="nota-inline">(elegí hasta 4)</span></h3>
       <div class="chips" id="pj-habilidades"></div>
@@ -105,6 +120,7 @@
       <span class="pastilla" id="ui-estado">exploración</span>
       <span class="pastilla pastilla-tenue" id="ui-invite" title="Código para invitar jugadores"></span>
       <button class="pastilla pastilla-tenue btn-llave" id="btn-llave" title="Copiar tu llave para retomar la campaña en otro dispositivo">🔑</button>
+      <button class="pastilla pastilla-tenue btn-llave" id="btn-salir" title="Volver al menú principal">Salir</button>
       <span class="pastilla pastilla-tenue" id="ui-dm" title="Narrador activo"></span>
       <span class="pastilla pastilla-tenue" id="ui-conexion">●</span>
     </div>

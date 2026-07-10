@@ -57,6 +57,19 @@ const CONJUROS_V1 = ["rayo_de_escarcha","llama_sagrada","toque_helado","luz",
   "hechizar_persona","marca_del_cazador","rociada_de_color","rayo_abrasador",
   "inmovilizar_persona","invisibilidad","paso_brumoso"];
 
+const RAZAS = {
+  humano:   {bonos:{FUE:1,DES:1,CON:1,INT:1,SAB:1,CAR:1}, sub:{}, info:"+1 a todo · 9m"},
+  elfo:     {bonos:{DES:2}, sub:{alto_elfo:{INT:1}, elfo_de_los_bosques:{SAB:1}, drow:{CAR:1}}, info:"+2 DES · visión nocturna"},
+  enano:    {bonos:{CON:2}, sub:{enano_de_las_colinas:{SAB:1}, enano_de_las_montanas:{FUE:2}}, info:"+2 CON · 7m · resiste veneno"},
+  mediano:  {bonos:{DES:2}, sub:{piesligeros:{CAR:1}, fornido:{CON:1}}, info:"+2 DES · 7m · suertudo"},
+  gnomo:    {bonos:{INT:2}, sub:{gnomo_del_bosque:{DES:1}, gnomo_de_las_rocas:{CON:1}}, info:"+2 INT · 7m"},
+  semielfo: {bonos:{CAR:2}, sub:{}, eleccion:2, info:"+2 CAR y +1 a dos atributos a elección"},
+  semiorco: {bonos:{FUE:2,CON:1}, sub:{}, info:"+2 FUE +1 CON · aguante implacable"},
+  draconido:{bonos:{FUE:2,CAR:1}, sub:{}, info:"+2 FUE +1 CAR · aliento de dragón"},
+  tiflin:   {bonos:{CAR:2,INT:1}, sub:{}, info:"+2 CAR +1 INT · resiste fuego"},
+};
+const COSTO_PB = {8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
+
 const CONSUMIBLES_USABLES = new Set(["pocion_de_curacion","pocion_de_curacion_mayor"]);
 const ATRS = ["FUE","DES","CON","INT","SAB","CAR"];
 const TIMEOUT_TURNO = 120;
@@ -147,7 +160,7 @@ $("btn-retomar").onclick = async () => {
 
 function prepararCreacionPJ() {
   const sel = $("pj-clase");
-  if (sel.options.length) return;
+  if (sel.options.length) { actualizarPB(); return; }
   for (const c of Object.keys(CLASES)) sel.add(new Option(c, c));
   sel.onchange = () => {
     $("pj-clase-info").textContent = CLASES[sel.value];
@@ -155,18 +168,46 @@ function prepararCreacionPJ() {
   };
   sel.onchange();
 
+  // razas
+  const sr = $("pj-raza");
+  for (const r of Object.keys(RAZAS)) sr.add(new Option(r.replaceAll("_"," "), r));
+  sr.onchange = () => {
+    const r = RAZAS[sr.value];
+    $("pj-raza-info").textContent = r.info;
+    const conSub = Object.keys(r.sub).length > 0;
+    $("lbl-subraza").hidden = !conSub;
+    if (conSub) {
+      const ss = $("pj-subraza"); ss.innerHTML = "";
+      for (const s of Object.keys(r.sub)) ss.add(new Option(s.replaceAll("_"," "), s));
+    }
+    $("lbl-eleccion").hidden = !r.eleccion;
+    if (r.eleccion) {
+      for (const id of ["pj-eleccion-1","pj-eleccion-2"]) {
+        const e = $(id); e.innerHTML = "";
+        for (const a of ATRS) if (!(a in r.bonos)) e.add(new Option(a, a));
+      }
+      $("pj-eleccion-2").selectedIndex = 1;
+    }
+    actualizarPB();
+  };
+  sr.onchange();
+
+  // atributos
   const ga = $("pj-atributos");
   for (const a of ATRS) {
     const l = document.createElement("label");
-    l.innerHTML = `${a}<input type="number" min="3" max="18" value="10" data-atr="${a}">
+    l.innerHTML = `${a}<input type="number" min="8" max="15" value="8" data-atr="${a}">
                    <span class="mod-vista"></span>`;
     ga.appendChild(l);
   }
-  ga.addEventListener("input",(ev)=>{
-    const v = +ev.target.value || 10, m = Math.floor((v-10)/2);
-    ev.target.nextElementSibling.textContent = (m>=0?"+":"")+m;
-  });
-  ga.querySelectorAll("input").forEach(i=>i.dispatchEvent(new Event("input",{bubbles:true})));
+  ga.addEventListener("input", actualizarPB);
+  $("pj-subraza").addEventListener("change", actualizarPB);
+  ["pj-eleccion-1","pj-eleccion-2"].forEach(id=>$(id).addEventListener("change", actualizarPB));
+
+  // toggle método
+  $("modo-puntos").onclick = () => setModo("puntos");
+  $("modo-libre").onclick = () => setModo("libre");
+  setModo("puntos");
 
   montarChips("pj-habilidades", HABILIDADES, 4);
   montarChips("pj-conjuros", CONJUROS_V1, 4, "chip-arcano");
@@ -176,6 +217,55 @@ function prepararCreacionPJ() {
   const sw = $("pj-arma");
   for (const a of ARMAS) sw.add(new Option(a.replaceAll("_"," "), a));
   sw.value = "espada_larga";
+}
+
+let modoAtributos = "puntos";
+function setModo(m) {
+  modoAtributos = m;
+  $("modo-puntos").classList.toggle("activo", m === "puntos");
+  $("modo-libre").classList.toggle("activo", m === "libre");
+  document.querySelectorAll("#pj-atributos input").forEach(i=>{
+    i.min = m === "puntos" ? 8 : 3;
+    i.max = m === "puntos" ? 15 : 18;
+    i.value = Math.max(+i.min, Math.min(+i.max, +i.value || 8));
+  });
+  actualizarPB();
+}
+
+function bonosRacialesActuales() {
+  const r = RAZAS[$("pj-raza").value];
+  const bonos = {...r.bonos};
+  if (!$("lbl-subraza").hidden) {
+    const sb = r.sub[$("pj-subraza").value] || {};
+    for (const [a,b] of Object.entries(sb)) bonos[a] = (bonos[a]||0) + b;
+  }
+  if (r.eleccion) {
+    for (const id of ["pj-eleccion-1","pj-eleccion-2"])
+      bonos[$(id).value] = (bonos[$(id).value]||0) + 1;
+  }
+  return bonos;
+}
+
+function actualizarPB() {
+  const bonos = bonosRacialesActuales();
+  let gastado = 0;
+  document.querySelectorAll("#pj-atributos input").forEach(i=>{
+    const base = +i.value || 8;
+    if (modoAtributos === "puntos") gastado += COSTO_PB[base] ?? 99;
+    const final = base + (bonos[i.dataset.atr] || 0);
+    const m = Math.floor((final - 10) / 2);
+    i.nextElementSibling.textContent =
+      (bonos[i.dataset.atr] ? `→${final} ` : "") + (m>=0?"+":"") + m;
+  });
+  const info = $("pj-puntos-info");
+  if (modoAtributos === "puntos") {
+    info.textContent = `Puntos usados: ${gastado} / 27` +
+      (gastado > 27 ? " ⚠ te pasaste" : "");
+    info.style.color = gastado > 27 ? "var(--brasa)" : "";
+  } else {
+    info.textContent = "Modo libre: valores 3–18 a criterio de la mesa.";
+    info.style.color = "";
+  }
 }
 
 function montarChips(id, items, max, extra="") {
@@ -199,9 +289,14 @@ $("btn-crear-pj").onclick = async () => {
   document.querySelectorAll("#pj-atributos input").forEach(i=>atributos[i.dataset.atr]=+i.value);
   const conjuros = chipsElegidos("pj-conjuros");
   try {
+    const razaSel = RAZAS[$("pj-raza").value];
     await api("POST","/characters",{
       nombre: $("pj-nombre").value.trim() || "Aventurero",
-      raza: $("pj-raza").value.trim() || "Humano",
+      raza: $("pj-raza").value,
+      subraza: $("lbl-subraza").hidden ? null : $("pj-subraza").value,
+      bonos_eleccion: razaSel.eleccion
+        ? [$("pj-eleccion-1").value, $("pj-eleccion-2").value] : [],
+      metodo: modoAtributos,
       clase: $("pj-clase").value, atributos,
       habilidades: chipsElegidos("pj-habilidades"),
       armadura: $("pj-armadura").value || null,
@@ -236,6 +331,30 @@ async function pintarNarrador() {
     }
   } catch {}
 }
+
+$("ui-dm").style.cursor = "pointer";
+$("ui-dm").title = "Click: probar el narrador (llamada real de test)";
+$("ui-dm").onclick = async () => {
+  const el = $("ui-dm");
+  const antes = el.textContent;
+  el.textContent = "probando…";
+  try {
+    const r = await fetch("/api/health/narrator");
+    const d = await r.json();
+    if (d.ok) alert(`✅ Narrador OK\nModelos: ${d.modelos.join(", ")}\nRespuesta: ${d.respuesta}`);
+    else alert(`❌ Narrador con problemas\n\n${d.detalle}\n\nDetalle técnico: ${d.crudo ?? "-"}`);
+  } catch(e) { alert("No se pudo probar: " + e.message); }
+  el.textContent = antes;
+  pintarNarrador();
+};
+
+$("btn-salir").onclick = () => {
+  if (!confirm("¿Volver al menú principal?\n\nTu llave 🔑 te permite retomar "
+             + "esta campaña cuando quieras. ¿La tenés guardada?")) return;
+  if (S.timerId) clearTimeout(S.timerId);
+  localStorage.clear();
+  location.reload();
+};
 
 $("btn-llave").onclick = async () => {
   try { await navigator.clipboard.writeText(S.token); alert("Llave copiada. Guardala para retomar la campaña."); }

@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     model_config = {"env_file": ".env", "extra": "ignore"}
 
     @property
+    def modelos(self) -> list[str]:
+        """OPENROUTER_MODEL acepta lista separada por comas: el primero es el
+        principal, el resto fallbacks (routing automático de OpenRouter)."""
+        return [m.strip() for m in self.openrouter_model.split(",") if m.strip()]
+
+    @property
     def db_url_normalizada(self) -> str:
         """Neon da 'postgresql://...' — lo convertimos a driver asyncpg."""
         url = self.database_url
