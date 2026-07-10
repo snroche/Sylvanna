@@ -87,5 +87,24 @@ viven en el servidor. El cliente nunca puede inventar un resultado.
 1. ✅ Motor de reglas + tests
 2. ✅ Models + API REST deployable
 3. ✅ Pipeline de contexto: resumen rodante, contrato JSON, conjuros, XP por CR
-4. ⬜ WebSockets + batch de exploración multijugador
-5. ⬜ Frontend de fichas y juego
+4. ⬜ WebSockets + batch de exploración (hoy: polling cada 3.5s, jugable)
+5. ✅ Frontend completo ("La Mesa") servido desde /
+
+## Frontend — La Mesa
+
+Vanilla JS sin build step (`static/`): abrí la raíz del sitio y listo.
+- **Inicio**: fundar campaña o unirse con código de invitación (visible en la
+  cabecera para compartir). Sesión en localStorage: recargar no te saca.
+- **Creación de personaje**: clase con info de dado/magia, atributos con
+  modificador en vivo, chips de habilidades (máx 4), armadura/arma, conjuros
+  para lanzadores. El servidor valida y calcula PG/CA/slots.
+- **Mesa**: log de narración con polling; los resultados mecánicos aparecen
+  como "sellos" de tinta (d20 14+5=19 vs CA 15 → IMPACTA) separados de la
+  prosa del DM. Composer de exploración (actuar / tirada de habilidad) que
+  cambia a modo combate automáticamente: barra de iniciativa con turno
+  resaltado, objetivos con estado de salud narrativo (ileso/herido/malherido,
+  nunca PG exactos), atacar y lanzar conjuros solo en tu turno.
+- **Ficha viva**: PG con barra, atributos, CA, slots como puntos, condiciones,
+  concentración. **Mundo**: misiones, NPCs conocidos con actitud, presagios
+  (consecuencias pendientes) y la crónica (resumen rodante).
+- Móvil: tabs Juego/Ficha/Mundo. Tolerante al cold start de Render.

@@ -55,15 +55,43 @@ async def ver_campania(campaign_id: int, player: Player = Depends(jugador_actual
     res = await db.execute(
         select(Character).where(Character.campaign_id == campaign_id))
     chars = res.scalars().all()
+
+    from ..models import NPC
+    res = await db.execute(select(NPC).where(
+        NPC.campaign_id == campaign_id, NPC.en_escena == True))  # noqa: E712
+    npcs = res.scalars().all()
+
+    def salud(n):
+        maximo = (n.stats or {}).get("pg")
+        if n.pg_actual is None or not maximo:
+            return None
+        r = n.pg_actual / maximo
+        if n.pg_actual == 0:
+            return "caído"
+        if r >= 1:
+            return "ileso"
+        if r >= 0.66:
+            return "magullado"
+        if r >= 0.33:
+            return "herido"
+        return "malherido"
+
     return {
         "id": camp.id, "nombre": camp.nombre, "estado": camp.estado,
         "ubicacion": camp.ubicacion_actual,
+        "tiempo_juego_min": camp.tiempo_juego_min,
         "combate": camp.combate,
         "personajes": [
             {"id": c.id, "nombre": c.nombre, "clase": c.clase, "nivel": c.nivel,
              "pg_actual": c.pg_actual, "pg_max": c.pg_max, "vivo": c.vivo,
+             "condiciones": [x["tipo"] for x in c.condiciones],
              "player_id": c.player_id}
             for c in chars
+        ],
+        "npcs_en_escena": [
+            {"id": n.id, "nombre": n.nombre, "tipo": n.tipo,
+             "actitud": n.actitud, "salud": salud(n), "vivo": n.vivo}
+            for n in npcs
         ],
     }
 

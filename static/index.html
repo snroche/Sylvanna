@@ -1,9 +1,160 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><meta charset="utf-8"><title>DnD AI DM</title></head>
-<body style="font-family: monospace; background:#1a1a2e; color:#eee; padding:2rem">
-<h1>🐉 DnD AI DM — backend activo</h1>
-<p>API docs: <a href="/docs" style="color:#8be">/docs</a></p>
-<p>El frontend real llega en el paso 5. Mientras tanto, probá la API desde /docs.</p>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Mesa — DnD con DM de IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- ============ PANTALLA: INICIO ============ -->
+<section id="pantalla-inicio" class="pantalla">
+  <div class="inicio-marco">
+    <h1 class="titulo-juego">La Mesa</h1>
+    <p class="subtitulo">Una campaña de D&D 5e narrada por IA.<br>Los dados los tira la casa.</p>
+
+    <div class="tarjeta">
+      <h2>Fundar campaña</h2>
+      <label>Nombre de la campaña
+        <input id="inp-camp-nombre" placeholder="La cripta de Valdengrís" maxlength="120">
+      </label>
+      <label>Tu nombre
+        <input id="inp-jugador-1" placeholder="Santi" maxlength="80">
+      </label>
+      <button class="btn btn-ambar" id="btn-crear-camp">Fundar</button>
+    </div>
+
+    <div class="separador-o">— o —</div>
+
+    <div class="tarjeta">
+      <h2>Unirse con código</h2>
+      <label>Código de invitación
+        <input id="inp-invite" placeholder="aBc123Xy" maxlength="20">
+      </label>
+      <label>Tu nombre
+        <input id="inp-jugador-2" placeholder="Nombre" maxlength="80">
+      </label>
+      <button class="btn" id="btn-unirse">Sentarse a la mesa</button>
+    </div>
+    <p id="inicio-error" class="error" hidden></p>
+  </div>
+</section>
+
+<!-- ============ PANTALLA: CREAR PERSONAJE ============ -->
+<section id="pantalla-personaje" class="pantalla" hidden>
+  <div class="crear-marco">
+    <h1 class="titulo-seccion">Forjá tu personaje</h1>
+    <div class="tarjeta">
+      <div class="fila-2">
+        <label>Nombre <input id="pj-nombre" placeholder="Thorin" maxlength="80"></label>
+        <label>Raza <input id="pj-raza" placeholder="Enano" maxlength="40"></label>
+      </div>
+      <label>Clase
+        <select id="pj-clase"></select>
+      </label>
+      <p class="nota" id="pj-clase-info"></p>
+
+      <h3>Atributos <span class="nota-inline">(8–15 en creación; sumá bonos raciales a mano si querés)</span></h3>
+      <div class="grilla-atributos" id="pj-atributos"></div>
+
+      <h3>Habilidades <span class="nota-inline">(elegí hasta 4)</span></h3>
+      <div class="chips" id="pj-habilidades"></div>
+
+      <div class="fila-2">
+        <label>Armadura
+          <select id="pj-armadura"><option value="">Sin armadura</option></select>
+        </label>
+        <label class="check-linea"><input type="checkbox" id="pj-escudo"> Escudo (+2 CA)</label>
+      </div>
+      <label>Arma equipada <select id="pj-arma"></select></label>
+
+      <div id="pj-magia" hidden>
+        <h3>Conjuros preparados/conocidos <span class="nota-inline">(elegí hasta 4)</span></h3>
+        <div class="chips" id="pj-conjuros"></div>
+      </div>
+
+      <button class="btn btn-ambar" id="btn-crear-pj">Entrar al mundo</button>
+      <p id="pj-error" class="error" hidden></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANTALLA: MESA DE JUEGO ============ -->
+<section id="pantalla-mesa" class="pantalla" hidden>
+
+  <header class="cabecera">
+    <div class="cabecera-izq">
+      <span class="titulo-campania" id="ui-camp-nombre">—</span>
+      <span class="ubicacion" id="ui-ubicacion"></span>
+    </div>
+    <div class="cabecera-der">
+      <span class="pastilla" id="ui-estado">exploración</span>
+      <span class="pastilla pastilla-tenue" id="ui-invite" title="Código para invitar jugadores"></span>
+      <span class="pastilla pastilla-tenue" id="ui-conexion">●</span>
+    </div>
+  </header>
+
+  <nav class="tabs-movil">
+    <button data-tab="juego" class="tab activo">Juego</button>
+    <button data-tab="ficha" class="tab">Ficha</button>
+    <button data-tab="mundo" class="tab">Mundo</button>
+  </nav>
+
+  <div class="mesa">
+
+    <!-- columna principal: log + acciones -->
+    <main class="col-juego" data-panel="juego">
+      <div id="ui-combate-barra" class="combate-barra" hidden></div>
+      <div id="ui-log" class="log" aria-live="polite"></div>
+
+      <div class="composer">
+        <div id="composer-exploracion">
+          <div class="composer-fila">
+            <textarea id="inp-accion" rows="2"
+              placeholder="Qué hacés o decís… (Enter envía, Shift+Enter salto de línea)"></textarea>
+            <button class="btn btn-ambar" id="btn-say">Actuar</button>
+          </div>
+          <details class="tirada-detalle">
+            <summary>🎲 Tirada de habilidad</summary>
+            <div class="composer-fila">
+              <select id="inp-habilidad"></select>
+              <input id="inp-desc-habilidad" placeholder="Qué intentás (opcional)">
+              <button class="btn" id="btn-skill">Tirar</button>
+            </div>
+            <p class="nota">La CD la fija el mundo (12 por defecto en v1). El servidor tira y suma tus bonos.</p>
+          </details>
+        </div>
+
+        <div id="composer-combate" hidden>
+          <div class="composer-fila">
+            <select id="inp-objetivo"></select>
+            <button class="btn btn-brasa" id="btn-atacar">⚔ Atacar</button>
+          </div>
+          <div class="composer-fila" id="fila-conjuro" hidden>
+            <select id="inp-conjuro"></select>
+            <button class="btn btn-arcano" id="btn-cast">✦ Lanzar</button>
+          </div>
+          <p class="nota" id="ui-turno-info"></p>
+        </div>
+      </div>
+    </main>
+
+    <!-- panel lateral: ficha -->
+    <aside class="col-ficha" data-panel="ficha">
+      <div id="ui-ficha" class="ficha"></div>
+    </aside>
+
+    <!-- panel mundo (móvil: tab; escritorio: debajo de la ficha) -->
+    <aside class="col-mundo" data-panel="mundo">
+      <div id="ui-mundo" class="mundo"></div>
+    </aside>
+
+  </div>
+</section>
+
+<script src="/app.js"></script>
 </body>
 </html>
