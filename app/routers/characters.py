@@ -47,15 +47,35 @@ def _validar(body: CrearPersonaje):
         raise HTTPException(400, f"Arma inválida. Opciones: {list(ARMAS)}")
 
 
+def _inventario_inicial(body: "CrearPersonaje") -> list[dict]:
+    """Equipo base: lo elegido + kit de aventurero estándar."""
+    inv = list(body.inventario)
+    def agregar(nombre, cant=1):
+        ex = next((x for x in inv if x.get("nombre") == nombre), None)
+        if ex:
+            ex["cantidad"] = ex.get("cantidad", 1) + cant
+        else:
+            inv.append({"nombre": nombre, "cantidad": cant})
+    if body.arma_equipada:
+        agregar(body.arma_equipada)
+    if body.armadura:
+        agregar(body.armadura)
+    agregar("pocion_de_curacion", 2)
+    agregar("antorcha", 3)
+    agregar("racion", 5)
+    return inv
+
+
 @router.post("")
 async def crear_personaje(body: CrearPersonaje,
                           player: Player = Depends(jugador_actual),
                           db: AsyncSession = Depends(get_db)):
     _validar(body)
     existente = await db.execute(
-        select(Character).where(Character.player_id == player.id))
-    if existente.scalar_one_or_none():
-        raise HTTPException(409, "Ya tenés un personaje en esta campaña")
+        select(Character).where(Character.player_id == player.id,
+                                Character.vivo == True))  # noqa: E712
+    if existente.scalars().first():
+        raise HTTPException(409, "Ya tenés un personaje VIVO en esta campaña")
 
     info = CLASES[body.clase]
     dado = info["dado_golpe"]                      # "d10"
@@ -103,7 +123,7 @@ async def crear_personaje(body: CrearPersonaje,
         },
         armadura=body.armadura, escudo=body.escudo,
         arma_equipada=body.arma_equipada,
-        inventario=body.inventario,
+        inventario=_inventario_inicial(body),
         slots=slots_iniciales(body.clase, 1),
         conocidos=body.conocidos, preparados=body.preparados,
     )

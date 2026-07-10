@@ -38,6 +38,8 @@ Campos permitidos (todos opcionales):
 - "inicia_combate": {"monstruos": ["goblin", ...]}  (opciones: goblin, lobo, bandido, esqueleto, zombi, orco)
 - "npcs_salen_de_escena": [int, ...]
 - "otorgar_xp": int  (solo hitos narrativos; el XP de combate lo calcula el sistema)
+- "loot": [{"nombre": str, "cantidad": int}]  (objetos que el grupo encuentra/recibe; máx 5)
+- "otorgar_monedas": int  (monedas de oro encontradas/pagadas; usá con mesura)
 - "avanzar_tiempo_min": int
 - "nueva_ubicacion": str
 No declares efectos que no correspondan a lo que acaba de pasar."""
@@ -72,7 +74,7 @@ CAMPOS_PERMITIDOS = {
     "nuevos_npcs", "actualizar_npc", "nueva_quest", "completar_quest",
     "consecuencia_pendiente", "resolver_consecuencia", "inicia_combate",
     "npcs_salen_de_escena", "otorgar_xp", "avanzar_tiempo_min",
-    "nueva_ubicacion",
+    "nueva_ubicacion", "loot", "otorgar_monedas",
 }
 
 _JSON_BLOQUE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)

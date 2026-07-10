@@ -18,7 +18,8 @@ ACTITUDES = {"amistoso", "neutral", "desconfiado", "hostil"}
 
 
 async def aplicar_efectos(db: AsyncSession, camp: Campaign,
-                          efectos: dict) -> dict:
+                          efectos: dict,
+                          actor: Character | None = None) -> dict:
     """Devuelve un log de qué se aplicó y qué se rechazó."""
     log = {"aplicados": [], "rechazados": [], "inicia_combate": None}
     if not efectos:
@@ -122,6 +123,45 @@ async def aplicar_efectos(db: AsyncSession, camp: Campaign,
     if isinstance(ub, str) and ub.strip():
         camp.ubicacion_actual = ub.strip()[:200]
         log["aplicados"].append(("ubicacion", camp.ubicacion_actual))
+
+    loot = efectos.get("loot")
+    if isinstance(loot, list) and loot:
+        receptor = actor
+        if receptor is None:
+            res = await db.execute(select(Character).where(
+                Character.campaign_id == camp.id,
+                Character.vivo == True).limit(1))  # noqa: E712
+            receptor = res.scalar_one_or_none()
+        if receptor:
+            inv = list(receptor.inventario)
+            for item in loot[:5]:
+                if not isinstance(item, dict) or not item.get("nombre"):
+                    continue
+                nombre = str(item["nombre"])[:60]
+                cant = min(int(item.get("cantidad", 1) or 1), 10)
+                existente = next((x for x in inv if x.get("nombre") == nombre), None)
+                if existente:
+                    existente["cantidad"] = existente.get("cantidad", 1) + cant
+                else:
+                    inv.append({"nombre": nombre, "cantidad": cant})
+                log["aplicados"].append(("loot", f"{nombre} x{cant}"))
+            receptor.inventario = inv
+
+    oro = efectos.get("otorgar_monedas")
+    if isinstance(oro, int) and oro > 0:
+        res = await db.execute(select(Character).where(
+            Character.campaign_id == camp.id, Character.vivo == True))  # noqa: E712
+        chars = res.scalars().all()
+        if chars:
+            nivel_prom = sum(c.nivel for c in chars) / len(chars)
+            tope = int(50 * nivel_prom)
+            otorgado = min(oro, tope)
+            porcada = max(1, otorgado // len(chars))
+            for c in chars:
+                m = dict(c.monedas)
+                m["mo"] = m.get("mo", 0) + porcada
+                c.monedas = m
+            log["aplicados"].append(("monedas_oro", porcada))
 
     ic = efectos.get("inicia_combate")
     if isinstance(ic, dict):

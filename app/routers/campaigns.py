@@ -46,12 +46,34 @@ async def unirse(body: Unirse, db: AsyncSession = Depends(get_db)):
             "player_id": player.id}
 
 
+@router.get("/me")
+async def quien_soy(player: Player = Depends(jugador_actual),
+                    db: AsyncSession = Depends(get_db)):
+    """Retomar campaña con solo el token del jugador."""
+    camp = await db.get(Campaign, player.campaign_id)
+    res = await db.execute(select(Character)
+                           .where(Character.player_id == player.id)
+                           .order_by(Character.id.desc()))
+    chars = res.scalars().all()
+    vivo = next((c for c in chars if c.vivo), None)
+    return {"campaign_id": camp.id, "campaign_nombre": camp.nombre,
+            "player_id": player.id, "player_nombre": player.nombre,
+            "invite_code": camp.invite_code,
+            "character_id": vivo.id if vivo else None,
+            "personaje_muerto": bool(chars) and vivo is None}
+
+
 @router.get("/{campaign_id}")
 async def ver_campania(campaign_id: int, player: Player = Depends(jugador_actual),
                        db: AsyncSession = Depends(get_db)):
     if player.campaign_id != campaign_id:
         raise HTTPException(403, "No pertenecés a esta campaña")
     camp = await db.get(Campaign, campaign_id)
+
+    # timeout de turno: los clientes pollean, así que este es el "reloj"
+    from .actions import chequear_timeout_turno
+    await chequear_timeout_turno(db, camp)
+
     res = await db.execute(
         select(Character).where(Character.campaign_id == campaign_id))
     chars = res.scalars().all()
@@ -80,6 +102,7 @@ async def ver_campania(campaign_id: int, player: Player = Depends(jugador_actual
         "id": camp.id, "nombre": camp.nombre, "estado": camp.estado,
         "ubicacion": camp.ubicacion_actual,
         "tiempo_juego_min": camp.tiempo_juego_min,
+        "narrando": camp.narrando,
         "combate": camp.combate,
         "personajes": [
             {"id": c.id, "nombre": c.nombre, "clase": c.clase, "nivel": c.nivel,

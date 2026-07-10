@@ -31,7 +31,23 @@ async def get_db():
         yield session
 
 
+# ALTERs idempotentes para columnas agregadas después del primer deploy.
+# create_all solo crea tablas nuevas, no altera existentes.
+MIGRACIONES = [
+    "ALTER TABLE campaigns ADD COLUMN narrando BOOLEAN DEFAULT FALSE",
+    "ALTER TABLE campaigns ADD COLUMN ultimo_descanso_largo_min INTEGER DEFAULT -10000",
+]
+
+
 async def crear_tablas():
+    from sqlalchemy import text
+
     from . import models  # noqa: F401  (registra los modelos)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    for sql in MIGRACIONES:
+        try:
+            async with engine.begin() as conn:
+                await conn.execute(text(sql))
+        except Exception:
+            pass  # la columna ya existe

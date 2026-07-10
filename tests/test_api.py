@@ -86,7 +86,7 @@ async def test_flujo_completo(client):
         "descripcion": "escalar el muro de la cripta"}, headers=h1)
     assert r.status_code == 200
     reso = r.json()["resolucion"]
-    assert reso["bono"] == 5 and "narracion" in r.json()
+    assert reso["bono"] == 5 and r.json()["narrando"]
 
     # 6. combate
     r = await client.post(f"/api/campaigns/{camp_id}/combat/start", json={

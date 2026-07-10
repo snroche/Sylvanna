@@ -39,6 +39,17 @@
       </label>
       <button class="btn" id="btn-unirse">Sentarse a la mesa</button>
     </div>
+    <div class="separador-o">— o —</div>
+
+    <div class="tarjeta">
+      <h2>Retomar campaña</h2>
+      <p class="nota">Pegá tu llave de jugador (te la mostramos al crear el personaje;
+      también podés copiarla desde la cabecera con 🔑).</p>
+      <label>Tu llave
+        <input id="inp-llave" placeholder="WZuqLY…" maxlength="64">
+      </label>
+      <button class="btn" id="btn-retomar">Volver a la mesa</button>
+    </div>
     <p id="inicio-error" class="error" hidden></p>
   </div>
 </section>
@@ -93,6 +104,8 @@
     <div class="cabecera-der">
       <span class="pastilla" id="ui-estado">exploración</span>
       <span class="pastilla pastilla-tenue" id="ui-invite" title="Código para invitar jugadores"></span>
+      <button class="pastilla pastilla-tenue btn-llave" id="btn-llave" title="Copiar tu llave para retomar la campaña en otro dispositivo">🔑</button>
+      <span class="pastilla pastilla-tenue" id="ui-dm" title="Narrador activo"></span>
       <span class="pastilla pastilla-tenue" id="ui-conexion">●</span>
     </div>
   </header>

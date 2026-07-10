@@ -250,3 +250,20 @@ label input, label select { margin-top: .25rem; color: var(--pergamino); }
   * { transition: none !important; animation: none !important; }
   .log { scroll-behavior: auto; }
 }
+
+/* ---------- agregados versión completa ---------- */
+.btn-llave { cursor: pointer; background: var(--panel); border: 1px solid var(--borde); }
+#ui-dm.dummy { border-color: var(--brasa); color: var(--brasa); }
+.dm-escribiendo {
+  font-style: italic; color: var(--pergamino-tenue); font-size: .95rem;
+  padding: .2rem 0 .6rem;
+}
+.dm-escribiendo::after { content: "…"; animation: puntitos 1.4s infinite; }
+@keyframes puntitos { 0% {content:"."} 33% {content:".."} 66% {content:"..."} }
+.ficha-acciones { display:flex; flex-wrap:wrap; gap:.4rem; margin:.9rem 0; }
+.ficha-acciones .btn { padding:.4rem .7rem; font-size:.88rem; }
+.item-linea { display:flex; justify-content:space-between; align-items:center;
+  font-size:.9rem; padding:.2rem 0; border-bottom:1px dashed #2a2e3c; }
+.item-linea .btn { padding:.15rem .55rem; font-size:.78rem; }
+.contador-turno { font-family: var(--mono); font-size:.8rem; color: var(--brasa); }
+.btn-nivel { background: var(--ambar); border-color: var(--ambar); color:#241c08; font-weight:700; }

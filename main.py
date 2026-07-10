@@ -27,7 +27,11 @@ app.include_router(actions.router)
 
 @app.get("/api/health")
 async def health():
-    return {"ok": True}
+    from app.config import get_settings
+    s = get_settings()
+    return {"ok": True,
+            "narrador": "openrouter" if s.openrouter_api_key else "dummy",
+            "modelo": s.openrouter_model if s.openrouter_api_key else None}
 
 
 # El frontend se sirve desde la misma app: sin CORS, un solo servicio en Render.

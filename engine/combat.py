@@ -39,6 +39,7 @@ class Combat:
     orden: list[dict] = field(default_factory=list)
     turno_idx: int = 0
     activo: bool = True
+    turno_ts: float | None = None   # epoch: cuándo empezó el turno actual
     tiradas_iniciativa: list[dict] = field(default_factory=list)
 
     @classmethod
@@ -104,9 +105,11 @@ class Combat:
         # Copias defensivas: si se comparte la referencia con la columna JSON
         # de la DB, SQLAlchemy no detecta el cambio y no persiste el UPDATE.
         return {"ronda": self.ronda, "orden": [dict(e) for e in self.orden],
-                "turno_idx": self.turno_idx, "activo": self.activo}
+                "turno_idx": self.turno_idx, "activo": self.activo,
+                "turno_ts": self.turno_ts}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Combat":
         return cls(ronda=d["ronda"], orden=[dict(e) for e in d["orden"]],
-                   turno_idx=d["turno_idx"], activo=d["activo"])
+                   turno_idx=d["turno_idx"], activo=d["activo"],
+                   turno_ts=d.get("turno_ts"))

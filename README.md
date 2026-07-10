@@ -87,8 +87,47 @@ viven en el servidor. El cliente nunca puede inventar un resultado.
 1. ✅ Motor de reglas + tests
 2. ✅ Models + API REST deployable
 3. ✅ Pipeline de contexto: resumen rodante, contrato JSON, conjuros, XP por CR
-4. ⬜ WebSockets + batch de exploración (hoy: polling cada 3.5s, jugable)
+4. ⬜ WebSockets (el polling adaptativo lo hace innecesario para grupos chicos)
 5. ✅ Frontend completo ("La Mesa") servido desde /
+6. ✅ Versión completa: latencia, descansos, inventario, niveles, timeout,
+   retomar campaña, reemplazo tras muerte
+
+## Versión completa — qué se agregó
+
+**Latencia (el cambio grande):** las acciones devuelven la resolución mecánica
+al instante (~25ms) y la narración del LLM corre en un BackgroundTask. La UI
+muestra "El DM narra…" y polling adaptativo (1.3s esperando narración o en
+combate, 5s en reposo) la trae cuando está. El resumen rodante también corre
+en background. Si OpenRouter falla, la mecánica ya quedó aplicada y un mensaje
+de sistema lo avisa.
+
+**Descansos:** corto por personaje (gasta dados de golpe; el brujo recupera
+slots) y largo grupal (PG/slots al máximo, mitad de dados; limitado a uno por
+día de juego). Botones en la ficha.
+
+**Inventario:** kit inicial automático (arma+armadura elegidas, 2 pociones,
+antorchas, raciones). Usar consumibles (la poción cura 2d4+2 server-side y en
+combate consume el turno), equipar armas del inventario, dar objetos a
+compañeros. El LLM puede otorgar loot y monedas de oro vía contrato (con topes).
+
+**Subida de nivel:** botón en la ficha cuando la XP alcanza; elegís tirar el
+dado de golpe o valor fijo; recalcula PG, dados y slots preservando gastados.
+
+**Timeout de turno:** 120s sin actuar en combate → Esquivar automático y pasa
+el turno (contador visible en la barra de combate). Un AFK no congela la mesa.
+
+**Retomar campaña:** tu "llave" de jugador (token) sirve para volver a entrar
+desde cualquier dispositivo (tarjeta en el inicio, botón 🔑 en la cabecera
+para copiarla, endpoint GET /api/campaigns/me).
+
+**Muerte con reemplazo:** si tu personaje muere podés forjar uno nuevo y
+seguir en la misma campaña; el caído queda en el historial.
+
+**Narrador visible:** la cabecera muestra qué modelo narra, o "DM dummy
+(falta API key)" en rojo si OPENROUTER_API_KEY no está configurada. Hay un
+.env.example para desarrollo local.
+
+**Contenido:** 12 monstruos (goblin→ogro), armas naturales, consumibles.
 
 ## Frontend — La Mesa
 

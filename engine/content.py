@@ -30,6 +30,11 @@ ARMAS: dict[str, Arma] = {
     "baston": Arma("baston", "1d6", "contundente", "simple", dos_manos="1d8"),
     "cimitarra": Arma("cimitarra", "1d6", "cortante", "marcial", finura=True),
     "garrote": Arma("garrote", "1d4", "contundente", "simple"),
+    # armas naturales de monstruos
+    "mordida": Arma("mordida", "1d6", "perforante", "simple"),
+    "garra": Arma("garra", "1d6", "cortante", "simple"),
+    "mordida_grande": Arma("mordida_grande", "2d4", "perforante", "simple"),
+    "clava_grande": Arma("clava_grande", "2d8", "contundente", "simple"),
 }
 
 ARMADURAS: dict[str, Armadura] = {
@@ -152,6 +157,42 @@ MONSTRUOS: dict[str, dict] = {
         "atributos": {"FUE": 16, "DES": 12, "CON": 16, "INT": 7, "SAB": 11, "CAR": 10},
         "armas": ["hacha_de_batalla"],
     },
+    "rata_gigante": {
+        "nombre": "Rata gigante", "cr": "1/8", "pg": 7, "ca_fija": 12, "velocidad_m": 9,
+        "atributos": {"FUE": 7, "DES": 15, "CON": 11, "INT": 2, "SAB": 10, "CAR": 4},
+        "armas": ["mordida"],
+    },
+    "cultista": {
+        "nombre": "Cultista", "cr": "1/8", "pg": 9, "ca_fija": 12, "velocidad_m": 9,
+        "atributos": {"FUE": 11, "DES": 12, "CON": 10, "INT": 10, "SAB": 11, "CAR": 10},
+        "armas": ["cimitarra"],
+    },
+    "maton": {
+        "nombre": "Matón", "cr": "1/2", "pg": 32, "ca_fija": 11, "velocidad_m": 9,
+        "atributos": {"FUE": 15, "DES": 11, "CON": 14, "INT": 10, "SAB": 10, "CAR": 11},
+        "armas": ["mazo"],
+    },
+    "arania_gigante": {
+        "nombre": "Araña gigante", "cr": "1", "pg": 26, "ca_fija": 14, "velocidad_m": 9,
+        "atributos": {"FUE": 14, "DES": 16, "CON": 12, "INT": 2, "SAB": 11, "CAR": 4},
+        "armas": ["mordida_grande"],
+    },
+    "ogro": {
+        "nombre": "Ogro", "cr": "2", "pg": 59, "ca_fija": 11, "velocidad_m": 12,
+        "atributos": {"FUE": 19, "DES": 8, "CON": 16, "INT": 5, "SAB": 7, "CAR": 7},
+        "armas": ["clava_grande"],
+    },
+}
+
+# ---------------------------------------------------------------- consumibles
+
+CONSUMIBLES: dict[str, dict] = {
+    "pocion_de_curacion": {"efecto": "curacion", "formula": "2d4+2",
+                           "descripcion": "Recupera 2d4+2 PG al beberla"},
+    "pocion_de_curacion_mayor": {"efecto": "curacion", "formula": "4d4+4",
+                                 "descripcion": "Recupera 4d4+4 PG"},
+    "antorcha": {"efecto": "narrativo", "descripcion": "Ilumina 6m por 1 hora"},
+    "racion": {"efecto": "narrativo", "descripcion": "Comida para un día"},
 }
 
 # ---------------------------------------------------------------- conjuros v1
