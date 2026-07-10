@@ -101,10 +101,12 @@ class Combat:
         return [e["id"] for e in self.orden if e["tipo"] == "pj"]
 
     def to_dict(self) -> dict:
-        return {"ronda": self.ronda, "orden": self.orden,
+        # Copias defensivas: si se comparte la referencia con la columna JSON
+        # de la DB, SQLAlchemy no detecta el cambio y no persiste el UPDATE.
+        return {"ronda": self.ronda, "orden": [dict(e) for e in self.orden],
                 "turno_idx": self.turno_idx, "activo": self.activo}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Combat":
-        return cls(ronda=d["ronda"], orden=d["orden"],
+        return cls(ronda=d["ronda"], orden=[dict(e) for e in d["orden"]],
                    turno_idx=d["turno_idx"], activo=d["activo"])

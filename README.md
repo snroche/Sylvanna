@@ -1,58 +1,72 @@
-# DnD Engine — Motor de reglas 5e (Paso 1 del proyecto)
+# DnD AI DM — Servicio multijugador con narrador IA
 
-Motor de reglas D&D 5e **puro**: sin base de datos, sin LLM, sin async.
-Es la fundación del servicio multijugador con narrador IA.
+Estado: **Paso 2 completo** — motor de reglas + API REST deployable en Render.
 
-## Estructura
-
-```
-engine/
-├── dice.py       # RNG del servidor (SystemRandom), roll("2d6+3"), d20 con ventaja
-├── entities.py   # Dataclasses puras: Criatura, Arma, Armadura, SpellState
-├── rules.py      # Núcleo 5e: mod, BC, CA, ataques, daño, curación, muerte,
-│                 #   concentración, slots, habilidades, salvaciones, descansos
-├── combat.py     # Máquina de estados de campaña + turnos/iniciativa (Combat)
-└── content.py    # Contenido SRD v1: 14 armas, 8 armaduras, 12 clases,
-                  #   tablas de slots, 6 monstruos, ~25 conjuros, XP por CR
-tests/            # 76 tests (pytest)
-demo.py           # Combate simulado de punta a punta
-```
-
-## Uso
+## Correr local
 
 ```bash
-pip install pytest
-python -m pytest tests/ -q     # correr la suite
-python demo.py                 # ver un combate resuelto por el motor
+pip install -r requirements.txt
+uvicorn main:app --reload
+# → http://localhost:8000/docs  (API interactiva)
+# Sin variables de entorno usa SQLite local y narrador dummy.
 ```
 
-## Principio de diseño
+Tests: `pip install pytest && python -m pytest tests/ -q` (77 tests)
 
-Cada función del motor devuelve un **dict de resolución completo**
-(tirada natural, bonos, totales, CD/CA, resultado, efectos derivados).
-Ese dict tiene tres destinos en el sistema final:
+## Deploy en Render (Web Service)
 
-1. Tabla `Roll` de la DB (auditoría)
-2. Broadcast por WebSocket (UI de los jugadores)
-3. Prompt del LLM (el narrador recibe resultados YA resueltos, nunca decide números)
+- **Build command:** `pip install -r requirements.txt`
+- **Start command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **Environment variables:**
+  - `OPENROUTER_API_KEY` — key de openrouter.ai
+  - `OPENROUTER_MODEL` — ej: `meta-llama/llama-3.3-70b-instruct:free`
+  - `OPENROUTER_MODEL_SUMMARIZER` — (opcional, default = OPENROUTER_MODEL)
+  - `DATABASE_URL` — connection string de Neon (pegalo tal cual, el código
+    normaliza el driver asyncpg y el SSL solo)
 
-El estado de las criaturas se **muta** dentro del motor (PG, slots, condiciones);
-la capa API es responsable de hidratar `Criatura` desde la DB antes de llamar
-al motor y persistir los cambios después.
+Las tablas se crean automáticamente al primer boot.
 
-## Qué NO hace el motor (a propósito)
+## Flujo de la API (probalo desde /docs)
 
-- No persiste nada → eso es de la capa `models/` (SQLAlchemy + Neon)
-- No llama a OpenRouter → eso es de `narrator/`
-- No maneja WebSockets ni HTTP → eso es de `api/` (FastAPI)
-- No resuelve efectos narrativos de conjuros (hechizar, invisibilidad):
-  el motor valida y gasta el slot; el efecto lo aplica el backend
-  como condición + el LLM lo narra
+1. `POST /api/campaigns` `{nombre, nombre_jugador}` → devuelve `invite_code` y `player_token`
+2. `POST /api/campaigns/join` `{invite_code, nombre_jugador}` → token del segundo jugador
+3. `POST /api/characters` (header `X-Player-Token`) → crea personaje; el server
+   calcula PG, CA, slots según clase
+4. `GET /api/characters/{id}/sheet` → ficha completa
+5. `POST /api/campaigns/{id}/say` `{texto}` → acción narrativa, responde el DM (IA)
+6. `POST /api/campaigns/{id}/skill-check` `{habilidad, cd, descripcion}` → tirada
+   resuelta por el server + narración
+7. `POST /api/campaigns/{id}/combat/start` `{monstruos: ["goblin","goblin"]}` →
+   iniciativa del server; turnos de NPC se auto-resuelven (IA simple v1)
+8. `POST /api/campaigns/{id}/combat/attack` `{objetivo_npc_id}` → solo en tu turno
+9. `GET /api/campaigns/{id}/messages?since=0` → historial (polling; WS en paso 4)
 
-## Próximos pasos (según el plan acordado)
+Toda tirada queda auditada en la tabla `rolls` con el dict de resolución completo.
+
+## Arquitectura
+
+```
+engine/    Motor 5e puro (dados, reglas, combate, contenido SRD) — 0 dependencias
+app/
+  config.py     pydantic-settings (4 env vars)
+  db.py         SQLAlchemy async: SQLite dev / Neon prod (SSL + pool free-tier)
+  models.py     Campaign, Player, Character, NPC, Quest, PendingConsequence,
+                Message, Roll
+  hydration.py  Puente DB ↔ entidades del motor
+  narrator.py   OpenRouter con fallback dummy si no hay key / falla la red
+  routers/      campaigns, characters, actions (say, skill-check, combat)
+main.py    FastAPI + frontend estático montado en /
+static/    Placeholder (frontend real = paso 5)
+```
+
+Principio: el LLM solo narra. Tiradas, validación de turnos, recursos y reglas
+viven en el servidor. El cliente nunca puede inventar un resultado.
+
+## Roadmap
 
 1. ✅ Motor de reglas + tests
-2. ⬜ `models/` + API REST (FastAPI, un jugador, DM dummy)
-3. ⬜ `narrator/` (OpenRouter, pipeline de contexto, resumen rodante)
-4. ⬜ WebSockets + multijugador (batch de exploración, turnos de combate)
-5. ⬜ Frontend de fichas (servido estático desde la misma app en Render)
+2. ✅ Models + API REST deployable (narrador OpenRouter básico incluido)
+3. ⬜ Pipeline de contexto completo: resumen rodante, NPCs en escena,
+   acciones de NPC decididas por el LLM (JSON contract), conjuros en combate
+4. ⬜ WebSockets + batch de exploración multijugador
+5. ⬜ Frontend de fichas y juego
