@@ -7,24 +7,8 @@ import os
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test_e2e.db"
-os.environ["OPENROUTER_API_KEY"] = ""  # fuerza narrador dummy
 
-from app.db import crear_tablas, engine  # noqa: E402
-from main import app  # noqa: E402
-
-
-@pytest.fixture
-async def client():
-    if os.path.exists("test_e2e.db"):
-        os.remove("test_e2e.db")
-    await crear_tablas()
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as c:
-        yield c
-    await engine.dispose()
-    if os.path.exists("test_e2e.db"):
-        os.remove("test_e2e.db")
+# fixtures client/db_session: ver conftest.py
 
 
 GUERRERO = {

@@ -62,11 +62,30 @@ static/    Placeholder (frontend real = paso 5)
 Principio: el LLM solo narra. Tiradas, validación de turnos, recursos y reglas
 viven en el servidor. El cliente nunca puede inventar un resultado.
 
+## Paso 3 — Pipeline del narrador (nuevo)
+
+- **Contexto estructurado** (`app/context.py`): cada llamada al LLM incluye
+  resumen rodante + grupo + NPCs en escena (ficha completa) + quests activas +
+  consecuencias pendientes + últimos 12 mensajes. Presupuesto ~6-8k tokens.
+- **Resumen rodante**: cada 40 mensajes sin resumir, un modelo (el summarizer)
+  reescribe `Campaign.resumen_actual` integrando lo nuevo. Los datos duros
+  (quests, NPCs, consecuencias) viven en tablas y nunca dependen del resumen.
+- **Contrato JSON de salida** (`app/narrator.py` + `app/effects.py`): el LLM
+  puede declarar efectos de mundo (crear NPCs/quests/consecuencias, actitudes,
+  XP narrativo topeado a 50×nivel, tiempo, ubicación, iniciar combate).
+  Campos fuera del schema se ignoran: no puede tocar PG ni recursos.
+- **Conjuros en combate** (`POST /combat/cast`): valida preparados/conocidos,
+  gasta slot antes de resolver (falla → slot igual gastado), resuelve por tipo
+  (ataque mágico / salvación del objetivo / curación / auto como proyectil
+  mágico), maneja concentración.
+- **XP automática por CR** al ganar un combate, dividida entre PJs vivos.
+- **`GET /state`**: quests, NPCs conocidos, consecuencias — el `!misiones` /
+  `!lore` del concepto original, con precisión de base de datos.
+
 ## Roadmap
 
 1. ✅ Motor de reglas + tests
-2. ✅ Models + API REST deployable (narrador OpenRouter básico incluido)
-3. ⬜ Pipeline de contexto completo: resumen rodante, NPCs en escena,
-   acciones de NPC decididas por el LLM (JSON contract), conjuros en combate
+2. ✅ Models + API REST deployable
+3. ✅ Pipeline de contexto: resumen rodante, contrato JSON, conjuros, XP por CR
 4. ⬜ WebSockets + batch de exploración multijugador
 5. ⬜ Frontend de fichas y juego
