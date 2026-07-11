@@ -1,7 +1,7 @@
-"""Modelos de base de datos.
+﻿"""Modelos de base de datos.
 
 JSON se usa para estructuras internas (atributos, slots, condiciones, inventario)
-— funciona nativo tanto en SQLite como en Postgres.
+â€” funciona nativo tanto en SQLite como en Postgres.
 """
 from __future__ import annotations
 
@@ -137,7 +137,6 @@ class Quest(Base):
     campaign_id: Mapped[int] = mapped_column(ForeignKey("campaigns.id"))
     titulo: Mapped[str] = mapped_column(String(160))
     descripcion: Mapped[str] = mapped_column(Text, default="")
-    typing: Mapped[dict] = mapped_column(JSON, default=dict)
     estado: Mapped[str] = mapped_column(String(20), default="activa")  # activa|completada|fallida
     principal: Mapped[bool] = mapped_column(Boolean, default=False)
     npc_origen_id: Mapped[int | None] = mapped_column(ForeignKey("npcs.id"),
@@ -166,7 +165,7 @@ class Message(Base):
 
 
 class Roll(Base):
-    """Auditoría de toda resolución del motor."""
+    """AuditorÃ­a de toda resoluciÃ³n del motor."""
     __tablename__ = "rolls"
     id: Mapped[int] = mapped_column(primary_key=True)
     campaign_id: Mapped[int] = mapped_column(ForeignKey("campaigns.id"), index=True)
