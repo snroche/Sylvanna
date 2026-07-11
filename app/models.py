@@ -94,6 +94,7 @@ class Character(Base):
     concentracion: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     alineamiento: Mapped[str] = mapped_column(String(30), default="neutral")
+    subclase: Mapped[str | None] = mapped_column(String(60), nullable=True)
     estilo_combate: Mapped[str | None] = mapped_column(String(30), nullable=True)
     recursos_clase: Mapped[dict] = mapped_column(JSON, default=dict)
     feats: Mapped[list] = mapped_column(JSON, default=list)

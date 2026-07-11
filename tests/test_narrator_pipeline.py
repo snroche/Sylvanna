@@ -371,3 +371,137 @@ async def test_apertura_de_campania(client):
     # con narrador dummy la apertura llega como mensaje del dm
     assert any(m["autor"] == "dm" and "APERTURA" in m["contenido"]
                for m in msgs)
+
+
+# ---------------------------------------------------------------- nivel 5
+
+async def _subir_a(client, h, cid, char_id, nivel_objetivo, clase="guerrero"):
+    """Setea XP y sube nivel a nivel, resolviendo ASI y subclase."""
+    from app.db import SessionLocal
+    from app.models import Character
+    from engine.rules import XP_POR_NIVEL
+    async with SessionLocal() as db:
+        ch = await db.get(Character, char_id)
+        ch.xp = XP_POR_NIVEL[nivel_objetivo]
+        await db.commit()
+    while True:
+        ficha = (await client.get(f"/api/characters/{char_id}/sheet",
+                                  headers=h)).json()
+        if ficha["nivel"] >= nivel_objetivo:
+            return ficha
+        body = {"metodo": "fijo"}
+        from engine.content import NIVEL_SUBCLASE, SUBCLASES_SRD
+        if ficha["nivel"] + 1 == NIVEL_SUBCLASE.get(clase):
+            body["subclase"] = SUBCLASES_SRD[clase][0]
+        if ficha["nivel"] + 1 in (4, 8):
+            body["asi"] = {"FUE": 2}
+        r = await client.post(f"/api/campaigns/{cid}/level-up",
+                              json=body, headers=h)
+        assert r.status_code == 200, r.text
+
+
+@pytest.mark.anyio
+async def test_ataque_extra_nivel_5(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    char_id = (await c.post("/api/characters", json=GUERRERO2,
+                            headers=h)).json()["character_id"]
+    ficha = await _subir_a(c, h, cid, char_id, 5)
+    assert ficha["nivel"] == 5 and ficha["subclase"] == "campeon"
+
+    # combate contra un ogro (aguanta varios golpes)
+    r = await c.post(f"/api/campaigns/{cid}/combat/start",
+                     json={"monstruos": ["ogro"]}, headers=h)
+    assert r.status_code == 200
+    for _ in range(3):
+        est = (await c.get(f"/api/campaigns/{cid}", headers=h)).json()
+        if est["estado"] != "combate":
+            pytest.skip("combate terminó por azar")
+        turno = est["combate"]["orden"][est["combate"]["turno_idx"]]
+        if turno["id"] != f"pj_{char_id}":
+            pytest.skip("azar de iniciativa")
+        npc_id = int([e for e in est["combate"]["orden"]
+                      if e["tipo"] == "npc"][0]["id"].split("_")[1])
+        # primer ataque: NO debe consumir el turno (ataque extra nv5)
+        r1 = await c.post(f"/api/campaigns/{cid}/combat/attack",
+                          json={"objetivo_npc_id": npc_id}, headers=h)
+        assert r1.status_code == 200
+        d1 = r1.json()
+        if d1["fin_combate"]:
+            pytest.skip("mató al ogro de un golpe (crítico), no verifica extra")
+        assert d1["turnos_npc"] == [], "el primer ataque no debe pasar el turno"
+        est2 = (await c.get(f"/api/campaigns/{cid}", headers=h)).json()
+        t2 = est2["combate"]["orden"][est2["combate"]["turno_idx"]]
+        assert t2["id"] == f"pj_{char_id}", "sigue siendo mi turno"
+        # segundo ataque: ahora sí consume el turno
+        r2 = await c.post(f"/api/campaigns/{cid}/combat/attack",
+                          json={"objetivo_npc_id": npc_id}, headers=h)
+        assert r2.status_code == 200
+        d2 = r2.json()
+        assert d2["fin_combate"] or d2["turnos_npc"], \
+            "el segundo ataque debe pasar el turno (el ogro responde)"
+        return
+
+
+MAGO5 = {
+    "nombre": "Zim", "raza": "gnomo", "subraza": "gnomo_de_las_rocas",
+    "clase": "mago", "metodo": "libre",
+    "atributos": {"FUE": 8, "DES": 14, "CON": 14, "INT": 16, "SAB": 10, "CAR": 10},
+    "arma_equipada": "daga", "preparados": ["rayo_de_escarcha", "proyectil_magico"],
+}
+
+
+@pytest.mark.anyio
+async def test_gestion_de_conjuros(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    char_id = (await c.post("/api/characters", json=MAGO5,
+                            headers=h)).json()["character_id"]
+
+    # nivel 1: máx lanzable 1 → rayo_abrasador (nv2) rebota
+    r = await c.post(f"/api/campaigns/{cid}/spells/manage",
+                     json={"lista": ["rayo_abrasador"]}, headers=h)
+    assert r.status_code == 400 and "nivel 2" in r.text
+
+    # límite de preparados: INT 16 +2 gnomo = 18 → mod +4, + nivel 1 = 5.
+    # Seis conjuros con nivel deben rebotar.
+    r = await c.post(f"/api/campaigns/{cid}/spells/manage",
+                     json={"lista": ["proyectil_magico", "escudo",
+                                     "manos_ardientes", "dormir",
+                                     "hechizar_persona", "onda_atronadora"]},
+                     headers=h)
+    assert r.status_code == 400 and "Máximo 5" in r.text
+
+    # válido: 3 con nivel + 1 truco
+    r = await c.post(f"/api/campaigns/{cid}/spells/manage",
+                     json={"lista": ["rayo_de_escarcha", "proyectil_magico",
+                                     "escudo", "dormir"]}, headers=h)
+    assert r.status_code == 200
+    ficha = (await c.get(f"/api/characters/{char_id}/sheet", headers=h)).json()
+    assert "dormir" in ficha["preparados"]
+
+    # a nivel 5: máx lanzable 3, límite 8
+    ficha = await _subir_a(c, h, cid, char_id, 5, clase="mago")
+    r = await c.post(f"/api/campaigns/{cid}/spells/manage",
+                     json={"lista": ["rayo_abrasador", "invisibilidad",
+                                     "proyectil_magico"]}, headers=h)
+    assert r.status_code == 200 and r.json()["nivel_max"] == 3
+
+
+@pytest.mark.anyio
+async def test_content_razas_completas(client):
+    r = await client.get("/api/content")
+    d = r.json()
+    assert "razas" in d and "tiflin" not in d["razas"]
+    elfo = d["razas"]["elfo"]
+    assert elfo["bonos"] == {"DES": 2}
+    assert "alto_elfo" in elfo["subrazas"]
+    assert elfo["subrazas"]["alto_elfo"]["rasgo"]  # info completa, no placeholder
+    assert d["razas"]["semielfo"]["bonos_a_eleccion"] == 2
+    assert "campeon" in d["subclases"]["guerrero"]

@@ -32,6 +32,20 @@ async def catalogo():
     oficiales = ["cuero", "cuero_tachonado", "camisa_de_mallas", "coraza",
                  "media_armadura", "ring_mail", "cota_de_mallas",
                  "armadura_de_placas"]
+    from engine.content import (NIVEL_SUBCLASE, RAZAS, SUBCLASES_SRD)
+    razas = {}
+    for k, r in RAZAS.items():
+        if k == "tiflin":   # alias de compatibilidad: no listar
+            continue
+        razas[k] = {
+            "bonos": r["bonos"], "velocidad_m": r.get("velocidad_m", 9),
+            "rasgo": r["rasgo"],
+            "bonos_a_eleccion": r.get("bonos_a_eleccion", 0),
+            "subrazas": {sk: {"bonos": sv.get("bonos", {}),
+                              "rasgo": sv.get("rasgo", ""),
+                              "velocidad_m": sv.get("velocidad_m")}
+                         for sk, sv in r["subrazas"].items()},
+        }
     return {
         "conjuros": {k: {"nivel": v["nivel"],
                          "nombre": v.get("nombre", k.replace("_", " "))}
@@ -39,6 +53,9 @@ async def catalogo():
         "monstruos": sorted(MONSTRUOS),
         "armas": sorted(set(ARMAS)),
         "armaduras": oficiales,
+        "razas": razas,
+        "subclases": SUBCLASES_SRD,
+        "nivel_subclase": NIVEL_SUBCLASE,
     }
 
 

@@ -280,3 +280,15 @@ label input, label select { margin-top: .25rem; color: var(--pergamino); }
 .msg-party .msg-autor { color: var(--arcano); }
 .msg-party .msg-autor::after { content: " (a la party)"; font-size: .78em; font-style: italic; }
 .msg-party .msg-texto { color: #b9cfcb; font-style: italic; }
+
+#pj-raza-info { white-space: pre-line; }
+.panel-conjuros {
+  position: fixed; inset: 0; background: rgba(10,11,16,.85); z-index: 50;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.panel-conjuros .caja {
+  background: var(--panel); border: 1px solid var(--borde); border-radius: 10px;
+  max-width: 640px; width: 100%; max-height: 85dvh; overflow-y: auto;
+  padding: 1.2rem;
+}
+.chip .nv { opacity: .6; font-size: .75em; margin-left: .25em; }

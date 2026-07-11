@@ -58,6 +58,44 @@ const CONJUROS_V1 = ["rayo_de_escarcha","llama_sagrada","toque_helado","luz",
   "inmovilizar_persona","invisibilidad","paso_brumoso"];
 
 let CONJUROS_SERVER = null;  // {clave: {nivel, nombre}} desde /api/content
+let CATALOGO = null;         // /api/content completo (razas, subclases...)
+
+async function cargarCatalogo() {
+  if (CATALOGO) return CATALOGO;
+  try {
+    const r = await fetch("/api/content");
+    CATALOGO = await r.json();
+    CONJUROS_SERVER = CATALOGO.conjuros;
+    // el server es la fuente de verdad de razas: pisar el espejo local
+    if (CATALOGO.razas) {
+      for (const k of Object.keys(RAZAS)) delete RAZAS[k];
+      for (const [k, r] of Object.entries(CATALOGO.razas)) {
+        RAZAS[k] = {
+          bonos: r.bonos,
+          sub: Object.fromEntries(Object.entries(r.subrazas)
+                 .map(([sk, sv]) => [sk, sv.bonos])),
+          subInfo: r.subrazas,
+          eleccion: r.bonos_a_eleccion || undefined,
+          info: infoRaza(r),
+        };
+      }
+    }
+  } catch {}
+  return CATALOGO;
+}
+
+function fmtBonos(bonos) {
+  return Object.entries(bonos || {})
+    .map(([a, b]) => `+${b} ${a}`).join(", ");
+}
+
+function infoRaza(r) {
+  const partes = [fmtBonos(r.bonos)];
+  if (r.bonos_a_eleccion) partes.push(`+1 a ${r.bonos_a_eleccion} atributos a elección`);
+  partes.push(`${r.velocidad_m}m`);
+  if (r.rasgo) partes.push(r.rasgo);
+  return partes.filter(Boolean).join(" · ");
+}
 const RAZAS = {
   humano:   {bonos:{FUE:1,DES:1,CON:1,INT:1,SAB:1,CAR:1}, sub:{}, info:"+1 a todo · 9m"},
   elfo:     {bonos:{DES:2}, sub:{alto_elfo:{INT:1}, elfo_de_los_bosques:{SAB:1}, drow:{CAR:1}}, info:"+2 DES · visión nocturna"},
@@ -174,7 +212,8 @@ $("btn-retomar").onclick = async () => {
 
 // ---------- creación de personaje
 
-function prepararCreacionPJ() {
+async function prepararCreacionPJ() {
+  await cargarCatalogo();
   const sel = $("pj-clase");
   if (sel.options.length) { actualizarPB(); return; }
   for (const c of Object.keys(CLASES)) sel.add(new Option(c, c));
@@ -196,15 +235,29 @@ function prepararCreacionPJ() {
   // razas
   const sr = $("pj-raza");
   for (const r of Object.keys(RAZAS)) sr.add(new Option(r.replaceAll("_"," "), r));
+  const infoSubraza = () => {
+    const r = RAZAS[$("pj-raza").value];
+    const base = r.info;
+    if (!$("lbl-subraza").hidden && r.subInfo) {
+      const sv = r.subInfo[$("pj-subraza").value];
+      if (sv) {
+        const extra = [fmtBonos(sv.bonos), sv.velocidad_m ? `${sv.velocidad_m}m` : "",
+                       sv.rasgo].filter(Boolean).join(" · ");
+        $("pj-raza-info").textContent = base + "\n↳ Subraza: " + extra;
+        return;
+      }
+    }
+    $("pj-raza-info").textContent = base;
+  };
   sr.onchange = () => {
     const r = RAZAS[sr.value];
-    $("pj-raza-info").textContent = r.info;
     const conSub = Object.keys(r.sub).length > 0;
     $("lbl-subraza").hidden = !conSub;
     if (conSub) {
       const ss = $("pj-subraza"); ss.innerHTML = "";
       for (const s of Object.keys(r.sub)) ss.add(new Option(s.replaceAll("_"," "), s));
     }
+    infoSubraza();
     $("lbl-eleccion").hidden = !r.eleccion;
     if (r.eleccion) {
       for (const id of ["pj-eleccion-1","pj-eleccion-2"]) {
@@ -226,7 +279,7 @@ function prepararCreacionPJ() {
     ga.appendChild(l);
   }
   ga.addEventListener("input", actualizarPB);
-  $("pj-subraza").addEventListener("change", actualizarPB);
+  $("pj-subraza").addEventListener("change", () => { infoSubraza(); actualizarPB(); });
   ["pj-eleccion-1","pj-eleccion-2"].forEach(id=>$(id).addEventListener("change", actualizarPB));
 
   // toggle método
@@ -709,7 +762,7 @@ function pintarFicha(f) {
 
   $("ui-ficha").innerHTML = `
     <h2>${esc(f.nombre)}</h2>
-    <p class="clase-linea">${esc(f.raza)} ${esc(f.clase)} · nivel ${f.nivel} · ${f.xp} XP</p>
+    <p class="clase-linea">${esc(f.raza)} ${esc(f.clase)}${f.subclase ? " ("+esc(f.subclase.replaceAll("_"," "))+")" : ""} · nivel ${f.nivel} · ${f.xp} XP</p>
     ${puedeSubir ? `<button class="btn btn-nivel" id="btn-subir-nivel">⭐ Subir a nivel ${f.nivel_por_xp}</button>` : ""}
     <div class="barra-pg"><div style="width:${pgPct}%"></div></div>
     <span class="pg-texto">${f.pg_actual} / ${f.pg_max} PG</span>
@@ -741,6 +794,8 @@ function pintarFicha(f) {
           <span class="party-pg">${estado}</span></span>${boton}</div>`;
       }).join("") : ""}
     <div class="ficha-acciones">
+      ${(f.preparados.length || f.conocidos.length || Object.keys(f.slots).length) ?
+        `<button class="btn" id="btn-gestionar-conjuros" ${enCombate?"disabled":""}>📜 Conjuros</button>` : ""}
       <button class="btn" id="btn-rest-short" ${enCombate||!f.dados_golpe_disp?"disabled":""}>🔥 Descanso corto (1 dado)</button>
       <button class="btn" id="btn-rest-long" ${enCombate?"disabled":""}>🌙 Descanso largo</button>
     </div>
@@ -765,6 +820,14 @@ function pintarFicha(f) {
   $("btn-subir-nivel")?.addEventListener("click", async ()=>{
     const tirar = confirm("¿Tirar el dado de golpe para los PG? (Aceptar = tirar, Cancelar = valor fijo)");
     const body = {metodo: tirar ? "tirar" : "fijo"};
+    const nvSub = CATALOGO?.nivel_subclase?.[f.clase];
+    if (nvSub === f.nivel + 1 && !f.subclase) {
+      const ops = (CATALOGO?.subclases?.[f.clase] || []).join(", ");
+      const s = prompt(`Nivel ${f.nivel + 1}: elegí tu subclase.\n` +
+                       `Del SRD: ${ops}\n(o escribí la tuya)`);
+      if (!s) return;
+      body.subclase = s.trim().toLowerCase().replaceAll(" ", "_");
+    }
     if ([4, 8].includes(f.nivel + 1)) {
       const rep = prompt("Mejora de atributos: +2 puntos a repartir.\n" +
         'Formato: "FUE" (para +2) o "DES,CON" (+1 y +1)');
@@ -779,6 +842,7 @@ function pintarFicha(f) {
       await refrescarTodo(false);
     } catch(e){ avisoSistema(e.message); }
   });
+  $("btn-gestionar-conjuros")?.addEventListener("click", ()=>abrirPanelConjuros(f));
   document.querySelectorAll("[data-clase-hab]").forEach(b=>b.onclick = async ()=>{
     const nombre = b.dataset.claseHab;
     const ui = HABILIDADES_CLASE_UI[nombre] || {};
@@ -818,6 +882,65 @@ function pintarFicha(f) {
       await refrescarTodo(false);
     } catch(e){ avisoSistema(e.message); }
   });
+}
+
+// ---------- gestión de conjuros
+
+async function abrirPanelConjuros(f) {
+  await cargarCatalogo();
+  if (!CONJUROS_SERVER) return avisoSistema("No pude cargar el catálogo");
+  const actuales = new Set(f.preparados.length ? f.preparados : f.conocidos);
+  const overlay = document.createElement("div");
+  overlay.className = "panel-conjuros";
+  overlay.innerHTML = `<div class="caja">
+    <h2>Conjuros de ${esc(f.nombre)}</h2>
+    <p class="nota" id="pc-limite">…</p>
+    <input id="pc-filtro" placeholder="Filtrar…" style="margin:.4rem 0">
+    <div class="chips" id="pc-chips"></div>
+    <div class="ficha-acciones">
+      <button class="btn btn-ambar" id="pc-guardar">Guardar</button>
+      <button class="btn" id="pc-cerrar">Cancelar</button>
+    </div></div>`;
+  document.body.appendChild(overlay);
+
+  const chips = overlay.querySelector("#pc-chips");
+  const entradas = Object.entries(CONJUROS_SERVER)
+    .sort((a,b)=>a[1].nivel-b[1].nivel || a[0].localeCompare(b[0]));
+  for (const [k, v] of entradas) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip chip-arcano" + (actuales.has(k) ? " activo" : "");
+    b.dataset.valor = k;
+    b.innerHTML = `${esc(k.replaceAll("_"," "))}<span class="nv">nv${v.nivel}</span>`;
+    b.onclick = () => { b.classList.toggle("activo"); actualizarContador(); };
+    chips.appendChild(b);
+  }
+  const actualizarContador = () => {
+    const sel = [...chips.querySelectorAll(".activo")].map(c=>c.dataset.valor);
+    const conNivel = sel.filter(k=>CONJUROS_SERVER[k].nivel > 0).length;
+    const trucos = sel.length - conNivel;
+    overlay.querySelector("#pc-limite").textContent =
+      `Seleccionados: ${conNivel} con nivel + ${trucos} trucos. ` +
+      `El servidor valida tu límite de clase y el nivel máximo lanzable.`;
+  };
+  actualizarContador();
+  overlay.querySelector("#pc-filtro").oninput = (e) => {
+    const q = e.target.value.toLowerCase();
+    chips.querySelectorAll(".chip").forEach(c =>
+      c.style.display = c.dataset.valor.includes(q) ||
+                        c.classList.contains("activo") ? "" : "none");
+  };
+  overlay.querySelector("#pc-cerrar").onclick = () => overlay.remove();
+  overlay.querySelector("#pc-guardar").onclick = async () => {
+    const lista = [...chips.querySelectorAll(".activo")].map(c=>c.dataset.valor);
+    try {
+      const r = await api("POST", `/campaigns/${S.campaignId}/spells/manage`,
+                          { lista });
+      avisoSistema(`Conjuros guardados (${r.lista.length}, máx nivel ${r.nivel_max}).`);
+      overlay.remove();
+      await refrescarTodo(false);
+    } catch(e) { avisoSistema(e.message); }
+  };
 }
 
 // ---------- mundo

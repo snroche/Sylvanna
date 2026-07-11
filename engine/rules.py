@@ -88,8 +88,10 @@ def tirada_habilidad(c: Criatura, habilidad: str, cd: int, ventaja: int = 0) -> 
     t = d20(_ventaja_neta(1 if ventaja > 0 else 0, penal + (1 if ventaja < 0 else 0)))
     total = t["natural"] + bono
     inspiracion = None
-    if c.tiene_condicion("inspirado"):
-        insp = roll("1d6")
+    cond_insp = next((x for x in c.condiciones
+                      if x.get("tipo") == "inspirado"), None)
+    if cond_insp:
+        insp = roll(cond_insp.get("dado", "1d6"))
         inspiracion = insp["dados"][0]
         total += inspiracion
         c.quitar_condicion("inspirado")
@@ -192,8 +194,10 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
     ca = calcular_ca(objetivo)
     total = t["natural"] + bono_ataque
     inspiracion = None
-    if atacante.tiene_condicion("inspirado"):
-        insp = roll("1d6")
+    cond_insp = next((c for c in atacante.condiciones
+                      if c.get("tipo") == "inspirado"), None)
+    if cond_insp:
+        insp = roll(cond_insp.get("dado", "1d6"))
         inspiracion = insp["dados"][0]
         total += inspiracion
         atacante.quitar_condicion("inspirado")

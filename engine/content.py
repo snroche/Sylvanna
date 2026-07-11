@@ -564,3 +564,62 @@ for _archivo, _destino in (("monstruos_srd.json", MONSTRUOS),
 XP_POR_CR.update({
     "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900,
 })
+
+
+# ---------------------------------------------------------------- nivel 5
+
+# Clases con Ataque Extra a partir de nivel 5 (SRD)
+ATAQUE_EXTRA_NV5 = {"guerrero", "barbaro", "paladin", "ranger", "monje"}
+
+# Conjuros conocidos máximos por nivel de personaje (SRD, lanzadores "conocidos")
+CONOCIDOS_MAX = {
+    "bardo":     {1: 4, 2: 5, 3: 6, 4: 7, 5: 8},
+    "hechicero": {1: 2, 2: 3, 3: 4, 4: 5, 5: 6},
+    "brujo":     {1: 2, 2: 3, 3: 4, 4: 5, 5: 6},
+    "ranger":    {1: 0, 2: 2, 3: 3, 4: 3, 5: 4},
+}
+
+
+def limite_conjuros(clase: str, nivel: int, mod_magico: int) -> tuple[str, int]:
+    """Devuelve (sistema, límite): sistema = "conocidos" | "preparados" | "ninguno".
+
+    - Conocidos (bardo/hechicero/brujo/ranger): tabla fija.
+    - Preparados (mago/clérigo/druida): mod + nivel (mín 1).
+    - Paladín (preparado, medio): mod CAR + nivel//2 (mín 1), desde nv2.
+    """
+    if clase in CONOCIDOS_MAX:
+        return "conocidos", CONOCIDOS_MAX[clase].get(min(nivel, 5), 0)
+    if clase in ("mago", "clerigo", "druida"):
+        return "preparados", max(1, mod_magico + nivel)
+    if clase == "paladin":
+        return ("preparados", max(1, mod_magico + nivel // 2)) if nivel >= 2             else ("preparados", 0)
+    return "ninguno", 0
+
+
+def nivel_max_conjuro(clase: str, nivel: int) -> int:
+    """Nivel de conjuro más alto lanzable según los slots de la clase/nivel."""
+    slots = slots_iniciales(clase, nivel)
+    return max((int(n) for n in slots), default=0)
+
+
+# Subclases del SRD por clase (elección narrativa v1: el DM la respeta,
+# la mecánica fina de cada una queda para una versión futura)
+SUBCLASES_SRD = {
+    "barbaro": ["senda_del_berserker"],
+    "bardo": ["colegio_del_saber"],
+    "clerigo": ["dominio_de_la_vida"],
+    "druida": ["circulo_de_la_tierra"],
+    "guerrero": ["campeon"],
+    "monje": ["camino_de_la_mano_abierta"],
+    "paladin": ["juramento_de_devocion"],
+    "picaro": ["ladron"],
+    "ranger": ["cazador"],
+    "hechicero": ["linaje_draconico"],
+    "brujo": ["patron_infernal"],
+    "mago": ["escuela_de_evocacion"],
+}
+# Nivel en el que cada clase elige subclase (SRD)
+NIVEL_SUBCLASE = {"clerigo": 1, "hechicero": 1, "brujo": 1,
+                  "barbaro": 3, "bardo": 3, "guerrero": 3, "monje": 3,
+                  "paladin": 3, "picaro": 3, "ranger": 3, "druida": 2,
+                  "mago": 2}

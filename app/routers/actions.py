@@ -79,6 +79,12 @@ def _quitar_esquivando(char: Character):
                         if c.get("tipo") != "esquivando"]
 
 
+def _inicio_de_turno(char: Character):
+    """Limpia condiciones que expiran al empezar el turno del personaje."""
+    char.condiciones = [c for c in char.condiciones
+                        if c.get("tipo") not in ("esquivando", "ya_ataco")]
+
+
 # ---------------- narración en background (fix de latencia) ----------------
 
 def encolar_narracion(bg: BackgroundTasks, camp: Campaign,
@@ -135,7 +141,7 @@ async def chequear_timeout_turno(db: AsyncSession, camp: Campaign) -> list[dict]
 
     char = await db.get(Character, int(combate.turno_actual["id"].split("_")[1]))
     if char.pg_actual > 0:
-        _quitar_esquivando(char)
+        _inicio_de_turno(char)
         char.condiciones = list(char.condiciones) + [
             {"tipo": "esquivando", "origen": "timeout"}]
         _msg(db, camp.id, "sistema", "Sistema",
@@ -361,11 +367,19 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
     _msg(db, campaign_id, "jugador", char.nombre, f"[ataque] contra {npc.nombre}")
     _roll(db, campaign_id, r, char.id)
 
-    if char.clase == "guerrero" and any(
-            c.get("tipo") == "oleada" for c in char.condiciones):
-        # oleada de acción: este ataque no consume el turno
-        char.condiciones = [c for c in char.condiciones
-                            if c.get("tipo") != "oleada"]
+    from engine.content import ATAQUE_EXTRA_NV5
+    tiene_oleada = any(c.get("tipo") == "oleada" for c in char.condiciones)
+    extra_pendiente = (char.clase in ATAQUE_EXTRA_NV5 and char.nivel >= 5
+                       and not any(c.get("tipo") == "ya_ataco"
+                                   for c in char.condiciones))
+    if tiene_oleada or extra_pendiente:
+        # este ataque NO consume el turno (Oleada de Acción / Ataque Extra nv5)
+        if tiene_oleada:
+            char.condiciones = [c for c in char.condiciones
+                                if c.get("tipo") != "oleada"]
+        else:
+            char.condiciones = list(char.condiciones) + [
+                {"tipo": "ya_ataco", "origen": "ataque_extra"}]
         if (npc.pg_actual or 0) == 0:
             combate.remover(f"npc_{npc.id}")
         eventos, fin = ([], None)
@@ -374,6 +388,8 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
         else:
             camp.combate = combate.to_dict()
     else:
+        char.condiciones = [c for c in char.condiciones
+                            if c.get("tipo") != "ya_ataco"]
         eventos, fin = await _post_accion_combate(db, camp, combate, char, npc)
     encolar_narracion(
         bg, camp,
@@ -428,6 +444,14 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
             raise HTTPException(400, f"Sin espacios: {gasto['motivo']}")
 
     atributo = CLASES[char.clase]["atributo_magico"] or "INT"
+
+    # trucos escalan a nivel 5: se duplican los dados de daño
+    conjuro = dict(conjuro)
+    if conjuro["nivel"] == 0 and char.nivel >= 5 and conjuro.get("danio"):
+        import re as _re
+        conjuro["danio"] = _re.sub(
+            r"^(\d+)d", lambda m: f"{int(m.group(1)) * 2}d", conjuro["danio"])
+
     resoluciones: list[dict] = []
     objetivo_nombre = None
     npc = None
@@ -538,7 +562,7 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
         if actual["tipo"] == "pj":
             char = await db.get(Character, int(actual["id"].split("_")[1]))
             if char.pg_actual > 0:
-                _quitar_esquivando(char)  # empieza su turno: deja de cubrirse
+                _inicio_de_turno(char)
                 break
             cr = hidratar_personaje(char)
             r = salvacion_muerte(cr)
@@ -705,9 +729,10 @@ async def habilidad_clase(campaign_id: int, body: UsarHabilidadClase,
                 or obj.id == char.id:
             raise HTTPException(404, "Elegí a un aliado (no a vos)")
         rec["usados"] += 1
+        dado_insp = "1d8" if char.nivel >= 5 else "1d6"
         obj.condiciones = list(obj.condiciones) + [
-            {"tipo": "inspirado", "origen": char.nombre}]
-        resultado["efecto"] = f"{obj.nombre} suma 1d6 a su próxima tirada"
+            {"tipo": "inspirado", "origen": char.nombre, "dado": dado_insp}]
+        resultado["efecto"] = f"{obj.nombre} suma {dado_insp} a su próxima tirada"
         _msg(db, campaign_id, "sistema", "Sistema",
              f"🎵 {char.nombre} inspira a {obj.nombre} (+1d6 próxima tirada).")
 
@@ -1083,12 +1108,72 @@ async def dar_objeto(campaign_id: int, body: DarObjeto,
     return {"ok": True}
 
 
+# ================================================================ conjuros
+
+class GestionarConjuros(BaseModel):
+    lista: list[str]
+
+
+@router.post("/spells/manage")
+async def gestionar_conjuros(campaign_id: int, body: GestionarConjuros,
+                             player: Player = Depends(jugador_actual),
+                             db: AsyncSession = Depends(get_db)):
+    """Setea los conjuros preparados (mago/clérigo/druida/paladín) o
+    conocidos (bardo/hechicero/brujo/ranger), con validación completa:
+    existencia, nivel lanzable y cantidad máxima. Solo fuera de combate."""
+    from engine.content import limite_conjuros, nivel_max_conjuro
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    if camp.estado == "combate":
+        raise HTTPException(409, "No podés reorganizar conjuros en combate")
+
+    atributo = CLASES[char.clase]["atributo_magico"]
+    if not atributo:
+        raise HTTPException(400, "Tu clase no lanza conjuros")
+    sistema, limite = limite_conjuros(char.clase, char.nivel,
+                                      mod(char.atributos[atributo]))
+    if sistema == "ninguno" or limite == 0:
+        raise HTTPException(400, "Tu clase no maneja conjuros a este nivel")
+
+    nv_max = nivel_max_conjuro(char.clase, char.nivel)
+    trucos, con_nivel = [], []
+    for nombre in dict.fromkeys(body.lista):   # dedup preservando orden
+        c = CONJUROS.get(nombre)
+        if c is None:
+            raise HTTPException(400, f"Conjuro desconocido: {nombre}")
+        if c["nivel"] == 0:
+            trucos.append(nombre)
+        else:
+            if c["nivel"] > nv_max:
+                raise HTTPException(400, f"{nombre} es nivel {c['nivel']} y tu "
+                                         f"máximo lanzable es {nv_max}")
+            con_nivel.append(nombre)
+    if len(con_nivel) > limite:
+        raise HTTPException(400, f"Máximo {limite} conjuros con nivel "
+                                 f"({sistema}); mandaste {len(con_nivel)}")
+    if len(trucos) > 6:
+        raise HTTPException(400, "Máximo 6 trucos")
+
+    final = trucos + con_nivel
+    if sistema == "preparados":
+        char.preparados = final
+    else:
+        char.conocidos = final
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"📜 {char.nombre} reorganiza sus conjuros ({len(con_nivel)}/{limite} "
+         f"con nivel + {len(trucos)} trucos).")
+    await db.commit()
+    return {"sistema": sistema, "limite": limite, "nivel_max": nv_max,
+            "lista": final}
+
+
 # ================================================================ nivel
 
 class SubirNivel(BaseModel):
     metodo: str = "fijo"   # "fijo" (mitad+1) | "tirar"
     # Mejora de atributos (niveles 4 y 8): {"FUE": 2} o {"DES": 1, "CON": 1}
     asi: dict[str, int] | None = None
+    subclase: str | None = None   # requerida al llegar al nivel de subclase
 
 
 @router.post("/level-up")
@@ -1101,6 +1186,15 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
         raise HTTPException(400, f"Todavía no tenés XP para subir "
                                  f"(nivel {char.nivel}, {char.xp} XP)")
     nuevo_nivel = char.nivel + 1
+    # subclase al llegar al nivel correspondiente (elección narrativa v1)
+    from engine.content import NIVEL_SUBCLASE, SUBCLASES_SRD
+    if nuevo_nivel == NIVEL_SUBCLASE.get(char.clase) and not char.subclase:
+        opciones = SUBCLASES_SRD.get(char.clase, [])
+        if body.subclase not in opciones and not (body.subclase or "").strip():
+            raise HTTPException(400,
+                f"Nivel {nuevo_nivel}: elegí subclase. Del SRD: {opciones} "
+                f"(o escribí la tuya como texto libre)")
+        char.subclase = (body.subclase or "").strip()[:60]
     # ASI en niveles 4 y 8 (SRD): +2 puntos de atributo a repartir
     if nuevo_nivel in (4, 8):
         asi = body.asi or {}

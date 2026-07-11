@@ -146,6 +146,38 @@ de juego ≈ 1 request, más 1 de resumen cada 40 mensajes.
 
 **Contenido:** 12 monstruos (goblin→ogro), armas naturales, consumibles.
 
+## Experiencia completa hasta nivel 5
+
+**Nivel 5 mecánico:**
+- **Ataque Extra** (guerrero/bárbaro/paladín/ranger/monje nv5+): el primer
+  ataque del turno no lo consume; el segundo sí. Compatible con Oleada de
+  Acción (que sigue dando un ataque adicional aparte).
+- **Trucos escalados**: a nivel 5 los trucos de daño duplican sus dados
+  (rayo de escarcha 2d8, explosión sobrenatural 2d10, etc.), automático.
+- **Inspiración Bárdica d8** a partir de nivel 5 del bardo.
+- Ataque Furtivo ya escalaba solo ((nivel+1)/2 d6 → 3d6 a nv5), igual que
+  el bonus de competencia (+3 a nv5) y los slots (nivel 3 a nv5).
+
+**Gestión de conjuros** (`POST /spells/manage`, botón 📜 en la ficha):
+panel con todo el catálogo (filtro + contador), validación server-side de
+existencia, nivel máximo lanzable según slots de clase, y cantidad:
+conocidos por tabla SRD (bardo/hechicero/brujo/ranger) o preparados =
+mod mágico + nivel (mago/clérigo/druida; paladín mod+nivel/2). Los
+preparados se pueden reorganizar en cualquier momento fuera de combate,
+como manda 5e.
+
+**Subclases**: al llegar al nivel de subclase de tu clase (1 para clérigo/
+hechicero/brujo, 2 para mago/druida, 3 para el resto) el level-up la exige.
+Opciones del SRD precargadas (Campeón, Dominio de la Vida, Ladrón, etc.) o
+texto libre. En v1 es una elección narrativa: figura en la ficha y en el
+contexto del DM, que la respeta; la mecánica fina de cada subclase queda
+para la próxima iteración.
+
+**Razas/subrazas desde el servidor**: `/api/content` ahora expone el
+catálogo completo (bonos, rasgo, velocidad por subraza) y la UI lo muestra
+al elegir — se acabaron los selects sin información. El frontend ya no
+tiene espejo propio de razas: una sola fuente de verdad.
+
 ## Ambientación, party chat, nomenclatura e importador SRD
 
 **Ambientación de campaña:** al crearla podés describir el setting
