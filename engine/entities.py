@@ -64,6 +64,7 @@ class Criatura:
     nivel_furtivo: int = 0          # pícaro: dados de ataque furtivo disponibles
     crit_min: int = 20              # Campeón nv3: crítico con 19-20
     subclase: Optional[str] = None
+    resistencias: list = field(default_factory=list)  # tipos de daño a mitad
     spell_state: Optional[SpellState] = None
     dados_golpe_disp: int = 0
     dado_golpe: str = "d8"          # "d6" | "d8" | "d10" | "d12"

@@ -146,6 +146,59 @@ de juego ≈ 1 request, más 1 de resumen cada 40 mensajes.
 
 **Contenido:** 12 monstruos (goblin→ogro), armas naturales, consumibles.
 
+## Panel del DM humano, condiciones completas y economía
+
+**Panel de admin (⚙ en la cabecera):** protegido por env `ADMIN_TOKEN`
+(vacío = deshabilitado; el token se pide una vez y queda en el navegador).
+Todo lo que necesitás para corregir rarezas del narrador en segundos:
+- **Hablar como el DM**: tu texto entra como narración; la IA lo ve en su
+  contexto y construye sobre él. Ideal para redirigir la historia.
+- Editar PG/oro/XP de cada personaje, limpiar condiciones, dar/quitar items.
+- NPCs: actitud, en escena, eliminar duplicados.
+- Cambiar estado de misiones, borrar consecuencias pendientes.
+- **Editar la crónica** (el resumen que la IA usa como memoria).
+- Forzar el fin de un combate trabado.
+Whitelist estricta de campos server-side: el token no permite romper fichas.
+
+**Condiciones 5e completas y mecánicas:** restringido (desventaja atacando,
+ventaja en tu contra), aturdido y paralizado (perdés el turno — PJ y NPC —,
+ventaja en tu contra, auto-fallo de salvaciones FUE/DES, y golpear a un
+paralizado es crítico), agarrado (bloquea Huir), atacar derribado da
+desventaja, y levantarse es automático al inicio de tu turno. Las
+condiciones pueden tener **duración en rondas** que expira sola. El DM (IA)
+puede aplicarlas y quitarlas con `aplicar_condicion` / `quitar_condicion`
+(whitelist de tipos, máximo 3 rondas).
+
+**Economía funcional:** la IA ya narraba mercaderes pero no podía cobrar.
+Nuevo efecto `quitar_monedas`: al comprar, el DM emite el item (loot) y el
+precio en la misma respuesta; el sistema rechaza el gasto si no te alcanza
+el oro (y el DM debe renegociar). Precios de referencia del SRD en el
+prompt. Vender = quitar_item + otorgar_monedas a mitad de precio.
+
+## Ascendencias dracónicas, resistencias y razas custom
+
+**Dracónido completo (SRD):** las 10 ascendencias como subrazas (negro,
+azul, latón, bronce, cobre, oro, verde, rojo, plata, blanco), cada una con
+su elemento y salvación. El **Aliento de Dragón es mecánico**: botón 🐉 en
+la ficha, 2d6 de daño (3d6 a nivel 5+), CD 8+BC+CON, salvación del enemigo
+para mitad, 1 uso por descanso corto, y puede cerrar el combate.
+
+**Resistencias elementales reales:** el motor ahora reduce a la mitad el
+daño de tipos resistidos (dracónido → su elemento, tiefling → fuego,
+enano → veneno; data-driven). Aplica en ataques, stat blocks y el aliento;
+la resolución marca `"resistido": true`.
+
+**Razas y subrazas custom (`data/razas_custom.json`):** para contenido de
+tus libros (bloodlines de tiefling de Mordenkainen's, etc.) que no puedo
+precargar por copyright. El formato está documentado en
+`engine/content.py`: las razas nuevas se agregan enteras, y las existentes
+se mergean a nivel subraza — agregás `"tiefling": {"subrazas": {"zariel":
+{...}}}` y aparece en la UI con sus bonos y rasgo, validación server-side
+incluida. Ojo: si le agregás subrazas a una raza que no tenía, la subraza
+pasa a ser obligatoria (agregá una `"estandar"` con `"bonos": {}` para
+conservar la base). Soporta `bonos`, `rasgo`, `velocidad_m`,
+`resistencias` y `bonos_a_eleccion`.
+
 ## Fixes de la sesión de testeo en profundidad
 
 - **Encoding (Windows):** el importador ahora escribe UTF-8 explícito, y el

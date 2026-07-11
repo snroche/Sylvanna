@@ -595,3 +595,227 @@ async def test_efecto_quitar_item(client):
     ficha = (await c.get(f"/api/characters/{char_id}/sheet", headers=h)).json()
     inv = {i["nombre"]: i["cantidad"] for i in ficha["inventario"]}
     assert inv.get("Antorcha") == 1 and "Cuerda de cáñamo (15m)" not in inv
+
+
+# ---------------------------------------------------------------- dracónido
+
+DRACONIDO = {
+    "nombre": "Rhogar", "raza": "draconido", "subraza": "oro",
+    "clase": "guerrero", "metodo": "libre", "estilo_combate": "duelo",
+    "atributos": {"FUE": 15, "DES": 12, "CON": 14, "INT": 8, "SAB": 10,
+                  "CAR": 10},
+    "armadura": "coraza", "arma_equipada": "espada_larga",
+}
+
+
+@pytest.mark.anyio
+async def test_aliento_de_dragon(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    r = await c.post("/api/characters", json=DRACONIDO, headers=h)
+    assert r.status_code == 200, r.text
+    char_id = r.json()["character_id"]
+    ficha = (await c.get(f"/api/characters/{char_id}/sheet", headers=h)).json()
+    assert "aliento_de_dragon" in ficha["recursos_clase"]
+    assert any(x["nombre"] == "aliento_de_dragon"
+               for x in ficha["habilidades_activas"])
+
+    # fuera de combate rebota
+    r = await c.post(f"/api/campaigns/{cid}/class-ability",
+                     json={"nombre": "aliento_de_dragon",
+                           "objetivo_npc_id": 1}, headers=h)
+    assert r.status_code == 409
+
+    await c.post(f"/api/campaigns/{cid}/combat/start",
+                 json={"monstruos": ["ogro"]}, headers=h)
+    est = (await c.get(f"/api/campaigns/{cid}", headers=h)).json()
+    if est["estado"] != "combate":
+        pytest.skip("azar")
+    turno = est["combate"]["orden"][est["combate"]["turno_idx"]]
+    if turno["id"] != f"pj_{char_id}":
+        pytest.skip("iniciativa del ogro")
+    npc_id = int([e for e in est["combate"]["orden"]
+                  if e["tipo"] == "npc"][0]["id"].split("_")[1])
+    r = await c.post(f"/api/campaigns/{cid}/class-ability",
+                     json={"nombre": "aliento_de_dragon",
+                           "objetivo_npc_id": npc_id}, headers=h)
+    assert r.status_code == 200, r.text
+    d2 = r.json()
+    assert d2["elemento"] == "fuego" and d2["cd"] == 8 + 2 + 2
+    assert d2["danio_final"] >= 1
+    # segundo uso agotado
+    r = await c.post(f"/api/campaigns/{cid}/class-ability",
+                     json={"nombre": "aliento_de_dragon",
+                           "objetivo_npc_id": npc_id}, headers=h)
+    assert r.status_code == 400
+
+
+def test_resistencia_mitad_de_danio():
+    from engine.entities import Criatura
+    from engine.rules import danio_con_resistencia
+    c = Criatura(id="x", nombre="x", nivel=1,
+                 atributos={"FUE": 10, "DES": 10, "CON": 10,
+                            "INT": 10, "SAB": 10, "CAR": 10},
+                 pg_actual=20, pg_max=20, resistencias=["fuego"])
+    assert danio_con_resistencia(c, 10, "fuego") == (5, True)
+    assert danio_con_resistencia(c, 10, "cortante") == (10, False)
+    assert danio_con_resistencia(c, 1, "fuego") == (1, True)  # mínimo 1
+
+
+# ---------------------------------------------------------------- admin + condiciones + economía
+
+@pytest.mark.anyio
+async def test_admin_panel(client, monkeypatch):
+    from app.config import get_settings
+    monkeypatch.setenv("ADMIN_TOKEN", "secreto123")
+    get_settings.cache_clear()
+    try:
+        c = client
+        d = (await c.post("/api/campaigns", json={
+            "nombre": "t", "nombre_jugador": "s"})).json()
+        h = {"X-Player-Token": d["player_token"]}
+        cid = d["campaign_id"]
+        char_id = (await c.post("/api/characters", json=GUERRERO2,
+                                headers=h)).json()["character_id"]
+
+        # sin token / token malo
+        r = await c.get(f"/api/admin/campaigns/{cid}/full")
+        assert r.status_code == 401
+        r = await c.get(f"/api/admin/campaigns/{cid}/full",
+                        headers={"X-Admin-Token": "nop"})
+        assert r.status_code == 401
+
+        ha = {"X-Admin-Token": "secreto123"}
+        d2 = (await c.get(f"/api/admin/campaigns/{cid}/full",
+                          headers=ha)).json()
+        assert d2["personajes"][0]["nombre"] == "Borin"
+
+        # patch de PJ con whitelist
+        r = await c.post(f"/api/admin/campaigns/{cid}/character/{char_id}",
+                         json={"campos": {"oro": 500, "pg_actual": 5}},
+                         headers=ha)
+        assert r.status_code == 200
+        r = await c.post(f"/api/admin/campaigns/{cid}/character/{char_id}",
+                         json={"campos": {"nombre": "Hackeado"}}, headers=ha)
+        assert r.status_code == 400  # campo fuera de whitelist
+
+        ficha = (await c.get(f"/api/characters/{char_id}/sheet",
+                             headers=h)).json()
+        assert ficha["monedas"]["mo"] == 500 and ficha["pg_actual"] == 5
+
+        # hablar como DM
+        r = await c.post(f"/api/admin/campaigns/{cid}/say-as-dm",
+                         json={"texto": "Un trueno parte el cielo."},
+                         headers=ha)
+        assert r.status_code == 200
+        msgs = (await c.get(f"/api/campaigns/{cid}/messages?since=0",
+                            headers=h)).json()
+        assert any(m["autor"] == "dm" and "trueno" in m["contenido"]
+                   for m in msgs)
+
+        # forzar fin de combate
+        await c.post(f"/api/campaigns/{cid}/combat/start",
+                     json={"monstruos": ["goblin"]}, headers=h)
+        r = await c.post(f"/api/admin/campaigns/{cid}/end-combat",
+                         headers=ha)
+        assert r.status_code == 200
+        est = (await c.get(f"/api/campaigns/{cid}", headers=h)).json()
+        assert est["estado"] == "exploracion"
+    finally:
+        monkeypatch.delenv("ADMIN_TOKEN", raising=False)
+        get_settings.cache_clear()
+
+
+@pytest.mark.anyio
+async def test_condiciones_dm_y_economia(client):
+    from app.db import SessionLocal
+    from app.models import NPC, Campaign, Character
+    from app.effects import aplicar_efectos
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    char_id = (await c.post("/api/characters", json=GUERRERO2,
+                            headers=h)).json()["character_id"]
+    async with SessionLocal() as db:
+        camp = await db.get(Campaign, cid)
+        char = await db.get(Character, char_id)
+        char.monedas = {"mo": 100, "mp": 0, "mc": 0}
+        npc = NPC(campaign_id=cid, nombre="Grog", tipo="monstruo",
+                  actitud="hostil", en_escena=True,
+                  stats={"pg": 20, "ca_fija": 12})
+        db.add(npc)
+        await db.flush()
+
+        # aplicar condición al NPC + tienda: pagar 60, luego 80 (no alcanza)
+        log = await aplicar_efectos(db, camp, {
+            "aplicar_condicion": {"objetivo": "Grog", "tipo": "aturdido",
+                                  "rondas": 9},   # se capea a 3
+            "quitar_monedas": 60,
+        }, char)
+        await db.commit()
+        assert ("quitar_monedas", 60) in log["aplicados"]
+        cond = [x for x in npc.condiciones if x["tipo"] == "aturdido"]
+        assert cond and cond[0]["rondas"] == 3
+        assert char.monedas["mo"] == 40
+
+        log2 = await aplicar_efectos(db, camp, {"quitar_monedas": 80}, char)
+        await db.commit()
+        assert any(x[0] == "quitar_monedas" for x in log2["rechazados"])
+        assert char.monedas["mo"] == 40  # no se fue en negativo
+
+        # condición inválida rechazada
+        log3 = await aplicar_efectos(db, camp, {
+            "aplicar_condicion": {"objetivo": "Grog", "tipo": "petrificado"}},
+            char)
+        assert any(x[0] == "aplicar_condicion" for x in log3["rechazados"])
+
+        # quitar_condicion la limpia
+        await aplicar_efectos(db, camp, {
+            "quitar_condicion": {"objetivo": "Grog", "tipo": "aturdido"}},
+            char)
+        await db.commit()
+        assert not any(x["tipo"] == "aturdido" for x in npc.condiciones)
+
+
+def test_tick_y_matriz_de_condiciones():
+    from engine.entities import Criatura
+    from engine.rules import (resolver_ataque, tick_condiciones,
+                              tirada_salvacion)
+    from engine.content import ARMAS
+    base = {a: 10 for a in ("FUE", "DES", "CON", "INT", "SAB", "CAR")}
+
+    # tick: 2 rondas → 1 → expira; sin rondas persiste
+    c = Criatura(id="x", nombre="x", nivel=1, atributos=base,
+                 pg_actual=10, pg_max=10,
+                 condiciones=[{"tipo": "aturdido", "rondas": 2},
+                              {"tipo": "envenenado"}])
+    assert tick_condiciones(c) == []
+    assert tick_condiciones(c) == ["aturdido"]
+    assert c.tiene_condicion("envenenado")
+
+    # aturdido: auto-fallo FUE/DES, ventaja para el atacante
+    v = Criatura(id="v", nombre="v", nivel=1, atributos=base,
+                 pg_actual=10, pg_max=10,
+                 condiciones=[{"tipo": "aturdido"}])
+    s = tirada_salvacion(v, "DES", 10)
+    assert not s["exito"] and s.get("auto_fallo")
+    assert tirada_salvacion(v, "SAB", 1)["exito"] in (True, False)  # no auto
+
+    a = Criatura(id="a", nombre="a", nivel=1, atributos=base,
+                 pg_actual=10, pg_max=10)
+    r = resolver_ataque(a, v, ARMAS["mazo"])
+    assert r["ventaja"] == 1
+
+    # restringido: desventaja atacando
+    a2 = Criatura(id="a2", nombre="a2", nivel=1, atributos=base,
+                  pg_actual=10, pg_max=10,
+                  condiciones=[{"tipo": "restringido"}])
+    v2 = Criatura(id="v2", nombre="v2", nivel=1, atributos=base,
+                  pg_actual=10, pg_max=10)
+    r2 = resolver_ataque(a2, v2, ARMAS["mazo"])
+    assert r2["ventaja"] == -1

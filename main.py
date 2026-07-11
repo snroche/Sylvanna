@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.db import crear_tablas
-from app.routers import actions, campaigns, characters
+from app.routers import admin, actions, campaigns, characters
 
 
 @asynccontextmanager
@@ -20,6 +20,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="DnD AI DM", lifespan=lifespan)
 
+app.include_router(admin.router)
 app.include_router(campaigns.router)
 app.include_router(characters.router)
 app.include_router(actions.router)

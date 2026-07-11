@@ -121,6 +121,7 @@ const HABILIDADES_CLASE_UI = {
   canalizar_divinidad:{icono:"✝️", label:"Canalizar divinidad", combate:false, aliado:true},
   imposicion_de_manos:{icono:"🙏", label:"Imposición de manos", combate:false, aliado:true, cantidad:true},
   inspiracion_bardica:{icono:"🎵", label:"Inspiración", combate:false, aliado:true, requiere_aliado:true},
+  aliento_de_dragon: {icono:"🐉", label:"Aliento de dragón", combate:true, enemigo:true},
 };
 
 const CONSUMIBLES_USABLES = new Set(["pocion_de_curacion","pocion_de_curacion_mayor"]);
@@ -475,6 +476,165 @@ $("ui-dm").onclick = async () => {
   el.textContent = antes;
   pintarNarrador();
 };
+
+// ---------- panel de admin (DM humano)
+$("btn-admin").onclick = async () => {
+  let tok = localStorage.getItem("adminToken");
+  if (!tok) {
+    tok = prompt("Token de admin (ADMIN_TOKEN del servidor):");
+    if (!tok) return;
+    localStorage.setItem("adminToken", tok.trim());
+  }
+  await abrirPanelAdmin();
+};
+
+async function apiAdmin(metodo, ruta, body) {
+  const r = await fetch(`/api/admin/campaigns/${S.campaignId}${ruta}`, {
+    method: metodo,
+    headers: {"Content-Type": "application/json",
+              "X-Admin-Token": localStorage.getItem("adminToken") || ""},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!r.ok) {
+    if (r.status === 401) localStorage.removeItem("adminToken");
+    throw new Error((await r.json()).detail || r.status);
+  }
+  return r.json();
+}
+
+async function abrirPanelAdmin() {
+  let d;
+  try { d = await apiAdmin("GET", "/full"); }
+  catch(e) { return avisoSistema("Admin: " + e.message); }
+
+  const ov = document.createElement("div");
+  ov.className = "panel-conjuros";
+  const filaPJ = (p) => `<div class="admin-fila" data-pj="${p.id}">
+    <b>${esc(p.nombre)}</b>
+    PG <input type="number" data-c="pg_actual" value="${p.pg_actual}" style="width:4rem">
+    /<input type="number" data-c="pg_max" value="${p.pg_max}" style="width:4rem">
+    Oro <input type="number" data-c="oro" value="${p.oro}" style="width:5rem">
+    XP <input type="number" data-c="xp" value="${p.xp}" style="width:5rem">
+    <button class="btn-mini" data-guardar-pj="${p.id}">💾</button>
+    <button class="btn-mini" data-limpiar-cond="${p.id}"
+      title="Quitar todas las condiciones">🧹 ${p.condiciones.length}</button>
+    <button class="btn-mini" data-item-pj="${p.id}" title="Dar/quitar item">🎒</button>
+  </div>`;
+  const filaNPC = (n) => `<div class="admin-fila" data-npc="${n.id}">
+    <b>${esc(n.nombre)}</b> <span class="party-meta">${esc(n.tipo)} ·
+    ${n.vivo ? (n.pg_actual ?? "?") + " PG" : "muerto"}</span>
+    <select data-c="actitud">
+      ${["amistoso","neutral","hostil"].map(a =>
+        `<option ${a===n.actitud?"selected":""}>${a}</option>`).join("")}
+    </select>
+    <label style="display:inline"><input type="checkbox" data-c="en_escena"
+      ${n.en_escena?"checked":""}> en escena</label>
+    <button class="btn-mini" data-guardar-npc="${n.id}">💾</button>
+    <button class="btn-mini" data-borrar-npc="${n.id}" title="Eliminar NPC">🗑</button>
+  </div>`;
+
+  ov.innerHTML = `<div class="caja">
+    <h2>⚙ Panel del DM — ${esc(d.campania.nombre)}
+      <span class="party-meta">${esc(d.campania.estado)}</span></h2>
+
+    <h3>Hablar como el DM</h3>
+    <textarea id="adm-dm-texto" rows="2" style="width:100%"
+      placeholder="Este mensaje aparece como narración del DM; la IA construye sobre él."></textarea>
+    <button class="btn" id="adm-dm-enviar">Narrar</button>
+    ${d.campania.en_combate ? '<button class="btn" id="adm-fin-combate">⚔ Forzar fin del combate</button>' : ""}
+
+    <h3>Personajes</h3>
+    ${d.personajes.map(filaPJ).join("")}
+
+    <h3>NPCs</h3>
+    ${d.npcs.map(filaNPC).join("") || '<p class="nota">Sin NPCs.</p>'}
+
+    <h3>Misiones</h3>
+    ${d.quests.map(q => `<div class="admin-fila"><b>${esc(q.titulo)}</b>
+      <select data-quest="${q.id}">
+        ${["activa","completada","fallida"].map(e =>
+          `<option ${e===q.estado?"selected":""}>${e}</option>`).join("")}
+      </select></div>`).join("") || '<p class="nota">Sin misiones.</p>'}
+
+    <h3>Consecuencias pendientes</h3>
+    ${d.consecuencias.map(x => `<div class="admin-fila">
+      <span>${esc(x.descripcion.slice(0,90))}</span>
+      <button class="btn-mini" data-borrar-con="${x.id}">🗑</button>
+    </div>`).join("") || '<p class="nota">Ninguna.</p>'}
+
+    <h3>Crónica (resumen que ve la IA)</h3>
+    <textarea id="adm-cronica" rows="5" style="width:100%">${esc(d.campania.resumen || "")}</textarea>
+    <button class="btn" id="adm-guardar-cronica">💾 Guardar crónica</button>
+
+    <div class="ficha-acciones"><button class="btn" id="adm-cerrar">Cerrar</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+
+  const refrescar = async () => { ov.remove(); await abrirPanelAdmin(); };
+  const seguro = (fn) => async (ev) => {
+    try { await fn(ev); } catch(e) { alert("Admin: " + e.message); } };
+
+  ov.querySelector("#adm-cerrar").onclick = () => ov.remove();
+  ov.querySelector("#adm-dm-enviar").onclick = seguro(async () => {
+    const t = ov.querySelector("#adm-dm-texto").value.trim();
+    if (!t) return;
+    await apiAdmin("POST", "/say-as-dm", {texto: t});
+    ov.remove(); acelerarPolling(); await pintarMensajes();
+  });
+  ov.querySelector("#adm-fin-combate")?.addEventListener("click", seguro(async () => {
+    if (!confirm("¿Terminar el combate por decreto?")) return;
+    await apiAdmin("POST", "/end-combat", {}); await refrescar();
+  }));
+  ov.querySelectorAll("[data-guardar-pj]").forEach(b => b.onclick = seguro(async () => {
+    const fila = b.closest(".admin-fila");
+    const campos = {};
+    fila.querySelectorAll("input[data-c]").forEach(i => campos[i.dataset.c] = +i.value);
+    await apiAdmin("POST", `/character/${b.dataset.guardarPj}`, {campos});
+    b.textContent = "✓"; setTimeout(()=>b.textContent="💾", 1200);
+  }));
+  ov.querySelectorAll("[data-limpiar-cond]").forEach(b => b.onclick = seguro(async () => {
+    await apiAdmin("POST", `/character/${b.dataset.limpiarCond}`,
+                   {campos: {condiciones: []}});
+    await refrescar();
+  }));
+  ov.querySelectorAll("[data-item-pj]").forEach(b => b.onclick = seguro(async () => {
+    const pj = d.personajes.find(p => p.id == b.dataset.itemPj);
+    const inv = pj.inventario.map((i,x)=>`${x+1}. ${i.nombre} x${i.cantidad}`).join("\n") || "(vacío)";
+    const acc = prompt(`Inventario de ${pj.nombre}:\n${inv}\n\n` +
+      `Escribí "+ nombre" para agregar o "- número" para quitar:`);
+    if (!acc) return;
+    let nuevo = [...pj.inventario];
+    if (acc.startsWith("+")) nuevo.push({nombre: acc.slice(1).trim(), cantidad: 1});
+    else if (acc.startsWith("-")) nuevo.splice(+acc.slice(1).trim() - 1, 1);
+    else return;
+    await apiAdmin("POST", `/character/${pj.id}`, {campos: {inventario: nuevo}});
+    await refrescar();
+  }));
+  ov.querySelectorAll("[data-guardar-npc]").forEach(b => b.onclick = seguro(async () => {
+    const fila = b.closest(".admin-fila");
+    const campos = {
+      actitud: fila.querySelector("select[data-c]").value,
+      en_escena: fila.querySelector("input[type=checkbox]").checked,
+    };
+    await apiAdmin("POST", `/npc/${b.dataset.guardarNpc}`, {campos});
+    b.textContent = "✓"; setTimeout(()=>b.textContent="💾", 1200);
+  }));
+  ov.querySelectorAll("[data-borrar-npc]").forEach(b => b.onclick = seguro(async () => {
+    if (!confirm("¿Eliminar este NPC para siempre?")) return;
+    await apiAdmin("DELETE", `/npc/${b.dataset.borrarNpc}`); await refrescar();
+  }));
+  ov.querySelectorAll("[data-quest]").forEach(s => s.onchange = seguro(async () => {
+    await apiAdmin("POST", `/quest/${s.dataset.quest}/${s.value}`, {});
+  }));
+  ov.querySelectorAll("[data-borrar-con]").forEach(b => b.onclick = seguro(async () => {
+    await apiAdmin("DELETE", `/consequence/${b.dataset.borrarCon}`); await refrescar();
+  }));
+  ov.querySelector("#adm-guardar-cronica").onclick = seguro(async () => {
+    await apiAdmin("POST", "/edit",
+                   {campos: {resumen_actual: ov.querySelector("#adm-cronica").value}});
+    alert("Crónica actualizada: la IA la usa desde la próxima narración.");
+  });
+}
 
 $("btn-salir").onclick = () => {
   if (!confirm("¿Volver al menú principal?\n\nTu llave 🔑 te permite retomar "
@@ -925,6 +1085,12 @@ function pintarFicha(f) {
       const el = candidatos[+n - 1];
       if (!el) return;
       body.objetivo_character_id = el.id;
+    }
+    if (ui.enemigo) {
+      // en combate: el select de objetivo ya tiene a los enemigos vivos
+      const sel = $("inp-objetivo");
+      if (!sel || !sel.value) return avisoSistema("No hay objetivo en combate");
+      body.objetivo_npc_id = +sel.value;
     }
     if (ui.cantidad) {
       const c = prompt("¿Cuántos PG curás del pool?");

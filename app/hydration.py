@@ -35,6 +35,8 @@ def hidratar_personaje(c: Character) -> Criatura:
         nivel_furtivo=nivel_furtivo,
         crit_min=crit_min,
         subclase=c.subclase,
+        resistencias=__import__("engine.content", fromlist=["x"])
+            .resistencias_de_raza(c.raza),
         spell_state=SpellState(
             slots={k: dict(v) for k, v in c.slots.items()},
             conocidos=list(c.conocidos),
@@ -62,6 +64,7 @@ def persistir_personaje(cr: Criatura, c: Character) -> None:
 
 
 def hidratar_npc(n: NPC) -> Criatura:
+    _resist = list((n.stats or {}).get("resistencias", []))
     stats = n.stats or (MONSTRUOS.get(n.plantilla, {}) if n.plantilla else {})
     return Criatura(
         id=f"npc_{n.id}",
@@ -75,6 +78,7 @@ def hidratar_npc(n: NPC) -> Criatura:
         velocidad_m=stats.get("velocidad_m", 9),
         ca_fija=stats.get("ca_fija"),
         condiciones=[dict(x) for x in n.condiciones],
+        resistencias=_resist,
         vivo=n.vivo,
     )
 

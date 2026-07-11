@@ -358,6 +358,7 @@ RAZAS: dict[str, dict] = {
     "enano": {
         "bonos": {"CON": 2}, "velocidad_m": 7,
         "rasgo": "Resistencia al veneno, visión en la oscuridad",
+        "resistencias": ["veneno"],
         "subrazas": {
             "enano_de_las_colinas": {"bonos": {"SAB": 1},
                                      "rasgo": "+1 PG por nivel"},
@@ -405,16 +406,81 @@ RAZAS: dict[str, dict] = {
     },
     "draconido": {
         "bonos": {"FUE": 2, "CAR": 1}, "velocidad_m": 9,
-        "rasgo": "Aliento de dragón (narrativo v1), resistencia elemental",
-        "subrazas": {},
+        "rasgo": "Ascendencia dracónica: aliento de dragón y resistencia "
+                 "elemental según tu linaje",
+        "subrazas": {
+            "negro": {"bonos": {}, "elemento": "acido", "salvacion_aliento": "DES",
+                "rasgo": "Aliento de acido (2d6, salvación de DES para mitad) y resistencia al acido"},
+            "azul": {"bonos": {}, "elemento": "rayo", "salvacion_aliento": "DES",
+                "rasgo": "Aliento de rayo (2d6, salvación de DES para mitad) y resistencia al rayo"},
+            "laton": {"bonos": {}, "elemento": "fuego", "salvacion_aliento": "DES",
+                "rasgo": "Aliento de fuego (2d6, salvación de DES para mitad) y resistencia al fuego"},
+            "bronce": {"bonos": {}, "elemento": "rayo", "salvacion_aliento": "DES",
+                "rasgo": "Aliento de rayo (2d6, salvación de DES para mitad) y resistencia al rayo"},
+            "cobre": {"bonos": {}, "elemento": "acido", "salvacion_aliento": "DES",
+                "rasgo": "Aliento de acido (2d6, salvación de DES para mitad) y resistencia al acido"},
+            "oro": {"bonos": {}, "elemento": "fuego", "salvacion_aliento": "DES",
+                "rasgo": "Aliento de fuego (2d6, salvación de DES para mitad) y resistencia al fuego"},
+            "verde": {"bonos": {}, "elemento": "veneno", "salvacion_aliento": "CON",
+                "rasgo": "Aliento de veneno (2d6, salvación de CON para mitad) y resistencia al veneno"},
+            "rojo": {"bonos": {}, "elemento": "fuego", "salvacion_aliento": "DES",
+                "rasgo": "Aliento de fuego (2d6, salvación de DES para mitad) y resistencia al fuego"},
+            "plata": {"bonos": {}, "elemento": "frio", "salvacion_aliento": "CON",
+                "rasgo": "Aliento de frio (2d6, salvación de CON para mitad) y resistencia al frio"},
+            "blanco": {"bonos": {}, "elemento": "frio", "salvacion_aliento": "CON",
+                "rasgo": "Aliento de frio (2d6, salvación de CON para mitad) y resistencia al frio"},
+        },
     },
     "tiefling": {
         "bonos": {"CAR": 2, "INT": 1}, "velocidad_m": 9,
         "rasgo": "Resistencia al fuego, visión en la oscuridad",
+        "resistencias": ["fuego"],
         "subrazas": {},
     },
 }
 RAZAS["tiflin"] = RAZAS["tiefling"]  # alias de compatibilidad
+
+def parsear_raza(raza_str: str) -> tuple[str, str | None]:
+    """'draconido (oro)' → ('draconido', 'oro'); 'humano' → ('humano', None)."""
+    raza_str = (raza_str or "").strip()
+    if "(" in raza_str:
+        base, _, resto = raza_str.partition("(")
+        return base.strip(), resto.rstrip(")").strip() or None
+    return raza_str, None
+
+
+def resistencias_de_raza(raza_str: str) -> list[str]:
+    base, sub = parsear_raza(raza_str)
+    r = RAZAS.get(base)
+    if r is None:
+        return []
+    res = list(r.get("resistencias", []))
+    if sub and sub in r["subrazas"]:
+        sr = r["subrazas"][sub]
+        res += sr.get("resistencias", [])
+        if sr.get("elemento"):           # dracónido: resiste su elemento
+            res.append(sr["elemento"])
+    return res
+
+
+def aliento_de_raza(raza_str: str) -> dict | None:
+    """Datos del aliento de dragón si la raza lo tiene."""
+    base, sub = parsear_raza(raza_str)
+    if base != "draconido" or not sub:
+        return None
+    sr = RAZAS["draconido"]["subrazas"].get(sub)
+    if not sr:
+        return None
+    return {"elemento": sr["elemento"], "salvacion": sr["salvacion_aliento"]}
+
+
+def recursos_raciales(raza_str: str, nivel: int) -> dict:
+    """Recursos activos que vienen de la raza (se suman a los de clase)."""
+    r: dict = {}
+    if aliento_de_raza(raza_str):
+        r["aliento_de_dragon"] = {"usados": 0, "max": 1, "reset": "corto"}
+    return r
+
 
 # ---------------------------------------------------------------- point buy
 
@@ -608,7 +674,45 @@ import pathlib as _pathlib
 # Objetos mágicos importados del SRD (catálogo para loot/tiendas futuras)
 OBJETOS_MAGICOS: dict[str, dict] = {}
 
+# Razas/subrazas custom del usuario: data/razas_custom.json.
+# Formato (mismo que RAZAS; las claves nuevas se agregan, las existentes
+# se MERGEAN a nivel subraza — ideal para agregar bloodlines de tus libros):
+# {
+#   "tiefling": {"subrazas": {
+#       "zariel": {"bonos": {"FUE": 1}, "rasgo": "Truco taumaturgia; ..."},
+#       "mephistopheles": {"bonos": {"INT": 1}, "rasgo": "..."}
+#   }},
+#   "raza_totalmente_nueva": {"bonos": {"DES": 2}, "velocidad_m": 9,
+#                             "rasgo": "...", "subrazas": {}}
+# }
+# Nota: si a una raza sin subrazas le agregás subrazas, la subraza pasa a
+# ser obligatoria en creación (agregá una "estandar" con bonos {} si querés
+# conservar la versión base).
+
 _DATA = _pathlib.Path(__file__).resolve().parent.parent / "data"
+_p_razas = _DATA / "razas_custom.json"
+if _p_razas.exists():
+    try:
+        try:
+            _texto = _p_razas.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            _texto = _p_razas.read_text(encoding="cp1252")
+        for _rk, _rv in _json.loads(_texto).items():
+            if _rk in RAZAS:
+                RAZAS[_rk].setdefault("subrazas", {}).update(
+                    _rv.get("subrazas", {}))
+                for _campo in ("bonos", "rasgo", "velocidad_m",
+                               "resistencias", "bonos_a_eleccion"):
+                    if _campo in _rv and _campo != "subrazas":
+                        RAZAS[_rk][_campo] = _rv[_campo]
+            else:
+                _rv.setdefault("subrazas", {})
+                _rv.setdefault("bonos", {})
+                _rv.setdefault("rasgo", "")
+                RAZAS[_rk] = _rv
+    except Exception as _e:
+        print(f"[content] no pude cargar razas_custom.json: {_e}")
+
 for _archivo, _destino in (("monstruos_srd.json", MONSTRUOS),
                            ("conjuros_srd.json", CONJUROS),
                            ("objetos_magicos_srd.json", OBJETOS_MAGICOS)):

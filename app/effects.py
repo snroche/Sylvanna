@@ -183,6 +183,74 @@ async def aplicar_efectos(db: AsyncSession, camp: Campaign,
                       f"(Usá el botón Tirada en la mesa.)"))
         log["aplicados"].append(("pedir_tirada", f"{hab} → {quien}"))
 
+    aplicar_cond = efectos.get("aplicar_condicion")
+    if isinstance(aplicar_cond, dict) and aplicar_cond.get("tipo"):
+        from engine.rules import CONDICIONES_APLICABLES
+        tipo = str(aplicar_cond["tipo"]).lower()
+        if tipo in CONDICIONES_APLICABLES:
+            rondas = min(int(aplicar_cond.get("rondas", 2) or 2), 3)
+            objetivo_n = str(aplicar_cond.get("objetivo", "")).lower()
+            aplicado = False
+            res_c = await db.execute(select(Character).where(
+                Character.campaign_id == camp.id, Character.vivo == True))  # noqa: E712
+            for pj in res_c.scalars().all():
+                if pj.nombre.lower() == objetivo_n:
+                    pj.condiciones = [c for c in pj.condiciones
+                                      if c.get("tipo") != tipo] + [
+                        {"tipo": tipo, "origen": "dm", "rondas": rondas}]
+                    aplicado = True
+            if not aplicado:
+                res_n = await db.execute(select(NPC).where(
+                    NPC.campaign_id == camp.id, NPC.vivo == True))  # noqa: E712
+                for npc in res_n.scalars().all():
+                    if npc.nombre.lower() == objetivo_n:
+                        npc.condiciones = [c for c in npc.condiciones
+                                           if c.get("tipo") != tipo] + [
+                            {"tipo": tipo, "origen": "dm", "rondas": rondas}]
+                        aplicado = True
+            if aplicado:
+                db.add(Message(campaign_id=camp.id, autor="sistema",
+                               autor_nombre="Sistema",
+                               contenido=f"⛓ {aplicar_cond.get('objetivo')} "
+                                         f"queda {tipo} ({rondas} rondas)."))
+                log["aplicados"].append(("aplicar_condicion",
+                                         f"{tipo}→{objetivo_n}"))
+            else:
+                log["rechazados"].append(("aplicar_condicion", objetivo_n))
+        else:
+            log["rechazados"].append(("aplicar_condicion", tipo))
+
+    quitar_cond = efectos.get("quitar_condicion")
+    if isinstance(quitar_cond, dict) and quitar_cond.get("tipo"):
+        tipo = str(quitar_cond["tipo"]).lower()
+        objetivo_n = str(quitar_cond.get("objetivo", "")).lower()
+        for tabla in (Character, NPC):
+            res_t = await db.execute(select(tabla).where(
+                tabla.campaign_id == camp.id))
+            for ent in res_t.scalars().all():
+                if ent.nombre.lower() == objetivo_n:
+                    ent.condiciones = [c for c in ent.condiciones
+                                       if c.get("tipo") != tipo]
+                    log["aplicados"].append(("quitar_condicion",
+                                             f"{tipo}←{objetivo_n}"))
+
+    gasto = efectos.get("quitar_monedas")
+    if isinstance(gasto, (int, float)) and gasto > 0 and actor is not None:
+        gasto = min(int(gasto), 10000)
+        m = dict(actor.monedas or {})
+        oro_actual = m.get("mo", 0)
+        if oro_actual >= gasto:
+            m["mo"] = oro_actual - gasto
+            actor.monedas = m   # reasignar: trampa de mutación JSON
+            log["aplicados"].append(("quitar_monedas", gasto))
+            db.add(Message(campaign_id=camp.id, autor="sistema",
+                           autor_nombre="Sistema",
+                           contenido=f"💰 {actor.nombre} paga {gasto} PO "
+                                     f"(le quedan {m['mo']})."))
+        else:
+            log["rechazados"].append(("quitar_monedas",
+                                      f"{gasto} > oro {oro_actual}"))
+
     oro = efectos.get("otorgar_monedas")
     if isinstance(oro, int) and oro > 0:
         res = await db.execute(select(Character).where(

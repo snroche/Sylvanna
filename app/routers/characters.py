@@ -172,9 +172,14 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
         alineamiento=body.alineamiento,
         estilo_combate=body.estilo_combate,
         subclase=(body.subclase or "").strip()[:60] or None,
-        recursos_clase=__import__("engine.content", fromlist=["x"])
-            .recursos_clase_iniciales(body.clase, 1,
-                                      mod(atributos_finales["CAR"])),
+        recursos_clase={
+            **__import__("engine.content", fromlist=["x"])
+                .recursos_clase_iniciales(body.clase, 1,
+                                          mod(atributos_finales["CAR"])),
+            **__import__("engine.content", fromlist=["x"])
+                .recursos_raciales(body.raza + (f" ({body.subraza})"
+                                                if body.subraza else ""), 1),
+        },
     )
     # el monje pelea con artes marciales por defecto
     if body.clase == "monje" and not body.arma_equipada:
@@ -250,6 +255,10 @@ def _habilidades_activas(c: Character) -> list[dict]:
     if c.clase == "bardo":
         agregar("inspiracion_bardica", "inspiracion_bardica",
                 aliado=True, requiere_aliado=True)
+    from engine.content import aliento_de_raza
+    if aliento_de_raza(c.raza):
+        agregar("aliento_de_dragon", "aliento_de_dragon",
+                combate=True, enemigo=True)
     return out
 
 

@@ -1,7 +1,7 @@
-﻿"""Modelos de base de datos.
+"""Modelos de base de datos.
 
 JSON se usa para estructuras internas (atributos, slots, condiciones, inventario)
-â€” funciona nativo tanto en SQLite como en Postgres.
+— funciona nativo tanto en SQLite como en Postgres.
 """
 from __future__ import annotations
 
@@ -165,7 +165,7 @@ class Message(Base):
 
 
 class Roll(Base):
-    """AuditorÃ­a de toda resoluciÃ³n del motor."""
+    """Auditoría de toda resolución del motor."""
     __tablename__ = "rolls"
     id: Mapped[int] = mapped_column(primary_key=True)
     campaign_id: Mapped[int] = mapped_column(ForeignKey("campaigns.id"), index=True)

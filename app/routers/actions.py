@@ -80,9 +80,14 @@ def _quitar_esquivando(char: Character):
 
 
 def _inicio_de_turno(char: Character):
-    """Limpia condiciones que expiran al empezar el turno del personaje."""
-    char.condiciones = [c for c in char.condiciones
-                        if c.get("tipo") not in ("esquivando", "ya_ataco")]
+    """Inicio del turno del PJ: expiran esquivando/ya_ataco, se levanta si
+    estaba derribado, y las condiciones con duración descuentan una ronda."""
+    from engine.rules import tick_condiciones
+    cr_tmp = hidratar_personaje(char)
+    tick_condiciones(cr_tmp)
+    char.condiciones = [c for c in cr_tmp.condiciones
+                        if c.get("tipo") not in ("esquivando", "ya_ataco",
+                                                 "derribado")]
 
 
 # ---------------- narración en background (fix de latencia) ----------------
@@ -573,6 +578,15 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
             char = await db.get(Character, int(actual["id"].split("_")[1]))
             if char.pg_actual > 0:
                 _inicio_de_turno(char)
+                if any(c.get("tipo") in ("aturdido", "paralizado")
+                       for c in char.condiciones):
+                    _msg(db, camp.id, "sistema", "Sistema",
+                         f"💫 {char.nombre} está incapacitado y pierde su "
+                         f"turno.")
+                    combate.avanzar_turno()
+                    combate.turno_ts = time.time()
+                    camp.combate = combate.to_dict()
+                    continue
                 break
             cr = hidratar_personaje(char)
             r = salvacion_muerte(cr)
@@ -605,6 +619,17 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
 
         objetivo = min(objetivos, key=lambda c: c.pg_actual)
         cr_npc = hidratar_npc(npc)
+        # inicio del turno del NPC: expiran duraciones y se levanta
+        from engine.rules import tick_condiciones
+        expiradas = tick_condiciones(cr_npc)
+        cr_npc.condiciones = [c for c in cr_npc.condiciones
+                              if c.get("tipo") != "derribado"]
+        if any(cr_npc.tiene_condicion(t) for t in ("aturdido", "paralizado")):
+            persistir_npc(cr_npc, npc)
+            eventos.append({"actor": npc.nombre, "incapacitado": True})
+            combate.avanzar_turno()
+            continue
+        persistir_npc(cr_npc, npc)
         cr_pj = hidratar_personaje(objetivo)
         ataques_sb = (npc.stats or {}).get("ataques") or []
         if ataques_sb:
@@ -736,6 +761,7 @@ async def escribiendo(campaign_id: int,
 class UsarHabilidadClase(BaseModel):
     nombre: str
     objetivo_character_id: int | None = None
+    objetivo_npc_id: int | None = None   # aliento de dragón
     cantidad: int | None = None      # imposición de manos: cuántos PG del pool
 
 
@@ -902,6 +928,56 @@ async def habilidad_clase(campaign_id: int, body: UsarHabilidadClase,
         _msg(db, campaign_id, "sistema", "Sistema",
              f"✨ El arma de {char.nombre} resplandece (+{valor} al ataque).")
 
+    elif body.nombre == "aliento_de_dragon":
+        from engine.content import aliento_de_raza
+        from engine.rules import (aplicar_danio, bc, danio_con_resistencia,
+                                  tirada_salvacion)
+        datos = aliento_de_raza(char.raza)
+        if datos is None:
+            raise HTTPException(400, "Tu raza no tiene aliento de dragón")
+        if not en_combate:
+            raise HTTPException(409, "El aliento se usa en combate")
+        if rec["usados"] >= rec["max"]:
+            raise HTTPException(400, "Aliento agotado (descanso corto)")
+        npc = await db.get(NPC, body.objetivo_npc_id or -1)
+        if npc is None or npc.campaign_id != campaign_id or not npc.vivo:
+            raise HTTPException(404, "Elegí un objetivo")
+        rec["usados"] += 1
+        cd = 8 + bc(char.nivel) + mod(char.atributos["CON"])
+        cr_npc = hidratar_npc(npc)
+        salv = tirada_salvacion(cr_npc, datos["salvacion"], cd)
+        d = roll("3d6" if char.nivel >= 5 else "2d6")
+        total = d["total"] // 2 if salv["exito"] else d["total"]
+        total, resistido = danio_con_resistencia(cr_npc, total,
+                                                 datos["elemento"])
+        eventos_d = aplicar_danio(cr_npc, max(1, total))
+        persistir_npc(cr_npc, npc)
+        resultado.update({"tipo": "aliento", "elemento": datos["elemento"],
+                          "cd": cd, "salvacion": salv, **d,
+                          "danio_final": max(1, total),
+                          "resistido": resistido,
+                          "objetivo": npc.nombre,
+                          "objetivo_pg": npc.pg_actual})
+        _roll(db, campaign_id, salv, char.id)
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"🐉 {char.nombre} exhala {datos['elemento']}: {npc.nombre} "
+             f"{'resiste a medias' if salv['exito'] else 'lo recibe de lleno'} "
+             f"({max(1, total)} de daño).")
+        # el aliento puede matar: cerrar combate si corresponde
+        if (npc.pg_actual or 0) == 0:
+            combate = Combat.from_dict(camp.combate)
+            combate.remover(f"npc_{npc.id}")
+            if not combate.npcs_restantes():
+                char.recursos_clase = recursos
+                _roll(db, campaign_id, {"tipo": "habilidad_clase", **resultado},
+                      char.id)
+                eventos, fin = await _post_accion_combate(db, camp, combate,
+                                                          char, None)
+                await db.commit()
+                return {**resultado, "fin_combate": fin,
+                        "turnos_npc": eventos}
+            camp.combate = combate.to_dict()
+
     else:
         raise HTTPException(400, f"Habilidad sin efecto activo: {body.nombre}")
 
@@ -1014,6 +1090,9 @@ async def huir(campaign_id: int, bg: BackgroundTasks,
     char = await _mi_personaje(campaign_id, player, db)
     camp = await db.get(Campaign, campaign_id)
     combate = _combate_activo(camp, char)
+    if any(c.get("tipo") == "agarrado" for c in char.condiciones):
+        raise HTTPException(409, "Estás agarrado: primero liberate "
+                                 "(tirada de atletismo o acrobacias)")
     _quitar_esquivando(char)
     cr_pj = hidratar_personaje(char)
     r = tirada_habilidad(cr_pj, "acrobacias", 12)
@@ -1128,14 +1207,15 @@ async def rest_long(campaign_id: int, bg: BackgroundTasks,
     res = await db.execute(select(Character).where(
         Character.campaign_id == campaign_id, Character.vivo == True))  # noqa: E712
     resultados = {}
-    from engine.content import recursos_clase_iniciales
+    from engine.content import recursos_clase_iniciales, recursos_raciales
     for c in res.scalars().all():
         cr = hidratar_personaje(c)
         r = descanso_largo(cr)
         persistir_personaje(cr, c)
         c.pg_actual = c.pg_max  # persistir_personaje ya lo hace; explícito
-        c.recursos_clase = recursos_clase_iniciales(
-            c.clase, c.nivel, mod(c.atributos["CAR"]))
+        c.recursos_clase = {**recursos_clase_iniciales(
+            c.clase, c.nivel, mod(c.atributos["CAR"])),
+            **recursos_raciales(c.raza, c.nivel)}
         resultados[c.nombre] = {"pg": c.pg_max, "dados": c.dados_golpe_disp}
     camp.tiempo_juego_min += 480
     camp.ultimo_descanso_largo_min = camp.tiempo_juego_min
@@ -1395,9 +1475,10 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
     char.dados_golpe_disp = min(char.nivel, char.dados_golpe_disp + 1)
 
     # recursos de clase del nuevo nivel (usos gastados se preservan)
-    from engine.content import recursos_clase_iniciales
-    nuevos_rec = recursos_clase_iniciales(char.clase, char.nivel,
-                                          mod(char.atributos["CAR"]))
+    from engine.content import recursos_clase_iniciales, recursos_raciales
+    nuevos_rec = {**recursos_clase_iniciales(char.clase, char.nivel,
+                                             mod(char.atributos["CAR"])),
+                  **recursos_raciales(char.raza, char.nivel)}
     viejos_rec = char.recursos_clase or {}
     for nombre, rec in nuevos_rec.items():
         if nombre in viejos_rec:

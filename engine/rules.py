@@ -119,6 +119,12 @@ def tirada_habilidad(c: Criatura, habilidad: str, cd: int, ventaja: int = 0) -> 
 
 
 def tirada_salvacion(c: Criatura, atributo: str, cd: int, ventaja: int = 0) -> dict:
+    if atributo in ("FUE", "DES") and (c.tiene_condicion("aturdido")
+                                       or c.tiene_condicion("paralizado")):
+        return {"tipo": "salvacion", "atributo": atributo, "cd": cd,
+                "natural": 0, "tiradas": [], "bono": 0, "total": 0,
+                "exito": False, "critico": False, "pifia": False,
+                "auto_fallo": "incapacitado"}
     if atributo not in ("FUE", "DES", "CON", "INT", "SAB", "CAR"):
         raise ValueError(f"Atributo inválido: {atributo}")
     # Paralizado/aturdido/inconsciente: falla automática en FUE y DES
@@ -183,8 +189,14 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
         atacante.quitar_condicion("ayudado")
     penal = 1 if ventaja < 0 else 0
     if atacante.tiene_condicion("envenenado") or atacante.tiene_condicion("cegado") \
-            or atacante.tiene_condicion("asustado"):
+            or atacante.tiene_condicion("asustado") \
+            or atacante.tiene_condicion("restringido") \
+            or atacante.tiene_condicion("derribado"):
         penal += 1
+    if objetivo.tiene_condicion("restringido") \
+            or objetivo.tiene_condicion("aturdido") \
+            or objetivo.tiene_condicion("paralizado"):
+        bonos += 1
     if objetivo.tiene_condicion("cegado"):
         bonos += 1
     if objetivo.tiene_condicion("derribado"):
@@ -248,8 +260,11 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
             extras.append({"motivo": "furtivo", "valor": f["total"],
                            "dados": f["dados"]})
         danio_total = max(1, d["total"] + m + sum(e["valor"] for e in extras))
+        danio_total, resistido = danio_con_resistencia(
+            objetivo, danio_total, arma.tipo_danio)
         resultado["danio"] = {**d, "mod_atributo": m, "total_final": danio_total,
                               "tipo_danio": arma.tipo_danio,
+                              "resistido": resistido,
                               "extras": extras}
         resultado["efectos"] = aplicar_danio(objetivo, danio_total)["eventos"]
     return resultado
@@ -438,6 +453,15 @@ def nivel_por_xp(xp: int) -> int:
     return nivel
 
 
+def danio_con_resistencia(objetivo: Criatura, total: int,
+                          tipo_danio: str) -> tuple[int, bool]:
+    """Aplica resistencias: mitad (redondeo abajo, mín 1) si el objetivo
+    resiste ese tipo de daño."""
+    if tipo_danio and tipo_danio in objetivo.resistencias:
+        return max(1, total // 2), True
+    return total, False
+
+
 def ataque_statblock(atacante: Criatura, objetivo: Criatura, nombre: str,
                      bono: int, danio_expr: str,
                      tipo_danio: str = "?") -> dict:
@@ -448,12 +472,18 @@ def ataque_statblock(atacante: Criatura, objetivo: Criatura, nombre: str,
         penal += 1
     if objetivo.tiene_condicion("derribado"):
         bonos += 1  # asumimos melé para monstruos v1
+    if objetivo.tiene_condicion("restringido") \
+            or objetivo.tiene_condicion("aturdido") \
+            or objetivo.tiene_condicion("paralizado"):
+        bonos += 1
     if objetivo.tiene_condicion("cegado"):
         bonos += 1
     t = d20(_ventaja_neta(bonos, penal))
     ca = calcular_ca(objetivo)
     total = t["natural"] + bono
     impacta = t["critico"] or (not t["pifia"] and total >= ca)
+    if impacta and objetivo.tiene_condicion("paralizado"):
+        t = {**t, "critico": True}  # golpe a paralizado: crítico (melé asumido)
     resultado = {"tipo": "ataque", "atacante_id": atacante.id,
                  "objetivo_id": objetivo.id, "arma": nombre, **t,
                  "bono_ataque": bono, "total": total, "ca_objetivo": ca,
@@ -467,7 +497,37 @@ def ataque_statblock(atacante: Criatura, objetivo: Criatura, nombre: str,
                  "dados": d["dados"] + extra["dados"], "mod": d["mod"],
                  "total": d["total"] + extra["total"] - extra["mod"]}
         danio_total = max(1, d["total"])
+        danio_total, resistido = danio_con_resistencia(
+            objetivo, danio_total, tipo_danio)
         resultado["danio"] = {**d, "total_final": danio_total,
-                              "tipo_danio": tipo_danio, "extras": []}
+                              "tipo_danio": tipo_danio,
+                              "resistido": resistido, "extras": []}
         resultado["efectos"] = aplicar_danio(objetivo, danio_total)["eventos"]
     return resultado
+
+
+INCAPACITANTES = {"aturdido", "paralizado"}
+CONDICIONES_APLICABLES = {"envenenado", "asustado", "cegado", "derribado",
+                          "restringido", "aturdido", "paralizado", "agarrado"}
+
+
+def tick_condiciones(c: Criatura) -> list[str]:
+    """Al inicio del turno de la criatura: expira condiciones con 'rondas'.
+    Devuelve los tipos que expiraron."""
+    expiradas = []
+    nuevas = []
+    for cond in c.condiciones:
+        rondas = cond.get("rondas")
+        if rondas is None:
+            nuevas.append(cond)
+            continue
+        if rondas <= 1:
+            expiradas.append(cond.get("tipo", "?"))
+        else:
+            nuevas.append({**cond, "rondas": rondas - 1})
+    c.condiciones = nuevas
+    return expiradas
+
+
+def esta_incapacitado(c: Criatura) -> bool:
+    return any(c.tiene_condicion(t) for t in INCAPACITANTES)

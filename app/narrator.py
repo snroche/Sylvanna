@@ -33,6 +33,10 @@ resuelta, narrá según ese resultado.
 - Mantené el inventario coherente con la ficción: si un PJ deja, entrega, \
 pierde, rompe o consume un objeto, emití quitar_item; si recibe o recupera \
 algo, emití loot.
+- MERCADERES: cuando un PJ compra, emití loot (el objeto) + quitar_monedas \
+(el precio) EN LA MISMA respuesta. Precios coherentes con el SRD: poción de \
+curación 50 PO, espada larga 15 PO, cota de mallas 75 PO. Si vende, emití \
+quitar_item + otorgar_monedas (a mitad de precio). Nunca regales equipo caro.
 - El bloque JSON va SIEMPRE al final, COMPLETO y BREVE (máximo 5 campos). Si \
 te falta espacio, acortá la narración: el JSON no se corta jamás.
 - Respondé en 1-3 párrafos de narración, sin listas ni encabezados.
@@ -55,6 +59,9 @@ Campos permitidos (todos opcionales):
 - "loot": [{"nombre": str, "cantidad": int}]  (objetos que el grupo encuentra/recibe; máx 5)
 - "quitar_item": [{"nombre": str, "cantidad": int}]  (objetos que el PJ actor deja, entrega, pierde o consume en la ficción)
 - "pedir_tirada": {"habilidad": str, "a_quien": str}  (pedile una tirada al PJ nombrado, o "todos"; NO resuelvas el resultado todavía)
+- "quitar_monedas": int  (el PJ actor PAGA ese oro: compras, sobornos, peajes. Si no le alcanza, el sistema lo rechaza y debés renegociar)
+- "aplicar_condicion": {"objetivo": str, "tipo": str, "rondas": int}  (tipos válidos: envenenado, asustado, cegado, derribado, restringido, aturdido, paralizado, agarrado; máx 3 rondas; usalo con moderación y justificación en la ficción)
+- "quitar_condicion": {"objetivo": str, "tipo": str}
 - "otorgar_monedas": int  (monedas de oro encontradas/pagadas; usá con mesura)
 - "avanzar_tiempo_min": int
 - "nueva_ubicacion": str
@@ -161,7 +168,8 @@ CAMPOS_PERMITIDOS = {
     "consecuencia_pendiente", "resolver_consecuencia", "inicia_combate",
     "npcs_salen_de_escena", "otorgar_xp", "avanzar_tiempo_min",
     "nueva_ubicacion", "loot", "otorgar_monedas",
-    "quitar_item", "pedir_tirada",
+    "quitar_item", "pedir_tirada", "quitar_monedas",
+    "aplicar_condicion", "quitar_condicion",
 }
 
 _JSON_BLOQUE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
