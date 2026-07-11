@@ -1,0 +1,1424 @@
+{
+ "adamantine_armor": {
+  "nombre": "Adamantine Armor",
+  "tipo": "Armor (medium or heavy)",
+  "rareza": "uncommon",
+  "descripcion": "This suit of armor is reinforced with adamantine, one of the hardest substances in existence. While you're wearing it, any critical hit against you becomes a normal hit."
+ },
+ "amulet_of_health": {
+  "nombre": "Amulet of Health",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "Your Constitution score is 19 while you wear this amulet. It has no effect on you if your Constitution is already 19 or higher."
+ },
+ "amulet_of_proof_against_detection_and_location": {
+  "nombre": "Amulet of Proof against Detection and Location",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this amulet, you are hidden from divination magic. You can't be targeted by such magic or perceived through magical scrying sensors."
+ },
+ "amulet_of_the_planes": {
+  "nombre": "Amulet of the Planes",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "While wearing this amulet, you can use an action to name a location that you are familiar with on another plane of existence. Then make a DC 15 Intelligence check. On a successful check, you cast the _plane shift_ spell. On a failure, you and each creature and object within 15 feet of you travel to a random destination. Roll a d100. On a 1-60, you travel to a random location on the plane you named"
+ },
+ "animated_shield": {
+  "nombre": "Animated Shield",
+  "tipo": "Armor (shield)",
+  "rareza": "very rare",
+  "descripcion": "While holding this shield, you can speak its command word as a bonus action to cause it to animate. The shield leaps into the air and hovers in your space to protect you as if you were wielding it, leaving your hands free. The shield remains animated for 1 minute, until you use a bonus action to end this effect, or until you are incapacitated or die, at which point the shield falls to the ground o"
+ },
+ "apparatus_of_the_crab": {
+  "nombre": "Apparatus of the Crab",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This item first appears to be a Large sealed iron barrel weighing 500 pounds. The barrel has a hidden catch, which can be found with a successful DC 20 Intelligence (Investigation) check. Releasing the catch unlocks a hatch at one end of the barrel, allowing two Medium or smaller creatures to crawl inside. Ten levers are set in a row at the far end, each in a neutral position, able to move either "
+ },
+ "armor_of_invulnerability": {
+  "nombre": "Armor of Invulnerability",
+  "tipo": "Armor (plate)",
+  "rareza": "legendary",
+  "descripcion": "You have resistance to nonmagical damage while you wear this armor. Additionally, you can use an action to make yourself immune to nonmagical damage for 10 minutes or until you are no longer wearing the armor. Once this special action is used, it can't be used again until the next dawn."
+ },
+ "armor_of_resistance": {
+  "nombre": "Armor of Resistance",
+  "tipo": "Armor (light)",
+  "rareza": "rare",
+  "descripcion": "You have resistance to one type of damage while you wear this armor. The GM chooses the type or determines it randomly from the options below.\n\n| d10 | Damage Type |\n|-----|-------------|\n| 1   | Acid        |\n| 2   | Cold        |\n| 3   | Fire        |\n| 4   | Force       |\n| 5   | Lightning   |\n| 6   | Necrotic    |\n| 7   | Poison      |\n| 8   | Psychic     |\n| 9   | Radiant     |\n| 10  | Thunde"
+ },
+ "armor_of_vulnerability": {
+  "nombre": "Armor of Vulnerability",
+  "tipo": "Armor (plate)",
+  "rareza": "rare",
+  "descripcion": "While wearing this armor, you have resistance to one of the following damage types: bludgeoning, piercing, or slashing. The GM chooses the type or determines it randomly.\n\n**_Curse_**. This armor is cursed, a fact that is revealed only when an _identify_ spell is cast on the armor or you attune to it. Attuning to the armor curses you until you are targeted by the _remove curse_ spell or similar ma"
+ },
+ "arrow_catching_shield": {
+  "nombre": "Arrow-Catching Shield",
+  "tipo": "Armor (shield)",
+  "rareza": "rare",
+  "descripcion": "You gain a +2 bonus to AC against ranged attacks while you wield this shield. This bonus is in addition to the shield's normal bonus to AC. In addition, whenever an attacker makes a ranged attack against a target within 5 feet of you, you can use your reaction to become the target of the attack instead."
+ },
+ "arrow_of_slaying": {
+  "nombre": "Arrow of Slaying",
+  "tipo": "Weapon (arrow)",
+  "rareza": "very rare",
+  "descripcion": "An _arrow of slaying_ is a magic weapon meant to slay a particular kind of creature. Some are more focused than others; for example, there are both _arrows of dragon slaying_ and _arrows of blue dragon slaying_. If a creature belonging to the type, race, or group associated with an _arrow of slaying_ takes damage from the arrow, the creature must make a DC 17 Constitution saving throw, taking an e"
+ },
+ "bag_of_beans": {
+  "nombre": "Bag of Beans",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "Inside this heavy cloth bag are 3d4 dry beans. The bag weighs 1/2 pound plus 1/4 pound for each bean it contains.\n\nIf you dump the bag's contents out on the ground, they explode in a 10-foot radius, extending from the beans. Each creature in the area, including you, must make a DC 15 Dexterity saving throw, taking 5d4 fire damage on a failed save, or half as much damage on a successful one. The fi"
+ },
+ "bag_of_devouring": {
+  "nombre": "Bag of Devouring",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This bag superficially resembles a _bag of holding_ but is a feeding orifice for a gigantic extradimensional creature. Turning the bag inside out closes the orifice.\n\nThe extradimensional creature attached to the bag can sense whatever is placed inside the bag. Animal or vegetable matter placed wholly in the bag is devoured and lost forever. When part of a living creature is placed in the bag, as "
+ },
+ "bag_of_holding": {
+  "nombre": "Bag of Holding",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This bag has an interior space considerably larger than its outside dimensions, roughly 2 feet in diameter at the mouth and 4 feet deep. The bag can hold up to 500 pounds, not exceeding a volume of 64 cubic feet. The bag weighs 15 pounds, regardless of its contents. Retrieving an item from the bag requires an action.\n\nIf the bag is overloaded, pierced, or torn, it ruptures and is destroyed, and it"
+ },
+ "bag_of_tricks": {
+  "nombre": "Bag of Tricks",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This ordinary bag, made from gray, rust, or tan cloth, appears empty. Reaching inside the bag, however, reveals the presence of a small, fuzzy object. The bag weighs 1/2 pound.\n\nYou can use an action to pull the fuzzy object from the bag and throw it up to 20 feet. When the object lands, it transforms into a creature you determine by rolling a d8 and consulting the table that corresponds to the ba"
+ },
+ "bead_of_force": {
+  "nombre": "Bead of Force",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This small black sphere measures 3/4 of an inch in diameter and weighs an ounce. Typically, 1d4 + 4 _beads of force_ are found together.\n\nYou can use an action to throw the bead up to 60 feet. The bead explodes on impact and is destroyed. Each creature within a 10-foot radius of where the bead landed must succeed on a DC 15 Dexterity saving throw or take 5d4 force damage. A sphere of transparent f"
+ },
+ "belt_of_dwarvenkind": {
+  "nombre": "Belt of Dwarvenkind",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While wearing this belt, you gain the following benefits:\n\n* Your Constitution score increases by 2, to a maximum of 20.\n* You have advantage on Charisma (Persuasion) checks made to interact with dwarves.\n\nIn addition, while attuned to the belt, you have a 50 percent chance each day at dawn of growing a full beard if you're capable of growing one, or a visibly thicker beard if you already have one"
+ },
+ "belt_of_giant_strength": {
+  "nombre": "Belt of Giant Strength",
+  "tipo": "Wondrous item",
+  "rareza": "varies",
+  "descripcion": "While wearing this belt, your Strength score changes to a score granted by the belt. If your Strength is already equal to or greater than the belt's score, the item has no effect on you.\n\nSix varieties of this belt exist, corresponding with and having rarity according to the six kinds of true giants. The _belt of stone giant strength_ and the _belt of frost giant strength_ look different, but they"
+ },
+ "berserker_axe": {
+  "nombre": "Berserker Axe",
+  "tipo": "Weapon (any axe)",
+  "rareza": "rare",
+  "descripcion": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. In addition, while you are attuned to this weapon, your hit point maximum increases by 1 for each level you have attained.\n\n**_Curse_**. This axe is cursed, and becoming attuned to it extends the curse to you. As long as you remain cursed, you are unwilling to part with the axe, keeping it within reach at all times. You al"
+ },
+ "boots_of_elvenkind": {
+  "nombre": "Boots of Elvenkind",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While you wear these boots, your steps make no sound, regardless of the surface you are moving across. You also have advantage on Dexterity (Stealth) checks that rely on moving silently."
+ },
+ "boots_of_levitation": {
+  "nombre": "Boots of Levitation",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While you wear these boots, you can use an action to cast the _levitate_ spell on yourself at will."
+ },
+ "boots_of_speed": {
+  "nombre": "Boots of Speed",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While you wear these boots, you can use a bonus action and click the boots' heels together. If you do, the boots double your walking speed, and any creature that makes an opportunity attack against you has disadvantage on the attack roll. If you click your heels together again, you end the effect.\n\nWhen the boots' property has been used for a total of 10 minutes, the magic ceases to function until"
+ },
+ "boots_of_striding_and_springing": {
+  "nombre": "Boots of Striding and Springing",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While you wear these boots, your walking speed becomes 30 feet, unless your walking speed is higher, and your speed isn't reduced if you are encumbered or wearing heavy armor. In addition, you can jump three times the normal distance, though you can't jump farther than your remaining movement would allow."
+ },
+ "boots_of_the_winterlands": {
+  "nombre": "Boots of the Winterlands",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "These furred boots are snug and feel quite warm. While you wear them, you gain the following benefits:\n\n* You have resistance to cold damage.\n* You ignore difficult terrain created by ice or snow.\n* You can tolerate temperatures as low as -50 degrees Fahrenheit without any additional protection. If you wear heavy clothes, you can tolerate temperatures as low as -100 degrees Fahrenheit."
+ },
+ "bowl_of_commanding_water_elementals": {
+  "nombre": "Bowl of Commanding Water Elementals",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While this bowl is filled with water, you can use an action to speak the bowl's command word and summon a water elemental, as if you had cast the _conjure elemental_ spell. The bowl can't be used this way again until the next dawn.\n\nThe bowl is about 1 foot in diameter and half as deep. It weighs 3 pounds and holds about 3 gallons."
+ },
+ "bracers_of_archery": {
+  "nombre": "Bracers of Archery",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing these bracers, you have proficiency with the longbow and shortbow, and you gain a +2 bonus to damage rolls on ranged attacks made with such weapons."
+ },
+ "bracers_of_defense": {
+  "nombre": "Bracers of Defense",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While wearing these bracers, you gain a +2 bonus to AC if you are wearing no armor and using no shield."
+ },
+ "brazier_of_commanding_fire_elementals": {
+  "nombre": "Brazier of Commanding Fire Elementals",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While a fire burns in this brass brazier, you can use an action to speak the brazier's command word and summon a fire elemental, as if you had cast the _conjure elemental_ spell. The brazier can't be used this way again until the next dawn.\n\nThe brazier weighs 5 pounds."
+ },
+ "brooch_of_shielding": {
+  "nombre": "Brooch of Shielding",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this brooch, you have resistance to force damage, and you have immunity to damage from the _magic missile_ spell."
+ },
+ "broom_of_flying": {
+  "nombre": "Broom of Flying",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This wooden broom, which weighs 3 pounds, functions like a mundane broom until you stand astride it and speak its command word. It then hovers beneath you and can be ridden in the air. It has a flying speed of 50 feet. It can carry up to 400 pounds, but its flying speed becomes 30 feet while carrying over 200 pounds. The broom stops hovering when you land.\n\nYou can send the broom to travel alone t"
+ },
+ "candle_of_invocation": {
+  "nombre": "Candle of Invocation",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This slender taper is dedicated to a deity and shares that deity's alignment. The candle's alignment can be detected with the _detect evil and good_ spell. The GM chooses the god and associated alignment or determines the alignment randomly.\n\n| d20   | Alignment       |\n|-------|-----------------|\n| 1-2   | Chaotic evil    |\n| 3-4   | Chaotic neutral |\n| 5-7   | Chaotic good    |\n| 8-9   | Neutral"
+ },
+ "cape_of_the_mountebank": {
+  "nombre": "Cape of the Mountebank",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This cape smells faintly of brimstone. While wearing it, you can use it to cast the _dimension door_ spell as an action. This property of the cape can't be used again until the next dawn.\n\nWhen you disappear, you leave behind a cloud of smoke, and you appear in a similar cloud of smoke at your destination. The smoke lightly obscures the space you left and the space you appear in, and it dissipates"
+ },
+ "carpet_of_flying": {
+  "nombre": "Carpet of Flying",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "You can speak the carpet's command word as an action to make the carpet hover and fly. It moves according to your spoken directions, provided that you are within 30 feet of it.\n\nFour sizes of _carpet of flying_ exist. The GM chooses the size of a given carpet or determines it randomly.\n\n| d100   | Size          | Capacity | Flying Speed |\n|--------|---------------|----------|--------------|\n| 01-2"
+ },
+ "censer_of_controlling_air_elementals": {
+  "nombre": "Censer of Controlling Air Elementals",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While incense is burning in this censer, you can use an action to speak the censer's command word and summon an air elemental, as if you had cast the _conjure elemental_ spell. The censer can't be used this way again until the next dawn.\n\nThis 6-inch-wide, 1-foot-high vessel resembles a chalice with a decorated lid. It weighs 1 pound."
+ },
+ "chime_of_opening": {
+  "nombre": "Chime of Opening",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This hollow metal tube measures about 1 foot long and weighs 1 pound. You can strike it as an action, pointing it at an object within 120 feet of you that can be opened, such as a door, lid, or lock. The chime issues a clear tone, and one lock or latch on the object opens unless the sound can't reach the object. If no locks or latches remain, the object itself opens.\n\nThe chime can be used ten tim"
+ },
+ "circlet_of_blasting": {
+  "nombre": "Circlet of Blasting",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this circlet, you can use an action to cast the _scorching ray_ spell with it. When you make the spell's attacks, you do so with an attack bonus of +5. The circlet can't be used this way again until the next dawn."
+ },
+ "cloak_of_arachnida": {
+  "nombre": "Cloak of Arachnida",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This fine garment is made of black silk interwoven with faint silvery threads. While wearing it, you gain the following benefits:\n\n* You have resistance to poison damage.\n* You have a climbing speed equal to your walking speed.\n* You can move up, down, and across vertical surfaces and upside down along ceilings, while leaving your hands free.\n* You can't be caught in webs of any sort and can move "
+ },
+ "cloak_of_displacement": {
+  "nombre": "Cloak of Displacement",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While you wear this cloak, it projects an illusion that makes you appear to be standing in a place near your actual location, causing any creature to have disadvantage on attack rolls against you. If you take damage, the property ceases to function until the start of your next turn. This property is suppressed while you are incapacitated, restrained, or otherwise unable to move."
+ },
+ "cloak_of_elvenkind": {
+  "nombre": "Cloak of Elvenkind",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While you wear this cloak with its hood up, Wisdom (Perception) checks made to see you have disadvantage, and you have advantage on Dexterity (Stealth) checks made to hide, as the cloak's color shifts to camouflage you. Pulling the hood up or down requires an action."
+ },
+ "cloak_of_protection": {
+  "nombre": "Cloak of Protection",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "You gain a +1 bonus to AC and saving throws while you wear this cloak."
+ },
+ "cloak_of_the_bat": {
+  "nombre": "Cloak of the Bat",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While wearing this cloak, you have advantage on Dexterity (Stealth) checks. In an area of dim light or darkness, you can grip the edges of the cloak with both hands and use it to fly at a speed of 40 feet. If you ever fail to grip the cloak's edges while flying in this way, or if you are no longer in dim light or darkness, you lose this flying speed.\n\nWhile wearing the cloak in an area of dim ligh"
+ },
+ "cloak_of_the_manta_ray": {
+  "nombre": "Cloak of the Manta Ray",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this cloak with its hood up, you can breathe underwater, and you have a swimming speed of 60 feet. Pulling the hood up or down requires an action."
+ },
+ "crystal_ball": {
+  "nombre": "Crystal Ball",
+  "tipo": "Wondrous item",
+  "rareza": "very rare or legendary",
+  "descripcion": "The typical _crystal ball_, a very rare item, is about 6 inches in diameter. While touching it, you can cast the _scrying_ spell (save DC 17) with it.\n\nThe following _crystal ball_ variants are legendary items and have additional properties.\n\n**_Crystal Ball of Mind Reading_**. You can use an action to cast the _detect thoughts_ spell (save DC 17) while you are scrying with the _crystal ball_, tar"
+ },
+ "cube_of_force": {
+  "nombre": "Cube of Force",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This cube is about an inch across. Each face has a distinct marking on it that can be pressed. The cube starts with 36 charges, and it regains 1d20 expended charges daily at dawn.\n\nYou can use an action to press one of the cube's faces, expending a number of charges based on the chosen face, as shown in the Cube of Force Faces table. Each face has a different effect. If the cube has insufficient c"
+ },
+ "cubic_gate": {
+  "nombre": "Cubic Gate",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This cube is 3 inches across and radiates palpable magical energy. The six sides of the cube are each keyed to a different plane of existence, one of which is the Material Plane. The other sides are linked to planes determined by the GM.\n\nYou can use an action to press one side of the cube to cast the _gate_ spell with it, opening a portal to the plane keyed to that side. Alternatively, if you use"
+ },
+ "dagger_of_venom": {
+  "nombre": "Dagger of Venom",
+  "tipo": "Weapon (dagger)",
+  "rareza": "rare",
+  "descripcion": "You gain a +1 bonus to attack and damage rolls made with this magic weapon.\n\nYou can use an action to cause thick, black poison to coat the blade. The poison remains for 1 minute or until an attack using this weapon hits a creature. That creature must succeed on a DC 15 Constitution saving throw or take 2d10 poison damage and become poisoned for 1 minute. The dagger can't be used this way again un"
+ },
+ "dancing_sword": {
+  "nombre": "Dancing Sword",
+  "tipo": "Weapon (any sword)",
+  "rareza": "very rare",
+  "descripcion": "You can use a bonus action to toss this magic sword into the air and speak the command word. When you do so, the sword begins to hover, flies up to 30 feet, and attacks one creature of your choice within 5 feet of it. The sword uses your attack roll and ability score modifier to damage rolls.\n\nWhile the sword hovers, you can use a bonus action to cause it to fly up to 30 feet to another spot withi"
+ },
+ "decanter_of_endless_water": {
+  "nombre": "Decanter of Endless Water",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This stoppered flask sloshes when shaken, as if it contains water. The decanter weighs 2 pounds.\n\nYou can use an action to remove the stopper and speak one of three command words, whereupon an amount of fresh water or salt water (your choice) pours out of the flask. The water stops pouring out at the start of your next turn. Choose from the following options:\n\n* \"Stream\" produces 1 gallon of water"
+ },
+ "deck_of_illusions": {
+  "nombre": "Deck of Illusions",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This box contains a set of parchment cards. A full deck has 34 cards. A deck found as treasure is usually missing 1d20 - 1 cards.\n\nThe magic of the deck functions only if cards are drawn at random (you can use an altered deck of playing cards to simulate the deck). You can use an action to draw a card at random from the deck and throw it to the ground at a point within 30 feet of you.\n\nAn illusion"
+ },
+ "deck_of_many_things": {
+  "nombre": "Deck of Many Things",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "Usually found in a box or pouch, this deck contains a number of cards made of ivory or vellum. Most (75 percent) of these decks have only thirteen cards, but the rest have twenty-two.\n\nBefore you draw a card, you must declare how many cards you intend to draw and then draw them randomly (you can use an altered deck of playing cards to simulate the deck). Any cards drawn in excess of this number ha"
+ },
+ "defender": {
+  "nombre": "Defender",
+  "tipo": "Weapon (any sword)",
+  "rareza": "legendary",
+  "descripcion": "You gain a +3 bonus to attack and damage rolls made with this magic weapon.\n\nThe first time you attack with the sword on each of your turns, you can transfer some or all of the sword's bonus to your Armor Class, instead of using the bonus on any attacks that turn. For example, you could reduce the bonus to your attack and damage rolls to +1 and gain a +2 bonus to AC. The adjusted bonuses remain in"
+ },
+ "demon_armor": {
+  "nombre": "Demon Armor",
+  "tipo": "Armor (plate)",
+  "rareza": "very rare",
+  "descripcion": "While wearing this armor, you gain a +1 bonus to AC, and you can understand and speak Abyssal. In addition, the armor's clawed gauntlets turn unarmed strikes with your hands into magic weapons that deal slashing damage, with a +1 bonus to attack rolls and damage rolls and a damage die of 1d8.\n\n**_Curse_**. Once you don this cursed armor, you can't doff it unless you are targeted by the _remove cur"
+ },
+ "dimensional_shackles": {
+  "nombre": "Dimensional Shackles",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "You can use an action to place these shackles on an incapacitated creature. The shackles adjust to fit a creature of Small to Large size. In addition to serving as mundane manacles, the shackles prevent a creature bound by them from using any method of extradimensional movement, including teleportation or travel to a different plane of existence. They don't prevent the creature from passing throug"
+ },
+ "dragon_scale_mail": {
+  "nombre": "Dragon Scale Mail",
+  "tipo": "Armor (scale mail)",
+  "rareza": "very rare",
+  "descripcion": "Dragon scale mail is made of the scales of one kind of dragon. Sometimes dragons collect their cast-off scales and gift them to humanoids. Other times, hunters carefully skin and preserve the hide of a dead dragon. In either case, dragon scale mail is highly valued.\n\nWhile wearing this armor, you gain a +1 bonus to AC, you have advantage on saving throws against the Frightful Presence and breath w"
+ },
+ "dragon_slayer": {
+  "nombre": "Dragon Slayer",
+  "tipo": "Weapon (any sword)",
+  "rareza": "rare",
+  "descripcion": "You gain a +1 bonus to attack and damage rolls made with this magic weapon.\n\nWhen you hit a dragon with this weapon, the dragon takes an extra 3d6 damage of the weapon's type. For the purpose of this weapon, \"dragon\" refers to any creature with the dragon type, including dragon turtles and wyverns."
+ },
+ "dust_of_disappearance": {
+  "nombre": "Dust of Disappearance",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "Found in a small packet, this powder resembles very fine sand. There is enough of it for one use. When you use an action to throw the dust into the air, you and each creature and object within 10 feet of you become invisible for 2d4 minutes. The duration is the same for all subjects, and the dust is consumed when its magic takes effect. If a creature affected by the dust attacks or casts a spell, "
+ },
+ "dust_of_dryness": {
+  "nombre": "Dust of Dryness",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This small packet contains 1d6 + 4 pinches of dust. You can use an action to sprinkle a pinch of it over water. The dust turns a cube of water 15 feet on a side into one marble-sized pellet, which floats or rests near where the dust was sprinkled. The pellet's weight is negligible.\n\nSomeone can use an action to smash the pellet against a hard surface, causing the pellet to shatter and release the "
+ },
+ "dust_of_sneezing_and_choking": {
+  "nombre": "Dust of Sneezing and Choking",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "Found in a small container, this powder resembles very fine sand. It appears to be _dust of disappearance_, and an _identify_ spell reveals it to be such. There is enough of it for one use.\n\nWhen you use an action to throw a handful of the dust into the air, you and each creature that needs to breathe within 30 feet of you must succeed on a DC 15 Constitution saving throw or become unable to breat"
+ },
+ "dwarven_plate": {
+  "nombre": "Dwarven Plate",
+  "tipo": "Armor (plate)",
+  "rareza": "very rare",
+  "descripcion": "While wearing this armor, you gain a +2 bonus to AC. In addition, if an effect moves you against your will along the ground, you can use your reaction to reduce the distance you are moved by up to 10 feet."
+ },
+ "dwarven_thrower": {
+  "nombre": "Dwarven Thrower",
+  "tipo": "Weapon (warhammer)",
+  "rareza": "very rare",
+  "descripcion": "You gain a +3 bonus to attack and damage rolls made with this magic weapon. It has the thrown property with a normal range of 20 feet and a long range of 60 feet. When you hit with a ranged attack using this weapon, it deals an extra 1d8 damage or, if the target is a giant, 2d8 damage. Immediately after the attack, the weapon flies back to your hand."
+ },
+ "efficient_quiver": {
+  "nombre": "Efficient Quiver",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "Each of the quiver's three compartments connects to an extradimensional space that allows the quiver to hold numerous items while never weighing more than 2 pounds. The shortest compartment can hold up to sixty arrows, bolts, or similar objects. The midsize compartment holds up to eighteen javelins or similar objects. The longest compartment holds up to six long objects, such as bows, quarterstaff"
+ },
+ "efreeti_bottle": {
+  "nombre": "Efreeti Bottle",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This painted brass bottle weighs 1 pound. When you use an action to remove the stopper, a cloud of thick smoke flows out of the bottle. At the end of your turn, the smoke disappears with a flash of harmless fire, and an efreeti appears in an unoccupied space within 30 feet of you.\n\nThe first time the bottle is opened, the GM rolls to determine what happens.\n\n| d100   | Effect                      "
+ },
+ "elemental_gem": {
+  "nombre": "Elemental Gem",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This gem contains a mote of elemental energy. When you use an action to break the gem, an elemental is summoned as if you had cast the _conjure elemental_ spell, and the gem's magic is lost. The type of gem determines the elemental summoned by the spell.\n\n| Gem            | Summoned Elemental |\n|----------------|--------------------|\n| Blue sapphire  | Air elemental      |\n| Yellow diamond | Earth"
+ },
+ "elven_chain": {
+  "nombre": "Elven Chain",
+  "tipo": "Armor (chain shirt)",
+  "rareza": "rare",
+  "descripcion": "You gain a +1 bonus to AC while you wear this armor. You are considered proficient with this armor even if you lack proficiency with medium armor."
+ },
+ "eversmoking_bottle": {
+  "nombre": "Eversmoking Bottle",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "Smoke leaks from the lead-stoppered mouth of this brass bottle, which weighs 1 pound. When you use an action to remove the stopper, a cloud of thick smoke pours out in a 60-foot radius from the bottle. The cloud's area is heavily obscured. Each minute the bottle remains open and within the cloud, the radius increases by 10 feet until it reaches its maximum radius of 120 feet.\n\nThe cloud persists a"
+ },
+ "eyes_of_charming": {
+  "nombre": "Eyes of Charming",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "These crystal lenses fit over the eyes. They have 3 charges. While wearing them, you can expend 1 charge as an action to cast the _charm person_ spell (save DC 13) on a humanoid within 30 feet of you, provided that you and the target can see each other. The lenses regain all expended charges daily at dawn."
+ },
+ "eyes_of_minute_seeing": {
+  "nombre": "Eyes of Minute Seeing",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "These crystal lenses fit over the eyes. While wearing them, you can see much better than normal out to a range of 1 foot. You have advantage on Intelligence (Investigation) checks that rely on sight while searching an area or studying an object within that range."
+ },
+ "eyes_of_the_eagle": {
+  "nombre": "Eyes of the Eagle",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "These crystal lenses fit over the eyes. While wearing them, you have advantage on Wisdom (Perception) checks that rely on sight. In conditions of clear visibility, you can make out details of even extremely distant creatures and objects as small as 2 feet across."
+ },
+ "feather_token": {
+  "nombre": "Feather Token",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This tiny object looks like a feather. Different types of feather tokens exist, each with a different single* use effect. The GM chooses the kind of token or determines it randomly.\n\n| d100   | Feather Token |\n|--------|---------------|\n| 01-20  | Anchor        |\n| 21-35  | Bird          |\n| 36-50  | Fan           |\n| 51-65  | Swan boat     |\n| 66-90  | Tree          |\n| 91-100  | Whip          |\n"
+ },
+ "figurine_of_wondrous_power": {
+  "nombre": "Figurine of Wondrous Power",
+  "tipo": "Wondrous item",
+  "rareza": "rarity by figurine",
+  "descripcion": "A _figurine of wondrous power_ is a statuette of a beast small enough to fit in a pocket. If you use an action to speak the command word and throw the figurine to a point on the ground within 60 feet of you, the figurine becomes a living creature. If the space where the creature would appear is occupied by other creatures or objects, or if there isn't enough space for the creature, the figurine do"
+ },
+ "flame_tongue": {
+  "nombre": "Flame Tongue",
+  "tipo": "Weapon (any sword)",
+  "rareza": "rare",
+  "descripcion": "You can use a bonus action to speak this magic sword's command word, causing flames to erupt from the blade. These flames shed bright light in a 40-foot radius and dim light for an additional 40 feet. While the sword is ablaze, it deals an extra 2d6 fire damage to any target it hits. The flames last until you use a bonus action to speak the command word again or until you drop or sheathe the sword"
+ },
+ "folding_boat": {
+  "nombre": "Folding Boat",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This object appears as a wooden box that measures 12 inches long, 6 inches wide, and 6 inches deep. It weighs 4 pounds and floats. It can be opened to store items inside. This item also has three command words, each requiring you to use an action to speak it.\n\nOne command word causes the box to unfold into a boat 10 feet long, 4 feet wide, and 2 feet deep. The boat has one pair of oars, an anchor,"
+ },
+ "frost_brand": {
+  "nombre": "Frost Brand",
+  "tipo": "Weapon (any sword)",
+  "rareza": "very rare",
+  "descripcion": "When you hit with an attack using this magic sword, the target takes an extra 1d6 cold damage. In addition, while you hold the sword, you have resistance to fire damage.\n\nIn freezing temperatures, the blade sheds bright light in a 10-foot radius and dim light for an additional 10 feet.\n\nWhen you draw this weapon, you can extinguish all nonmagical flames within 30 feet of you. This property can be "
+ },
+ "gauntlets_of_ogre_power": {
+  "nombre": "Gauntlets of Ogre Power",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is already 19 or higher."
+ },
+ "gem_of_brightness": {
+  "nombre": "Gem of Brightness",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This prism has 50 charges. While you are holding it, you can use an action to speak one of three command words to cause one of the following effects:\n\n* The first command word causes the gem to shed bright light in a 30-foot radius and dim light for an additional 30 feet. This effect doesn't expend a charge. It lasts until you use a bonus action to repeat the command word or until you use another "
+ },
+ "gem_of_seeing": {
+  "nombre": "Gem of Seeing",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This gem has 3 charges. As an action, you can speak the gem's command word and expend 1 charge. For the next 10 minutes, you have truesight out to 120 feet when you peer through the gem.\n\nThe gem regains 1d3 expended charges daily at dawn."
+ },
+ "giant_slayer": {
+  "nombre": "Giant Slayer",
+  "tipo": "Weapon (any axe or sword)",
+  "rareza": "rare",
+  "descripcion": "You gain a +1 bonus to attack and damage rolls made with this magic weapon.\n\nWhen you hit a giant with it, the giant takes an extra 2d6 damage of the weapon's type and must succeed on a DC 15 Strength saving throw or fall prone. For the purpose of this weapon, \"giant\" refers to any creature with the giant type, including ettins and trolls."
+ },
+ "glamoured_studded_leather": {
+  "nombre": "Glamoured Studded Leather",
+  "tipo": "Armor (studded leather)",
+  "rareza": "rare",
+  "descripcion": "While wearing this armor, you gain a +1 bonus to AC. You can also use a bonus action to speak the armor's command word and cause the armor to assume the appearance of a normal set of clothing or some other kind of armor. You decide what it looks like, including color, style, and accessories, but the armor retains its normal bulk and weight. The illusory appearance lasts until you use this property"
+ },
+ "gloves_of_missile_snaring": {
+  "nombre": "Gloves of Missile Snaring",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "These gloves seem to almost meld into your hands when you don them. When a ranged weapon attack hits you while you're wearing them, you can use your reaction to reduce the damage by 1d10 + your Dexterity modifier, provided that you have a free hand. If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in that hand."
+ },
+ "gloves_of_swimming_and_climbing": {
+  "nombre": "Gloves of Swimming and Climbing",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing these gloves, climbing and swimming don't cost you extra movement, and you gain a +5 bonus to Strength (Athletics) checks made to climb or swim."
+ },
+ "goggles_of_night": {
+  "nombre": "Goggles of Night",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing these dark lenses, you have darkvision out to a range of 60 feet. If you already have darkvision, wearing the goggles increases its range by 60 feet."
+ },
+ "hammer_of_thunderbolts": {
+  "nombre": "Hammer of Thunderbolts",
+  "tipo": "Weapon (maul)",
+  "rareza": "legendary",
+  "descripcion": "You gain a +1 bonus to attack and damage rolls made with this magic weapon.\n\n**_Giant's Bane (Requires Attunement)_**. You must be wearing a _belt of giant strength_ (any variety) and _gauntlets of ogre power_ to attune to this weapon. The attunement ends if you take off either of those items. While you are attuned to this weapon and holding it, your Strength score increases by 4 and can exceed 20"
+ },
+ "handy_haversack": {
+  "nombre": "Handy Haversack",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This backpack has a central pouch and two side pouches, each of which is an extradimensional space. Each side pouch can hold up to 20 pounds of material, not exceeding a volume of 2 cubic feet. The large central pouch can hold up to 8 cubic feet or 80 pounds of material. The backpack always weighs 5 pounds, regardless of its contents.\n\nPlacing an object in the haversack follows the normal rules fo"
+ },
+ "hat_of_disguise": {
+  "nombre": "Hat of Disguise",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this hat, you can use an action to cast the _disguise self_ spell from it at will. The spell ends if the hat is removed."
+ },
+ "headband_of_intellect": {
+  "nombre": "Headband of Intellect",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "Your Intelligence score is 19 while you wear this headband. It has no effect on you if your Intelligence is already 19 or higher."
+ },
+ "helm_of_brilliance": {
+  "nombre": "Helm of Brilliance",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This dazzling helm is set with 1d10 diamonds, 2d10 rubies, 3d10 fire opals, and 4d10 opals. Any gem pried from the helm crumbles to dust. When all the gems are removed or destroyed, the helm loses its magic.\n\nYou gain the following benefits while wearing it:\n\n* You can use an action to cast one of the following spells (save DC 18), using one of the helm's gems of the specified type as a component:"
+ },
+ "helm_of_comprehending_languages": {
+  "nombre": "Helm of Comprehending Languages",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this helm, you can use an action to cast the _comprehend languages_ spell from it at will."
+ },
+ "helm_of_telepathy": {
+  "nombre": "Helm of Telepathy",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this helm, you can use an action to cast the _detect thoughts_ spell (save DC 13) from it. As long as you maintain concentration on the spell, you can use a bonus action to send a telepathic message to a creature you are focused on. It can reply-using a bonus action to do so-while your focus on it continues.\n\nWhile focusing on a creature with _detect thoughts_, you can use an action "
+ },
+ "helm_of_teleportation": {
+  "nombre": "Helm of Teleportation",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This helm has 3 charges. While wearing it, you can use an action and expend 1 charge to cast the _teleport_ spell from it. The helm regains 1d3\n\nexpended charges daily at dawn."
+ },
+ "holy_avenger": {
+  "nombre": "Holy Avenger",
+  "tipo": "Weapon (any sword)",
+  "rareza": "legendary",
+  "descripcion": "You gain a +3 bonus to attack and damage rolls made with this magic weapon. When you hit a fiend or an undead with it, that creature takes an extra 2d10 radiant damage.\n\nWhile you hold the drawn sword, it creates an aura in a 10-foot radius around you. You and all creatures friendly to you in the aura have advantage on saving throws against spells and other magical effects. If you have 17 or more "
+ },
+ "horn_of_blasting": {
+  "nombre": "Horn of Blasting",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "You can use an action to speak the horn's command word and then blow the horn, which emits a thunderous blast in a 30-foot cone that is audible 600 feet away. Each creature in the cone must make a DC 15 Constitution saving throw. On a failed save, a creature takes 5d6 thunder damage and is deafened for 1 minute. On a successful save, a creature takes half as much damage and isn't deafened. Creatur"
+ },
+ "horn_of_valhalla": {
+  "nombre": "Horn of Valhalla",
+  "tipo": "Wondrous item",
+  "rareza": "rare (silver or brass), very rare (bronze) or legendary (iron)",
+  "descripcion": "You can use an action to blow this horn. In response, warrior spirits from the Valhalla appear within 60 feet of you. They use the statistics of a berserker. They return to Valhalla after 1 hour or when they drop to 0 hit points. Once you use the horn, it can't be used again until 7 days have passed.\n\nFour types of _horn of Valhalla_ are known to exist, each made of a different metal. The horn's t"
+ },
+ "horseshoes_of_a_zephyr": {
+  "nombre": "Horseshoes of a Zephyr",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "These iron horseshoes come in a set of four. While all four shoes are affixed to the hooves of a horse or similar creature, they allow the creature to move normally while floating 4 inches above the ground. This effect means the creature can cross or stand above nonsolid or unstable surfaces, such as water or lava. The creature leaves no tracks and ignores difficult terrain. In addition, the creat"
+ },
+ "horseshoes_of_speed": {
+  "nombre": "Horseshoes of Speed",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "These iron horseshoes come in a set of four. While all four shoes are affixed to the hooves of a horse or similar creature, they increase the creature's walking speed by 30 feet."
+ },
+ "immovable_rod": {
+  "nombre": "Immovable Rod",
+  "tipo": "Rod",
+  "rareza": "uncommon",
+  "descripcion": "This flat iron rod has a button on one end. You can use an action to press the button, which causes the rod to become magically fixed in place. Until you or another creature uses an action to push the button again, the rod doesn't move, even if it is defying gravity. The rod can hold up to 8,000 pounds of weight. More weight causes the rod to deactivate and fall. A creature can use an action to ma"
+ },
+ "instant_fortress": {
+  "nombre": "Instant Fortress",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "You can use an action to place this 1-inch metal cube on the ground and speak its command word. The cube rapidly grows into a fortress that remains until you use an action to speak the command word that dismisses it, which works only if the fortress is empty.\n\nThe fortress is a square tower, 20 feet on a side and 30 feet high, with arrow slits on all sides and a battlement atop it. Its interior is"
+ },
+ "ioun_stone": {
+  "nombre": "Ioun Stone",
+  "tipo": "Wondrous item",
+  "rareza": "varies",
+  "descripcion": "An _Ioun stone_ is named after Ioun, a god of knowledge and prophecy revered on some worlds. Many types of _Ioun stone_ exist, each type a distinct combination of shape and color.\n\nWhen you use an action to toss one of these stones into the air, the stone orbits your head at a distance of 1d3 feet and confers a benefit to you. Thereafter, another creature must use an action to grasp or net the sto"
+ },
+ "iron_bands_of_binding": {
+  "nombre": "Iron Bands of Binding",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This rusty iron sphere measures 3 inches in diameter and weighs 1 pound. You can use an action to speak the command word and throw the sphere at a Huge or smaller creature you can see within 60 feet of you. As the sphere moves through the air, it opens into a tangle of metal bands.\n\nMake a ranged attack roll with an attack bonus equal to your Dexterity modifier plus your proficiency bonus. On a hi"
+ },
+ "iron_flask": {
+  "nombre": "Iron Flask",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This iron bottle has a brass stopper. You can use an action to speak the flask's command word, targeting a creature that you can see within 60 feet of you. If the target is native to a plane of existence other than the one you're on, the target must succeed on a DC 17 Wisdom saving throw or be trapped in the flask. If the target has been trapped by the flask before, it has advantage on the saving "
+ },
+ "javelin_of_lightning": {
+  "nombre": "Javelin of Lightning",
+  "tipo": "Weapon (javelin)",
+  "rareza": "uncommon",
+  "descripcion": "This javelin is a magic weapon. When you hurl it and speak its command word, it transforms into a bolt of lightning, forming a line 5 feet wide that extends out from you to a target within 120 feet. Each creature in the line excluding you and the target must make a DC 13 Dexterity saving throw, taking 4d6 lightning damage on a failed save, and half as much damage on a successful one. The lightning"
+ },
+ "lantern_of_revealing": {
+  "nombre": "Lantern of Revealing",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While lit, this hooded lantern burns for 6 hours on 1 pint of oil, shedding bright light in a 30-foot radius and dim light for an additional 30 feet. Invisible creatures and objects are visible as long as they are in the lantern's bright light. You can use an action to lower the hood, reducing the light to dim light in a 5* foot radius."
+ },
+ "luck_blade": {
+  "nombre": "Luck Blade",
+  "tipo": "Weapon (any sword)",
+  "rareza": "legendary",
+  "descripcion": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. While the sword is on your person, you also gain a +1 bonus to saving throws.\n\n**_Luck_**. If the sword is on your person, you can call on its luck (no action required) to reroll one attack roll, ability check, or saving throw you dislike. You must use the second roll. This property can't be used again until the next dawn."
+ },
+ "mace_of_disruption": {
+  "nombre": "Mace of Disruption",
+  "tipo": "Weapon (mace)",
+  "rareza": "rare",
+  "descripcion": "When you hit a fiend or an undead with this magic weapon, that creature takes an extra 2d6 radiant damage. If the target has 25 hit points or fewer after taking this damage, it must succeed on a DC 15 Wisdom saving throw or be destroyed. On a successful save, the creature becomes frightened of you until the end of your next turn.\n\nWhile you hold this weapon, it sheds bright light in a 20-foot radi"
+ },
+ "mace_of_smiting": {
+  "nombre": "Mace of Smiting",
+  "tipo": "Weapon (mace)",
+  "rareza": "rare",
+  "descripcion": "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The bonus increases to +3 when you use the mace to attack a construct.\n\nWhen you roll a 20 on an attack roll made with this weapon, the target takes an extra 2d6 bludgeoning damage, or 4d6 bludgeoning damage if it's a construct. If a construct has 25 hit points or fewer after taking this damage, it is destroyed."
+ },
+ "mace_of_terror": {
+  "nombre": "Mace of Terror",
+  "tipo": "Weapon (mace)",
+  "rareza": "rare",
+  "descripcion": "This magic weapon has 3 charges. While holding it, you can use an action and expend 1 charge to release a wave of terror. Each creature of your choice in a 30-foot radius extending from you must succeed on a DC 15 Wisdom saving throw or become frightened of you for 1 minute. While it is frightened in this way, a creature must spend its turns trying to move as far away from you as it can, and it ca"
+ },
+ "mantle_of_spell_resistance": {
+  "nombre": "Mantle of Spell Resistance",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "You have advantage on saving throws against spells while you wear this cloak."
+ },
+ "manual_of_bodily_health": {
+  "nombre": "Manual of Bodily Health",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This book contains health and diet tips, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book's contents and practicing its guidelines, your Constitution score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+ },
+ "manual_of_gainful_exercise": {
+  "nombre": "Manual of Gainful Exercise",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This book describes fitness exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book's contents and practicing its guidelines, your Strength score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+ },
+ "manual_of_golems": {
+  "nombre": "Manual of Golems",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This tome contains information and incantations necessary to make a particular type of golem. The GM chooses the type or determines it randomly. To decipher and use the manual, you must be a spellcaster with at least two 5th-level spell slots. A creature that can't use a _manual of golems_ and attempts to read it takes 6d6 psychic damage.\n\n| d20   | Golem | Time     | Cost       |\n|-------|-------"
+ },
+ "manual_of_quickness_of_action": {
+  "nombre": "Manual of Quickness of Action",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This book contains coordination and balance exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book's contents and practicing its guidelines, your Dexterity score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+ },
+ "marvelous_pigments": {
+  "nombre": "Marvelous Pigments",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "Typically found in 1d4 pots inside a fine wooden box with a brush (weighing 1 pound in total), these pigments allow you to create three-dimensional objects by painting them in two dimensions. The paint flows from the brush to form the desired object as you concentrate on its image.\n\nEach pot of paint is sufficient to cover 1,000 square feet of a surface, which lets you create inanimate objects or "
+ },
+ "medallion_of_thoughts": {
+  "nombre": "Medallion of Thoughts",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "The medallion has 3 charges. While wearing it, you can use an action and expend 1 charge to cast the _detect thoughts_ spell (save DC 13) from it. The medallion regains 1d3 expended charges daily at dawn."
+ },
+ "mirror_of_life_trapping": {
+  "nombre": "Mirror of Life Trapping",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "When this 4-foot-tall mirror is viewed indirectly, its surface shows faint images of creatures. The mirror weighs 50 pounds, and it has AC 11, 10 hit points, and vulnerability to bludgeoning damage. It shatters and is destroyed when reduced to 0 hit points.\n\nIf the mirror is hanging on a vertical surface and you are within 5 feet of it, you can use an action to speak its command word and activate "
+ },
+ "mithral_armor": {
+  "nombre": "Mithral Armor",
+  "tipo": "Armor (medium or heavy)",
+  "rareza": "uncommon",
+  "descripcion": "Mithral is a light, flexible metal. A mithral chain shirt or breastplate can be worn under normal clothes. If the armor normally imposes disadvantage on Dexterity (Stealth) checks or has a Strength requirement, the mithral version of the armor doesn't."
+ },
+ "necklace_of_adaptation": {
+  "nombre": "Necklace of Adaptation",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this necklace, you can breathe normally in any environment, and you have advantage on saving throws made against harmful gases and vapors (such as _cloudkill_ and _stinking cloud_ effects, inhaled poisons, and the breath weapons of some dragons)."
+ },
+ "necklace_of_fireballs": {
+  "nombre": "Necklace of Fireballs",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This necklace has 1d6 + 3 beads hanging from it. You can use an action to detach a bead and throw it up to 60 feet away. When it reaches the end of its trajectory, the bead detonates as a 3rd-level _fireball_ spell (save DC 15).\n\nYou can hurl multiple beads, or even the whole necklace, as one action. When you do so, increase the level of the _fireball_ by 1 for each bead beyond the first."
+ },
+ "necklace_of_prayer_beads": {
+  "nombre": "Necklace of Prayer Beads",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This necklace has 1d4 + 2 magic beads made from aquamarine, black pearl, or topaz. It also has many nonmagical beads made from stones such as amber, bloodstone, citrine, coral, jade, pearl, or quartz. If a magic bead is removed from the necklace, that bead loses its magic.\n\nSix types of magic beads exist. The GM decides the type of each bead on the necklace or determines it randomly. A necklace ca"
+ },
+ "nine_lives_stealer": {
+  "nombre": "Nine Lives Stealer",
+  "tipo": "Weapon (any sword)",
+  "rareza": "very rare",
+  "descripcion": "You gain a +2 bonus to attack and damage rolls made with this magic weapon.\n\nThe sword has 1d8 + 1 charges. If you score a critical hit against a creature that has fewer than 100 hit points, it must succeed on a DC 15 Constitution saving throw or be slain instantly as the sword tears its life force from its body (a construct or an undead is immune). The sword loses 1 charge if the creature is slai"
+ },
+ "oathbow": {
+  "nombre": "Oathbow",
+  "tipo": "Weapon (longbow)",
+  "rareza": "very rare",
+  "descripcion": "When you nock an arrow on this bow, it whispers in Elvish, \"Swift defeat to my enemies.\" When you use this weapon to make a ranged attack, you can, as a command phrase, say, \"Swift death to you who have wronged me.\" The target of your attack becomes your sworn enemy until it dies or until dawn seven days later. You can have only one such sworn enemy at a time. When your sworn enemy dies, you can c"
+ },
+ "oil_of_etherealness": {
+  "nombre": "Oil of Etherealness",
+  "tipo": "Potion",
+  "rareza": "rare",
+  "descripcion": "Beads of this cloudy gray oil form on the outside of its container and quickly evaporate. The oil can cover a Medium or smaller creature, along with the equipment it's wearing and carrying (one additional vial is required for each size category above Medium). Applying the oil takes 10 minutes. The affected creature then gains the effect of the _etherealness_ spell for 1 hour."
+ },
+ "oil_of_sharpness": {
+  "nombre": "Oil of Sharpness",
+  "tipo": "Potion",
+  "rareza": "very rare",
+  "descripcion": "This clear, gelatinous oil sparkles with tiny, ultrathin silver shards. The oil can coat one slashing or piercing weapon or up to 5 pieces of slashing or piercing ammunition. Applying the oil takes 1 minute. For 1 hour, the coated item is magical and has a +3 bonus to attack and damage rolls."
+ },
+ "oil_of_slipperiness": {
+  "nombre": "Oil of Slipperiness",
+  "tipo": "Potion",
+  "rareza": "uncommon",
+  "descripcion": "This sticky black unguent is thick and heavy in the container, but it flows quickly when poured. The oil can cover a Medium or smaller creature, along with the equipment it's wearing and carrying (one additional vial is required for each size category above Medium). Applying the oil takes 10 minutes. The affected creature then gains the effect of a _freedom of movement_ spell for 8 hours.\n\nAlterna"
+ },
+ "orb_of_dragonkind": {
+  "nombre": "Orb of Dragonkind",
+  "tipo": "Wondrous item",
+  "rareza": "artifact",
+  "descripcion": "Ages past, elves and humans waged a terrible war against evil dragons. When the world seemed doomed, powerful wizards came together and worked their greatest magic, forging five _Orbs of Dragonkind_ (or _Dragon Orbs_) to help them defeat the dragons. One orb was taken to each of the five wizard towers, and there they were used to speed the war toward a victorious end. The wizards used the orbs to "
+ },
+ "pearl_of_power": {
+  "nombre": "Pearl of Power",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While this pearl is on your person, you can use an action to speak its command word and regain one expended spell slot. If the expended slot was of 4th level or higher, the new slot is 3rd level. Once you use the pearl, it can't be used again until the next dawn."
+ },
+ "periapt_of_health": {
+  "nombre": "Periapt of Health",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "You are immune to contracting any disease while you wear this pendant. If you are already infected with a disease, the effects of the disease are suppressed you while you wear the pendant."
+ },
+ "periapt_of_proof_against_poison": {
+  "nombre": "Periapt of Proof against Poison",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This delicate silver chain has a brilliant-cut black gem pendant. While you wear it, poisons have no effect on you. You are immune to the poisoned condition and have immunity to poison damage."
+ },
+ "periapt_of_wound_closure": {
+  "nombre": "Periapt of Wound Closure",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While you wear this pendant, you stabilize whenever you are dying at the start of your turn. In addition, whenever you roll a Hit Die to regain hit points, double the number of hit points it restores."
+ },
+ "philter_of_love": {
+  "nombre": "Philter of Love",
+  "tipo": "Potion",
+  "rareza": "uncommon",
+  "descripcion": "The next time you see a creature within 10 minutes after drinking this philter, you become charmed by that creature for 1 hour. If the creature is of a species and gender you are normally attracted to, you regard it as your true love while you are charmed. This potion's rose-hued, effervescent liquid contains one easy-to-miss bubble shaped like a heart."
+ },
+ "pipes_of_haunting": {
+  "nombre": "Pipes of Haunting",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "You must be proficient with wind instruments to use these pipes. They have 3 charges. You can use an action to play them and expend 1 charge to create an eerie, spellbinding tune. Each creature within 30 feet of you that hears you play must succeed on a DC 15 Wisdom saving throw or become frightened of you for 1 minute. If you wish, all creatures in the area that aren't hostile toward you automati"
+ },
+ "pipes_of_the_sewers": {
+  "nombre": "Pipes of the Sewers",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "You must be proficient with wind instruments to use these pipes. While you are attuned to the pipes, ordinary rats and giant rats are indifferent toward you and will not attack you unless you threaten or harm them.\n\nThe pipes have 3 charges. If you play the pipes as an action, you can use a bonus action to expend 1 to 3 charges, calling forth one swarm of rats with each expended charge, provided t"
+ },
+ "plate_armor_of_etherealness": {
+  "nombre": "Plate Armor of Etherealness",
+  "tipo": "Armor (plate)",
+  "rareza": "legendary",
+  "descripcion": "While you're wearing this armor, you can speak its command word as an action to gain the effect of the _etherealness_ spell, which last for 10 minutes or until you remove the armor or use an action to speak the command word again. This property of the armor can't be used again until the next dawn."
+ },
+ "portable_hole": {
+  "nombre": "Portable Hole",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This fine black cloth, soft as silk, is folded up to the dimensions of a handkerchief. It unfolds into a circular sheet 6 feet in diameter.\n\nYou can use an action to unfold a _portable hole_ and place it on or against a solid surface, whereupon the _portable hole_ creates an extradimensional hole 10 feet deep. The cylindrical space within the hole exists on a different plane, so it can't be used t"
+ },
+ "potion_of_animal_friendship": {
+  "nombre": "Potion of Animal Friendship",
+  "tipo": "Potion",
+  "rareza": "uncommon",
+  "descripcion": "When you drink this potion, you can cast the _animal friendship_ spell (save DC 13) for 1 hour at will. Agitating this muddy liquid brings little bits into view: a fish scale, a hummingbird tongue, a cat claw, or a squirrel hair."
+ },
+ "potion_of_clairvoyance": {
+  "nombre": "Potion of Clairvoyance",
+  "tipo": "Potion",
+  "rareza": "rare",
+  "descripcion": "When you drink this potion, you gain the effect of the _clairvoyance_ spell. An eyeball bobs in this yellowish liquid but vanishes when the potion is opened."
+ },
+ "potion_of_climbing": {
+  "nombre": "Potion of Climbing",
+  "tipo": "Potion",
+  "rareza": "common",
+  "descripcion": "When you drink this potion, you gain a climbing speed equal to your walking speed for 1 hour. During this time, you have advantage on Strength (Athletics) checks you make to climb. The potion is separated into brown, silver, and gray layers resembling bands of stone. Shaking the bottle fails to mix the colors."
+ },
+ "potion_of_diminution": {
+  "nombre": "Potion of Diminution",
+  "tipo": "Potion",
+  "rareza": "rare",
+  "descripcion": "When you drink this potion, you gain the \"reduce\" effect of the _enlarge/reduce_ spell for 1d4 hours (no concentration required). The red in the potion's liquid continuously contracts to a tiny bead and then expands to color the clear liquid around it. Shaking the bottle fails to interrupt this process."
+ },
+ "potion_of_flying": {
+  "nombre": "Potion of Flying",
+  "tipo": "Potion",
+  "rareza": "very rare",
+  "descripcion": "When you drink this potion, you gain a flying speed equal to your walking speed for 1 hour and can hover. If you're in the air when the potion wears off, you fall unless you have some other means of staying aloft. This potion's clear liquid floats at the top of its container and has cloudy white impurities drifting in it."
+ },
+ "potion_of_gaseous_form": {
+  "nombre": "Potion of Gaseous Form",
+  "tipo": "Potion",
+  "rareza": "rare",
+  "descripcion": "When you drink this potion, you gain the effect of the _gaseous form_ spell for 1 hour (no concentration required) or until you end the effect as a bonus action. This potion's container seems to hold fog that moves and pours like water."
+ },
+ "potion_of_giant_strength": {
+  "nombre": "Potion of Giant Strength",
+  "tipo": "Potion",
+  "rareza": "varies",
+  "descripcion": "When you drink this potion, your Strength score changes for 1 hour. The type of giant determines the score (see the table below). The potion has no effect on you if your Strength is equal to or greater than that score.\n\nThis potion's transparent liquid has floating in it a sliver of fingernail from a giant of the appropriate type. The _potion of frost giant strength_ and the _potion of stone giant"
+ },
+ "potion_of_growth": {
+  "nombre": "Potion of Growth",
+  "tipo": "Potion",
+  "rareza": "uncommon",
+  "descripcion": "When you drink this potion, you gain the \"enlarge\" effect of the _enlarge/reduce_ spell for 1d4 hours (no concentration required). The red in the potion's liquid continuously expands from a tiny bead to color the clear liquid around it and then contracts. Shaking the bottle fails to interrupt this process."
+ },
+ "potion_of_healing": {
+  "nombre": "Potion of Healing",
+  "tipo": "Potion",
+  "rareza": "varies",
+  "descripcion": "You regain hit points when you drink this potion. The number of hit points depends on the potion's rarity, as shown in the Potions of Healing table. Whatever its potency, the potion's red liquid glimmers when agitated.\n\n**Potions of Healing (table)**\n\n| Potion of ...    | Rarity    | HP Regained |\n|------------------|-----------|-------------|\n| Healing          | Common    | 2d4 + 2     |\n| Great"
+ },
+ "potion_of_heroism": {
+  "nombre": "Potion of Heroism",
+  "tipo": "Potion",
+  "rareza": "rare",
+  "descripcion": "For 1 hour after drinking it, you gain 10 temporary hit points that last for 1 hour. For the same duration, you are under the effect of the _bless_ spell (no concentration required). This blue potion bubbles and steams as if boiling."
+ },
+ "potion_of_invisibility": {
+  "nombre": "Potion of Invisibility",
+  "tipo": "Potion",
+  "rareza": "very rare",
+  "descripcion": "This potion's container looks empty but feels as though it holds liquid. When you drink it, you become invisible for 1 hour. Anything you wear or carry is invisible with you. The effect ends early if you attack or cast a spell."
+ },
+ "potion_of_mind_reading": {
+  "nombre": "Potion of Mind Reading",
+  "tipo": "Potion",
+  "rareza": "rare",
+  "descripcion": "When you drink this potion, you gain the effect of the _detect thoughts_ spell (save DC 13). The potion's dense, purple liquid has an ovoid cloud of pink floating in it."
+ },
+ "potion_of_poison": {
+  "nombre": "Potion of Poison",
+  "tipo": "Potion",
+  "rareza": "uncommon",
+  "descripcion": "This concoction looks, smells, and tastes like a _potion of healing_ or other beneficial potion. However, it is actually poison masked by illusion magic. An _identify_ spell reveals its true nature.\n\nIf you drink it, you take 3d6 poison damage, and you must succeed on a DC 13 Constitution saving throw or be poisoned. At the start of each of your turns while you are poisoned in this way, you take 3"
+ },
+ "potion_of_resistance": {
+  "nombre": "Potion of Resistance",
+  "tipo": "Potion",
+  "rareza": "uncommon",
+  "descripcion": "When you drink this potion, you gain resistance to one type of damage for 1 hour. The GM chooses the type or determines it randomly from the options below.\n\n| d10 | Damage Type |\n|-----|-------------|\n| 1   | Acid        |\n| 2   | Cold        |\n| 3   | Fire        |\n| 4   | Force       |\n| 5   | Lightning   |\n| 6   | Necrotic    |\n| 7   | Poison      |\n| 8   | Psychic     |\n| 9   | Radiant     |\n|"
+ },
+ "potion_of_speed": {
+  "nombre": "Potion of Speed",
+  "tipo": "Potion",
+  "rareza": "very rare",
+  "descripcion": "When you drink this potion, you gain the effect of the _haste_ spell for 1 minute (no concentration required). The potion's yellow fluid is streaked with black and swirls on its own."
+ },
+ "potion_of_water_breathing": {
+  "nombre": "Potion of Water Breathing",
+  "tipo": "Potion",
+  "rareza": "uncommon",
+  "descripcion": "You can breathe underwater for 1 hour after drinking this potion. Its cloudy green fluid smells of the sea and has a jellyfish-like bubble floating in it."
+ },
+ "restorative_ointment": {
+  "nombre": "Restorative Ointment",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This glass jar, 3 inches in diameter, contains 1d4 + 1 doses of a thick mixture that smells faintly of aloe. The jar and its contents weigh 1/2 pound.\n\nAs an action, one dose of the ointment can be swallowed or applied to the skin. The creature that receives it regains 2d8 + 2 hit points, ceases to be poisoned, and is cured of any disease."
+ },
+ "ring_of_animal_influence": {
+  "nombre": "Ring of Animal Influence",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "This ring has 3 charges, and it regains 1d3 expended charges daily at dawn. While wearing the ring, you can use an action to expend 1 of its charges to cast one of the following spells:\n\n* _Animal friendship_ (save DC 13)\n* _Fear_ (save DC 13), targeting only beasts that have an Intelligence of 3 or lower\n* _Speak with animals_"
+ },
+ "ring_of_djinni_summoning": {
+  "nombre": "Ring of Djinni Summoning",
+  "tipo": "Ring",
+  "rareza": "legendary",
+  "descripcion": "While wearing this ring, you can speak its command word as an action to summon a particular djinni from the Elemental Plane of Air. The djinni appears in an unoccupied space you choose within 120 feet of you. It remains as long as you concentrate (as if concentrating on a spell), to a maximum of 1 hour, or until it drops to 0 hit points. It then returns to its home plane.\n\nWhile summoned, the djin"
+ },
+ "ring_of_elemental_command": {
+  "nombre": "Ring of Elemental Command",
+  "tipo": "Ring",
+  "rareza": "legendary",
+  "descripcion": "This ring is linked to one of the four Elemental Planes. The GM chooses or randomly determines the linked plane.\n\nWhile wearing this ring, you have advantage on attack rolls against elementals from the linked plane, and they have disadvantage on attack rolls against you. In addition, you have access to properties based on the linked plane.\n\nThe ring has 5 charges. It regains 1d4 + 1 expended charg"
+ },
+ "ring_of_evasion": {
+  "nombre": "Ring of Evasion",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "This ring has 3 charges, and it regains 1d3 expended charges daily at dawn. When you fail a Dexterity saving throw while wearing it, you can use your reaction to expend 1 of its charges to succeed on that saving throw instead."
+ },
+ "ring_of_feather_falling": {
+  "nombre": "Ring of Feather Falling",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "When you fall while wearing this ring, you descend 60 feet per round and take no damage from falling."
+ },
+ "ring_of_free_action": {
+  "nombre": "Ring of Free Action",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "While you wear this ring, difficult terrain doesn't cost you extra movement. In addition, magic can neither reduce your speed nor cause you to be paralyzed or restrained."
+ },
+ "ring_of_invisibility": {
+  "nombre": "Ring of Invisibility",
+  "tipo": "Ring",
+  "rareza": "legendary",
+  "descripcion": "While wearing this ring, you can turn invisible as an action. Anything you are wearing or carrying is invisible with you. You remain invisible until the ring is removed, until you attack or cast a spell, or until you use a bonus action to become visible again."
+ },
+ "ring_of_jumping": {
+  "nombre": "Ring of Jumping",
+  "tipo": "Ring",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this ring, you can cast the _jump_ spell from it as a bonus action at will, but can target only yourself when you do so."
+ },
+ "ring_of_mind_shielding": {
+  "nombre": "Ring of Mind Shielding",
+  "tipo": "Ring",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this ring, you are immune to magic that allows other creatures to read your thoughts, determine whether you are lying, know your alignment, or know your creature type. Creatures can telepathically communicate with you only if you allow it.\n\nYou can use an action to cause the ring to become invisible until you use another action to make it visible, until you remove the ring, or until "
+ },
+ "ring_of_protection": {
+  "nombre": "Ring of Protection",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "You gain a +1 bonus to AC and saving throws while wearing this ring."
+ },
+ "ring_of_regeneration": {
+  "nombre": "Ring of Regeneration",
+  "tipo": "Ring",
+  "rareza": "very rare",
+  "descripcion": "While wearing this ring, you regain 1d6 hit points every 10 minutes, provided that you have at least 1 hit point. If you lose a body part, the ring causes the missing part to regrow and return to full functionality after 1d6 + 1 days if you have at least 1 hit point the whole time."
+ },
+ "ring_of_resistance": {
+  "nombre": "Ring of Resistance",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "You have resistance to one damage type while wearing this ring. The gem in the ring indicates the type, which the GM chooses or determines randomly.\n\n| d10 | Damage Type | Gem        |\n|-----|-------------|------------|\n| 1   | Acid        | Pearl      |\n| 2   | Cold        | Tourmaline |\n| 3   | Fire        | Garnet     |\n| 4   | Force       | Sapphire   |\n| 5   | Lightning   | Citrine    |\n| 6  "
+ },
+ "ring_of_shooting_stars": {
+  "nombre": "Ring of Shooting Stars",
+  "tipo": "Ring",
+  "rareza": "very rare",
+  "descripcion": "While wearing this ring in dim light or darkness, you can cast _dancing lights_ and _light_ from the ring at will. Casting either spell from the ring requires an action.\n\nThe ring has 6 charges for the following other properties. The ring regains 1d6 expended charges daily at dawn.\n\n**_Faerie Fire_**. You can expend 1 charge as an action to cast _faerie fire_ from the ring.\n\n**_Ball Lightning_**. "
+ },
+ "ring_of_spell_storing": {
+  "nombre": "Ring of Spell Storing",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "This ring stores spells cast into it, holding them until the attuned wearer uses them. The ring can store up to 5 levels worth of spells at a time. When found, it contains 1d6 - 1 levels of stored spells chosen by the GM.\n\nAny creature can cast a spell of 1st through 5th level into the ring by touching the ring as the spell is cast. The spell has no effect, other than to be stored in the ring. If "
+ },
+ "ring_of_spell_turning": {
+  "nombre": "Ring of Spell Turning",
+  "tipo": "Ring",
+  "rareza": "legendary",
+  "descripcion": "While wearing this ring, you have advantage on saving throws against any spell that targets only you (not in an area of effect). In addition, if you roll a 20 for the save and the spell is 7th level or lower, the spell has no effect on you and instead targets the caster, using the slot level, spell save DC, attack bonus, and spellcasting ability of the caster."
+ },
+ "ring_of_swimming": {
+  "nombre": "Ring of Swimming",
+  "tipo": "Ring",
+  "rareza": "uncommon",
+  "descripcion": "You have a swimming speed of 40 feet while wearing this ring."
+ },
+ "ring_of_telekinesis": {
+  "nombre": "Ring of Telekinesis",
+  "tipo": "Ring",
+  "rareza": "very rare",
+  "descripcion": "While wearing this ring, you can cast the _telekinesis_ spell at will, but you can target only objects that aren't being worn or carried."
+ },
+ "ring_of_the_ram": {
+  "nombre": "Ring of the Ram",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "This ring has 3 charges, and it regains 1d3 expended charges daily at dawn. While wearing the ring, you can use an action to expend 1 to 3 of its charges to attack one creature you can see within 60 feet of you. The ring produces a spectral ram's head and makes its attack roll with a +7 bonus. On a hit, for each charge you spend, the target takes 2d10 force damage and is pushed 5 feet away from yo"
+ },
+ "ring_of_three_wishes": {
+  "nombre": "Ring of Three Wishes",
+  "tipo": "Ring",
+  "rareza": "legendary",
+  "descripcion": "While wearing this ring, you can use an action to expend 1 of its 3 charges to cast the _wish_ spell from it. The ring becomes nonmagical when you use the last charge."
+ },
+ "ring_of_warmth": {
+  "nombre": "Ring of Warmth",
+  "tipo": "Ring",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this ring, you have resistance to cold damage. In addition, you and everything you wear and carry are unharmed by temperatures as low as -50 degrees Fahrenheit."
+ },
+ "ring_of_water_walking": {
+  "nombre": "Ring of Water Walking",
+  "tipo": "Ring",
+  "rareza": "uncommon",
+  "descripcion": "While wearing this ring, you can stand on and move across any liquid surface as if it were solid ground."
+ },
+ "ring_of_x_ray_vision": {
+  "nombre": "Ring of X-ray Vision",
+  "tipo": "Ring",
+  "rareza": "rare",
+  "descripcion": "While wearing this ring, you can use an action to speak its command word. When you do so, you can see into and through solid matter for 1 minute. This vision has a radius of 30 feet. To you, solid objects within that radius appear transparent and don't prevent light from passing through them. The vision can penetrate 1 foot of stone, 1 inch of common metal, or up to 3 feet of wood or dirt. Thicker"
+ },
+ "robe_of_eyes": {
+  "nombre": "Robe of Eyes",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This robe is adorned with eyelike patterns. While you wear the robe, you gain the following benefits:\n\n* The robe lets you see in all directions, and you have advantage on Wisdom (Perception) checks that rely on sight.\n* You have darkvision out to a range of 120 feet.\n* You can see invisible creatures and objects, as well as see into the Ethereal Plane, out to a range of 120 feet.\n\nThe eyes on the"
+ },
+ "robe_of_scintillating_colors": {
+  "nombre": "Robe of Scintillating Colors",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This robe has 3 charges, and it regains 1d3 expended charges daily at dawn. While you wear it, you can use an action and expend 1 charge to cause the garment to display a shifting pattern of dazzling hues until the end of your next turn. During this time, the robe sheds bright light in a 30-foot radius and dim light for an additional 30 feet. Creatures that can see you have disadvantage on attack "
+ },
+ "robe_of_stars": {
+  "nombre": "Robe of Stars",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This black or dark blue robe is embroidered with small white or silver stars. You gain a +1 bonus to saving throws while you wear it.\n\nSix stars, located on the robe's upper front portion, are particularly large. While wearing this robe, you can use an action to pull off one of the stars and use it to cast _magic missile_ as a 5th-level spell. Daily at dusk, 1d6 removed stars reappear on the robe."
+ },
+ "robe_of_the_archmagi": {
+  "nombre": "Robe of the Archmagi",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This elegant garment is made from exquisite cloth of white, gray, or black and adorned with silvery runes. The robe's color corresponds to the alignment for which the item was created. A white robe was made for good, gray for neutral, and black for evil. You can't attune to a _robe of the archmagi_ that doesn't correspond to your alignment.\n\nYou gain these benefits while wearing the robe:\n\n* If yo"
+ },
+ "robe_of_useful_items": {
+  "nombre": "Robe of Useful Items",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This robe has cloth patches of various shapes and colors covering it. While wearing the robe, you can use an action to detach one of the patches, causing it to become the object or creature it represents. Once the last patch is removed, the robe becomes an ordinary garment.\n\nThe robe has two of each of the following patches:\n\n* Dagger\n* Bullseye lantern (filled and lit)\n* Steel mirror\n* 10-foot po"
+ },
+ "rod_of_absorption": {
+  "nombre": "Rod of Absorption",
+  "tipo": "Rod",
+  "rareza": "very rare",
+  "descripcion": "While holding this rod, you can use your reaction to absorb a spell that is targeting only you and not with an area of effect. The absorbed spell's effect is canceled, and the spell's energy-not the spell itself-is stored in the rod. The energy has the same level as the spell when it was cast. The rod can absorb and store up to 50 levels of energy over the course of its existence. Once the rod abs"
+ },
+ "rod_of_alertness": {
+  "nombre": "Rod of Alertness",
+  "tipo": "Rod",
+  "rareza": "very rare",
+  "descripcion": "This rod has a flanged head and the following properties.\n\n**_Alertness_**. While holding the rod, you have advantage on Wisdom (Perception) checks and on rolls for initiative.\n\n**_Spells_**. While holding the rod, you can use an action to cast one of the following spells from it: _detect evil and good_, _detect magic_, _detect poison and disease_, or _see invisibility._\n\n**_Protective Aura_**. As"
+ },
+ "rod_of_lordly_might": {
+  "nombre": "Rod of Lordly Might",
+  "tipo": "Rod",
+  "rareza": "legendary",
+  "descripcion": "This rod has a flanged head, and it functions as a magic mace that grants a +3 bonus to attack and damage rolls made with it. The rod has properties associated with six different buttons that are set in a row along the haft. It has three other properties as well, detailed below.\n\n**_Six Buttons_**. You can press one of the rod's six buttons as a bonus action. A button's effect lasts until you push"
+ },
+ "rod_of_rulership": {
+  "nombre": "Rod of Rulership",
+  "tipo": "Rod",
+  "rareza": "rare",
+  "descripcion": "You can use an action to present the rod and command obedience from each creature of your choice that you can see within 120 feet of you. Each target must succeed on a DC 15 Wisdom saving throw or be charmed by you for 8 hours. While charmed in this way, the creature regards you as its trusted leader. If harmed by you or your companions, or commanded to do something contrary to its nature, a targe"
+ },
+ "rod_of_security": {
+  "nombre": "Rod of Security",
+  "tipo": "Rod",
+  "rareza": "very rare",
+  "descripcion": "While holding this rod, you can use an action to activate it. The rod then instantly transports you and up to 199 other willing creatures you can see to a paradise that exists in an extraplanar space. You choose the form that the paradise takes. It could be a tranquil garden, lovely glade, cheery tavern, immense palace, tropical island, fantastic carnival, or whatever else you can imagine. Regardl"
+ },
+ "rope_of_climbing": {
+  "nombre": "Rope of Climbing",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "This 60-foot length of silk rope weighs 3 pounds and can hold up to 3,000 pounds. If you hold one end of the rope and use an action to speak the command word, the rope animates. As a bonus action, you can command the other end to move toward a destination you choose. That end moves 10 feet on your turn when you first command it and 10 feet on each of your turns until reaching its destination, up t"
+ },
+ "rope_of_entanglement": {
+  "nombre": "Rope of Entanglement",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "This rope is 30 feet long and weighs 3 pounds. If you hold one end of the rope and use an action to speak its command word, the other end darts forward to entangle a creature you can see within 20 feet of you. The target must succeed on a DC 15 Dexterity saving throw or become restrained.\n\nYou can release the creature by using a bonus action to speak a second command word. A target restrained by t"
+ },
+ "scarab_of_protection": {
+  "nombre": "Scarab of Protection",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "If you hold this beetle-shaped medallion in your hand for 1 round, an inscription appears on its surface revealing its magical nature. It provides two benefits while it is on your person:\n\n* You have advantage on saving throws against spells.\n* The scarab has 12 charges. If you fail a saving throw against a necromancy spell or a harmful effect originating from an undead creature, you can use your "
+ },
+ "scimitar_of_speed": {
+  "nombre": "Scimitar of Speed",
+  "tipo": "Weapon (scimitar)",
+  "rareza": "very rare",
+  "descripcion": "You gain a +2 bonus to attack and damage rolls made with this magic weapon. In addition, you can make one attack with it as a bonus action on each of your turns."
+ },
+ "shield_of_missile_attraction": {
+  "nombre": "Shield of Missile Attraction",
+  "tipo": "Armor (shield)",
+  "rareza": "rare",
+  "descripcion": "While holding this shield, you have resistance to damage from ranged weapon attacks.\n\n**_Curse_**. This shield is cursed. Attuning to it curses you until you are targeted by the _remove curse_ spell or similar magic. Removing the shield fails to end the curse on you. Whenever a ranged weapon attack is made against a target within 10 feet of you, the curse causes you to become the target instead."
+ },
+ "slippers_of_spider_climbing": {
+  "nombre": "Slippers of Spider Climbing",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While you wear these light shoes, you can move up, down, and across vertical surfaces and upside down along ceilings, while leaving your hands free. You have a climbing speed equal to your walking speed. However, the slippers don't allow you to move this way on a slippery surface, such as one covered by ice or oil."
+ },
+ "sovereign_glue": {
+  "nombre": "Sovereign Glue",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This viscous, milky-white substance can form a permanent adhesive bond between any two objects. It must be stored in a jar or flask that has been coated inside with _oil of slipperiness._ When found, a container contains 1d6 + 1 ounces.\n\nOne ounce of the glue can cover a 1-foot square surface. The glue takes 1 minute to set. Once it has done so, the bond it creates can be broken only by the applic"
+ },
+ "spell_scroll": {
+  "nombre": "Spell Scroll",
+  "tipo": "Scroll",
+  "rareza": "varies",
+  "descripcion": "A _spell scroll_ bears the words of a single spell, written in a mystical cipher. If the spell is on your class's spell list, you can use an action to read the scroll and cast its spell without having to provide any of the spell's components. Otherwise, the scroll is unintelligible.\n\nIf the spell is on your class's spell list but of a higher level than you can normally cast, you must make an abili"
+ },
+ "spellguard_shield": {
+  "nombre": "Spellguard Shield",
+  "tipo": "Armor (shield)",
+  "rareza": "very rare",
+  "descripcion": "While holding this shield, you have advantage on saving throws against spells and other magical effects, and spell attacks have disadvantage against you."
+ },
+ "sphere_of_annihilation": {
+  "nombre": "Sphere of Annihilation",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This 2-foot-diameter black sphere is a hole in the multiverse, hovering in space and stabilized by a magical field surrounding it.\n\nThe sphere obliterates all matter it passes through and all matter that passes through it. Artifacts are the exception. Unless an artifact is susceptible to damage from a _sphere of annihilation_, it passes through the sphere unscathed. Anything else that touches the "
+ },
+ "staff_of_charming": {
+  "nombre": "Staff of Charming",
+  "tipo": "Staff",
+  "rareza": "rare",
+  "descripcion": "While holding this staff, you can use an action to expend 1 of its 10 charges to cast _charm person_, _command_, _or comprehend languages_ from it using your spell save DC. The staff can also be used as a magic quarterstaff.\n\nIf you are holding the staff and fail a saving throw against an enchantment spell that targets only you, you can turn your failed save into a successful one. You can't use th"
+ },
+ "staff_of_fire": {
+  "nombre": "Staff of Fire",
+  "tipo": "Staff",
+  "rareza": "very rare",
+  "descripcion": "You have resistance to fire damage while you hold this staff.\n\nThe staff has 10 charges. While holding it, you can use an action to expend 1 or more of its charges to cast one of the following spells from it, using your spell save DC: _burning hands_ (1 charge), _fireball_ (3 charges), or _wall of fire_ (4 charges).\n\nThe staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last "
+ },
+ "staff_of_frost": {
+  "nombre": "Staff of Frost",
+  "tipo": "Staff",
+  "rareza": "very rare",
+  "descripcion": "You have resistance to cold damage while you hold this staff.\n\nThe staff has 10 charges. While holding it, you can use an action to expend 1 or more of its charges to cast one of the following spells from it, using your spell save DC: _cone of cold_ (5 charges), _fog cloud_ (1 charge), _ice storm_ (4 charges), or _wall of ice_ (4 charges).\n\nThe staff regains 1d6 + 4 expended charges daily at dawn."
+ },
+ "staff_of_healing": {
+  "nombre": "Staff of Healing",
+  "tipo": "Staff",
+  "rareza": "rare",
+  "descripcion": "This staff has 10 charges. While holding it, you can use an action to expend 1 or more of its charges to cast one of the following spells from it, using your spell save DC and spellcasting ability modifier: _cure wounds_ (1 charge per spell level, up to 4th), _lesser restoration_ (2 charges), or _mass cure wounds_ (5 charges).\n\nThe staff regains 1d6 + 4 expended charges daily at dawn. If you expen"
+ },
+ "staff_of_power": {
+  "nombre": "Staff of Power",
+  "tipo": "Staff",
+  "rareza": "very rare",
+  "descripcion": "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While holding it, you gain a +2 bonus to Armor Class, saving throws, and spell attack rolls.\n\nThe staff has 20 charges for the following properties. The staff regains 2d8 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff retains its +2 bon"
+ },
+ "staff_of_striking": {
+  "nombre": "Staff of Striking",
+  "tipo": "Staff",
+  "rareza": "very rare",
+  "descripcion": "This staff can be wielded as a magic quarterstaff that grants a +3 bonus to attack and damage rolls made with it.\n\nThe staff has 10 charges. When you hit with a melee attack using it, you can expend up to 3 of its charges. For each charge you expend, the target takes an extra 1d6 force damage. The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a"
+ },
+ "staff_of_swarming_insects": {
+  "nombre": "Staff of Swarming Insects",
+  "tipo": "Staff",
+  "rareza": "very rare",
+  "descripcion": "This staff has 10 charges and regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, a swarm of insects consumes and destroys the staff, then disperses.\n\n**_Spells_**. While holding the staff, you can use an action to expend some of its charges to cast one of the following spells from it, using your spell save DC: _giant insect_ (4 charges) or _insect pl"
+ },
+ "staff_of_the_magi": {
+  "nombre": "Staff of the Magi",
+  "tipo": "Staff",
+  "rareza": "legendary",
+  "descripcion": "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While you hold it, you gain a +2 bonus to spell attack rolls.\n\nThe staff has 50 charges for the following properties. It regains 4d6 + 2 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 20, the staff regains 1d12 + 1 charges.\n\n**_Spell Absorption_**. Whil"
+ },
+ "staff_of_the_python": {
+  "nombre": "Staff of the Python",
+  "tipo": "Staff",
+  "rareza": "very rare",
+  "descripcion": "You can use an action to speak this staff's command word and throw the staff on the ground within 10 feet of you. The staff becomes a giant constrictor snake under your control and acts on its own initiative count. By using a bonus action to speak the command word again, you return the staff to its normal form in a space formerly occupied by the snake.\n\nOn your turn, you can mentally command the s"
+ },
+ "staff_of_the_woodlands": {
+  "nombre": "Staff of the Woodlands",
+  "tipo": "Staff",
+  "rareza": "rare",
+  "descripcion": "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While holding it, you have a +2 bonus to spell attack rolls.\n\nThe staff has 10 charges for the following properties. It regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff loses its properties and becomes a nonmagical quarterstaf"
+ },
+ "staff_of_thunder_and_lightning": {
+  "nombre": "Staff of Thunder and Lightning",
+  "tipo": "Staff",
+  "rareza": "very rare",
+  "descripcion": "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. It also has the following additional properties. When one of these properties is used, it can't be used again until the next dawn.\n\n**_Lightning_**. When you hit with a melee attack using the staff, you can cause the target to take an extra 2d6 lightning damage.\n\n**_Thunder_**. When yo"
+ },
+ "staff_of_withering": {
+  "nombre": "Staff of Withering",
+  "tipo": "Staff",
+  "rareza": "rare",
+  "descripcion": "This staff has 3 charges and regains 1d3 expended charges daily at dawn.\n\nThe staff can be wielded as a magic quarterstaff. On a hit, it deals damage as a normal quarterstaff, and you can expend 1 charge to deal an extra 2d10 necrotic damage to the target. In addition, the target must succeed on a DC 15 Constitution saving throw or have disadvantage for 1 hour on any ability check or saving throw "
+ },
+ "stone_of_controlling_earth_elementals": {
+  "nombre": "Stone of Controlling Earth Elementals",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "If the stone is touching the ground, you can use an action to speak its command word and summon an earth elemental, as if you had cast the _conjure elemental_ spell. The stone can't be used this way again until the next dawn. The stone weighs 5 pounds."
+ },
+ "stone_of_good_luck_luckstone": {
+  "nombre": "Stone of Good Luck (Luckstone)",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While this polished agate is on your person, you gain a +1 bonus to ability checks and saving throws."
+ },
+ "sun_blade": {
+  "nombre": "Sun Blade",
+  "tipo": "Weapon (longsword)",
+  "rareza": "rare",
+  "descripcion": "This item appears to be a longsword hilt. While grasping the hilt, you can use a bonus action to cause a blade of pure radiance to spring into existence, or make the blade disappear. While the blade exists, this magic longsword has the finesse property. If you are proficient with shortswords or longswords, you are proficient with the _sun blade_.\n\nYou gain a +2 bonus to attack and damage rolls mad"
+ },
+ "sword_of_life_stealing": {
+  "nombre": "Sword of Life Stealing",
+  "tipo": "Weapon (any sword)",
+  "rareza": "rare",
+  "descripcion": "When you attack a creature with this magic weapon and roll a 20 on the attack roll, that target takes an extra 3d6 necrotic damage, provided that the target isn't a construct or an undead. You gain temporary hit points equal to the extra damage dealt."
+ },
+ "sword_of_sharpness": {
+  "nombre": "Sword of Sharpness",
+  "tipo": "Weapon (any sword that deals slashing damage)",
+  "rareza": "very rare",
+  "descripcion": "When you attack an object with this magic sword and hit, maximize your weapon damage dice against the target.\n\nWhen you attack a creature with this weapon and roll a 20 on the attack roll, that target takes an extra 4d6 slashing damage. Then roll another d20. If you roll a 20, you lop off one of the target's limbs, with the effect of such loss determined by the GM. If the creature has no limb to s"
+ },
+ "sword_of_wounding": {
+  "nombre": "Sword of Wounding",
+  "tipo": "Weapon (any sword)",
+  "rareza": "rare",
+  "descripcion": "Hit points lost to this weapon's damage can be regained only through a short or long rest, rather than by regeneration, magic, or any other means.\n\nOnce per turn, when you hit a creature with an attack using this magic weapon, you can wound the target. At the start of each of the wounded creature's turns, it takes 1d4 necrotic damage for each time you've wounded it, and it can then make a DC 15 Co"
+ },
+ "talisman_of_pure_good": {
+  "nombre": "Talisman of Pure Good",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This talisman is a mighty symbol of goodness. A creature that is neither good nor evil in alignment takes 6d6 radiant damage upon touching the talisman. An evil creature takes 8d6 radiant damage upon touching the talisman. Either sort of creature takes the damage again each time it ends its turn holding or carrying the talisman.\n\nIf you are a good cleric or paladin, you can use the talisman as a h"
+ },
+ "talisman_of_the_sphere": {
+  "nombre": "Talisman of the Sphere",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "When you make an Intelligence (Arcana) check to control a _sphere of annihilation_ while you are holding this talisman, you double your proficiency bonus on the check. In addition, when you start your turn with control over a _sphere of annihilation_, you can use an action to levitate it 10 feet plus a number of additional feet equal to 10 × your Intelligence modifier."
+ },
+ "talisman_of_ultimate_evil": {
+  "nombre": "Talisman of Ultimate Evil",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This item symbolizes unrepentant evil. A creature that is neither good nor evil in alignment takes 6d6 necrotic damage upon touching the talisman. A good creature takes 8d6 necrotic damage upon touching the talisman. Either sort of creature takes the damage again each time it ends its turn holding or carrying the talisman.\n\nIf you are an evil cleric or paladin, you can use the talisman as a holy s"
+ },
+ "tome_of_clear_thought": {
+  "nombre": "Tome of Clear Thought",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This book contains memory and logic exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book's contents and practicing its guidelines, your Intelligence score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+ },
+ "tome_of_leadership_and_influence": {
+  "nombre": "Tome of Leadership and Influence",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This book contains guidelines for influencing and charming others, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book's contents and practicing its guidelines, your Charisma score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+ },
+ "tome_of_understanding": {
+  "nombre": "Tome of Understanding",
+  "tipo": "Wondrous item",
+  "rareza": "very rare",
+  "descripcion": "This book contains intuition and insight exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book's contents and practicing its guidelines, your Wisdom score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+ },
+ "trident_of_fish_command": {
+  "nombre": "Trident of Fish Command",
+  "tipo": "Weapon (trident)",
+  "rareza": "uncommon",
+  "descripcion": "This trident is a magic weapon. It has 3 charges. While you carry it, you can use an action and expend 1 charge to cast _dominate beast_ (save DC 15) from it on a beast that has an innate swimming speed. The trident regains 1d3 expended charges daily at dawn."
+ },
+ "universal_solvent": {
+  "nombre": "Universal Solvent",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This tube holds milky liquid with a strong alcohol smell. You can use an action to pour the contents of the tube onto a surface within reach. The liquid instantly dissolves up to 1 square foot of adhesive it touches, including _sovereign glue._"
+ },
+ "vicious_weapon": {
+  "nombre": "Vicious Weapon",
+  "tipo": "Weapon (any)",
+  "rareza": "rare",
+  "descripcion": "When you roll a 20 on your attack roll with this magic weapon, your critical hit deals an extra 2d6 damage of the weapon's type."
+ },
+ "vorpal_sword": {
+  "nombre": "Vorpal Sword",
+  "tipo": "Weapon (any sword that deals slashing damage)",
+  "rareza": "legendary",
+  "descripcion": "You gain a +3 bonus to attack and damage rolls made with this magic weapon. In addition, the weapon ignores resistance to slashing damage.\n\nWhen you attack a creature that has at least one head with this weapon and roll a 20 on the attack roll, you cut off one of the creature's heads. The creature dies if it can't survive without the lost head. A creature is immune to this effect if it is immune t"
+ },
+ "wand_of_binding": {
+  "nombre": "Wand of Binding",
+  "tipo": "Wand",
+  "rareza": "rare",
+  "descripcion": "This wand has 7 charges for the following properties. It regains 1d6 + 1 expended charges daily at dawn. If you expend the wand's last charge, roll a d20. On a 1, the wand crumbles into ashes and is destroyed.\n\n**_Spells_**. While holding the wand, you can use an action to expend some of its charges to cast one of the following spells (save DC 17): _hold monster_ (5 charges) or _hold person_ (2 ch"
+ },
+ "wand_of_enemy_detection": {
+  "nombre": "Wand of Enemy Detection",
+  "tipo": "Wand",
+  "rareza": "rare",
+  "descripcion": "This wand has 7 charges. While holding it, you can use an action and expend 1 charge to speak its command word. For the next minute, you know the direction of the nearest creature hostile to you within 60 feet, but not its distance from you. The wand can sense the presence of hostile creatures that are ethereal, invisible, disguised, or hidden, as well as those in plain sight. The effect ends if y"
+ },
+ "wand_of_fear": {
+  "nombre": "Wand of Fear",
+  "tipo": "Wand",
+  "rareza": "rare",
+  "descripcion": "This wand has 7 charges for the following properties. It regains 1d6 + 1 expended charges daily at dawn. If you expend the wand's last charge, roll a d20. On a 1, the wand crumbles into ashes and is destroyed.\n\n**_Command_**. While holding the wand, you can use an action to expend 1 charge and command another creature to flee or grovel, as with the _command_ spell (save DC 15).\n\n**_Cone of Fear_**"
+ },
+ "wand_of_fireballs": {
+  "nombre": "Wand of Fireballs",
+  "tipo": "Wand",
+  "rareza": "rare",
+  "descripcion": "This wand has 7 charges. While holding it, you can use an action to expend 1 or more of its charges to cast the _fireball_ spell (save DC 15) from it. For 1 charge, you cast the 3rd-level version of the spell. You can increase the spell slot level by one for each additional charge you expend.\n\nThe wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand's last charge, roll a d20"
+ },
+ "wand_of_lightning_bolts": {
+  "nombre": "Wand of Lightning Bolts",
+  "tipo": "Wand",
+  "rareza": "rare",
+  "descripcion": "This wand has 7 charges. While holding it, you can use an action to expend 1 or more of its charges to cast the _lightning bolt_ spell (save DC 15) from it. For 1 charge, you cast the 3rd-level version of the spell. You can increase the spell slot level by one for each additional charge you expend.\n\nThe wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand's last charge, roll"
+ },
+ "wand_of_magic_detection": {
+  "nombre": "Wand of Magic Detection",
+  "tipo": "Wand",
+  "rareza": "uncommon",
+  "descripcion": "This wand has 3 charges. While holding it, you can expend 1 charge as an action to cast the _detect magic_ spell from it. The wand regains 1d3 expended charges daily at dawn."
+ },
+ "wand_of_magic_missiles": {
+  "nombre": "Wand of Magic Missiles",
+  "tipo": "Wand",
+  "rareza": "uncommon",
+  "descripcion": "This wand has 7 charges. While holding it, you can use an action to expend 1 or more of its charges to cast the _magic missile_ spell from it. For 1 charge, you cast the 1st-level version of the spell. You can increase the spell slot level by one for each additional charge you expend.\n\nThe wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand's last charge, roll a d20. On a 1"
+ },
+ "wand_of_paralysis": {
+  "nombre": "Wand of Paralysis",
+  "tipo": "Wand",
+  "rareza": "rare",
+  "descripcion": "This wand has 7 charges. While holding it, you can use an action to expend 1 of its charges to cause a thin blue ray to streak from the tip toward a creature you can see within 60 feet of you. The target must succeed on a DC 15 Constitution saving throw or be paralyzed for 1 minute. At the end of each of the target's turns, it can repeat the saving throw, ending the effect on itself on a success.\n"
+ },
+ "wand_of_polymorph": {
+  "nombre": "Wand of Polymorph",
+  "tipo": "Wand",
+  "rareza": "very rare",
+  "descripcion": "This wand has 7 charges. While holding it, you can use an action to expend 1 of its charges to cast the _polymorph_ spell (save DC 15) from it.\n\nThe wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand's last charge, roll a d20. On a 1, the wand crumbles into ashes and is destroyed."
+ },
+ "wand_of_secrets": {
+  "nombre": "Wand of Secrets",
+  "tipo": "Wand",
+  "rareza": "uncommon",
+  "descripcion": "The wand has 3 charges. While holding it, you can use an action to expend 1 of its charges, and if a secret door or trap is within 30 feet of you, the wand pulses and points at the one nearest to you. The wand regains 1d3 expended charges daily at dawn."
+ },
+ "wand_of_the_war_mage_1_2_or_3": {
+  "nombre": "Wand of the War Mage, +1, +2, or +3",
+  "tipo": "Wand",
+  "rareza": "uncommon (+1), rare (+2), or very rare (+3)",
+  "descripcion": "While holding this wand, you gain a bonus to spell attack rolls determined by the wand's rarity. In addition, you ignore half cover when making a spell attack."
+ },
+ "wand_of_web": {
+  "nombre": "Wand of Web",
+  "tipo": "Wand",
+  "rareza": "uncommon",
+  "descripcion": "This wand has 7 charges. While holding it, you can use an action to expend 1 of its charges to cast the _web_ spell (save DC 15) from it.\n\nThe wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand's last charge, roll a d20. On a 1, the wand crumbles into ashes and is destroyed."
+ },
+ "wand_of_wonder": {
+  "nombre": "Wand of Wonder",
+  "tipo": "Wand",
+  "rareza": "rare",
+  "descripcion": "This wand has 7 charges. While holding it, you can use an action to expend 1 of its charges and choose a target within 120 feet of you. The target can be a creature, an object, or a point in space. Roll d100 and consult the following table to discover what happens.\n\nIf the effect causes you to cast a spell from the wand, the spell's save DC is 15. If the spell normally has a range expressed in fee"
+ },
+ "weapon_1_2_or_3": {
+  "nombre": "Weapon, +1, +2, or +3",
+  "tipo": "Weapon (any)",
+  "rareza": "uncommon (+1), rare (+2), or very rare (+3)",
+  "descripcion": "You have a bonus to attack and damage rolls made with this magic weapon. The bonus is determined by the weapon's rarity."
+ },
+ "well_of_many_worlds": {
+  "nombre": "Well of Many Worlds",
+  "tipo": "Wondrous item",
+  "rareza": "legendary",
+  "descripcion": "This fine black cloth, soft as silk, is folded up to the dimensions of a handkerchief. It unfolds into a circular sheet 6 feet in diameter.\n\nYou can use an action to unfold and place the _well of many worlds_ on a solid surface, whereupon it creates a two-way portal to another world or plane of existence. Each time the item opens a portal, the GM decides where it leads. You can use an action to cl"
+ },
+ "wind_fan": {
+  "nombre": "Wind Fan",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While holding this fan, you can use an action to cast the _gust of wind_ spell (save DC 13) from it. Once used, the fan shouldn't be used again until the next dawn. Each time it is used again before then, it has a cumulative 20 percent chance of not working and tearing into useless, nonmagical tatters."
+ },
+ "winged_boots": {
+  "nombre": "Winged Boots",
+  "tipo": "Wondrous item",
+  "rareza": "uncommon",
+  "descripcion": "While you wear these boots, you have a flying speed equal to your walking speed. You can use the boots to fly for up to 4 hours, all at once or in several shorter flights, each one using a minimum of 1 minute from the duration. If you are flying when the duration expires, you descend at a rate of 30 feet per round until you land.\n\nThe boots regain 2 hours of flying capability for every 12 hours th"
+ },
+ "wings_of_flying": {
+  "nombre": "Wings of Flying",
+  "tipo": "Wondrous item",
+  "rareza": "rare",
+  "descripcion": "While wearing this cloak, you can use an action to speak its command word. This turns the cloak into a pair of bat wings or bird wings on your back for 1 hour or until you repeat the command word as an action. The wings give you a flying speed of 60 feet. When they disappear, you can't use them again for 1d12 hours."
+ }
+}

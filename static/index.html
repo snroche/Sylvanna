@@ -83,6 +83,7 @@
       <div class="fila-2">
         <label>Alineamiento <select id="pj-alineamiento"></select></label>
         <label id="lbl-estilo" hidden>Estilo de combate <select id="pj-estilo"></select></label>
+        <label id="lbl-subclase-crea" hidden>Subclase <select id="pj-subclase-crea"></select></label>
       </div>
       <p class="nota" id="pj-estilo-info"></p>
 
@@ -149,12 +150,15 @@
       <div id="ui-log" class="log" aria-live="polite"></div>
 
       <div class="composer">
+        <p class="escribiendo-jugador" id="ui-escribiendo"></p>
         <div id="composer-exploracion">
           <div class="composer-fila">
             <textarea id="inp-accion" rows="2"
               placeholder="Qué hacés o decís… (Enter envía, Shift+Enter salto de línea)"></textarea>
             <button class="btn btn-ambar" id="btn-say">Actuar</button>
             <button class="btn" id="btn-party" title="Hablar con los demás jugadores sin que el DM intervenga">💬 Party</button>
+            <button class="btn-mini" id="btn-regen" title="Regenerar la última narración del DM">↺</button>
+            <button class="btn-mini" id="btn-undo" title="Deshacer tu última acción y su narración">⌫</button>
           </div>
           <details class="tirada-detalle">
             <summary>🎲 Tirada de habilidad</summary>

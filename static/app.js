@@ -223,6 +223,13 @@ async function prepararCreacionPJ() {
     $("lbl-estilo").hidden = sel.value !== "guerrero";
     $("pj-estilo-info").textContent = sel.value === "guerrero"
       ? ESTILOS[$("pj-estilo").value] : "";
+    const nvSub = CATALOGO?.nivel_subclase?.[sel.value];
+    $("lbl-subclase-crea").hidden = nvSub !== 1;
+    if (nvSub === 1) {
+      const ss = $("pj-subclase-crea"); ss.innerHTML = "";
+      for (const s of (CATALOGO?.subclases?.[sel.value] || []))
+        ss.add(new Option(s.replaceAll("_"," "), s));
+    }
   };
   const sal = $("pj-alineamiento");
   for (const a of ALINEAMIENTOS) sal.add(new Option(a.replaceAll("_"," "), a));
@@ -258,15 +265,24 @@ async function prepararCreacionPJ() {
       for (const s of Object.keys(r.sub)) ss.add(new Option(s.replaceAll("_"," "), s));
     }
     infoSubraza();
-    $("lbl-eleccion").hidden = !r.eleccion;
-    if (r.eleccion) {
+    actualizarEleccion();
+    actualizarPB();
+  };
+  const actualizarEleccion = () => {
+    const r = RAZAS[$("pj-raza").value];
+    let n = r.eleccion || 0;
+    if (!$("lbl-subraza").hidden && r.subInfo) {
+      const sv = r.subInfo[$("pj-subraza").value];
+      if (sv && sv.bonos_a_eleccion !== undefined) n = sv.bonos_a_eleccion;
+    }
+    $("lbl-eleccion").hidden = !n;
+    if (n) {
       for (const id of ["pj-eleccion-1","pj-eleccion-2"]) {
         const e = $(id); e.innerHTML = "";
         for (const a of ATRS) if (!(a in r.bonos)) e.add(new Option(a, a));
       }
       $("pj-eleccion-2").selectedIndex = 1;
     }
-    actualizarPB();
   };
   sr.onchange();
 
@@ -279,7 +295,8 @@ async function prepararCreacionPJ() {
     ga.appendChild(l);
   }
   ga.addEventListener("input", actualizarPB);
-  $("pj-subraza").addEventListener("change", () => { infoSubraza(); actualizarPB(); });
+  $("pj-subraza").addEventListener("change", () => {
+    infoSubraza(); actualizarEleccion(); actualizarPB(); });
   ["pj-eleccion-1","pj-eleccion-2"].forEach(id=>$(id).addEventListener("change", actualizarPB));
 
   // toggle método
@@ -397,12 +414,14 @@ $("btn-crear-pj").onclick = async () => {
   const conjuros = chipsElegidos("pj-conjuros");
   try {
     const razaSel = RAZAS[$("pj-raza").value];
+    const conEleccion = !$("lbl-eleccion").hidden;
     await api("POST","/characters",{
       nombre: $("pj-nombre").value.trim() || "Aventurero",
       raza: $("pj-raza").value,
       subraza: $("lbl-subraza").hidden ? null : $("pj-subraza").value,
-      bonos_eleccion: razaSel.eleccion
+      bonos_eleccion: conEleccion
         ? [$("pj-eleccion-1").value, $("pj-eleccion-2").value] : [],
+      subclase: $("lbl-subclase-crea").hidden ? null : $("pj-subclase-crea").value,
       metodo: modoAtributos,
       alineamiento: $("pj-alineamiento").value,
       estilo_combate: $("pj-clase").value === "guerrero" ? $("pj-estilo").value : null,
@@ -502,6 +521,17 @@ async function refrescarTodo(inicial) {
   pintarCabecera(camp);
   pintarCombate(camp);
   pintarEscribiendo();
+  // deshacer/regenerar de OTRO jugador: el server tiene menos mensajes que yo
+  if (S.campania?.ultimo_mensaje_id !== undefined
+      && S.campania.ultimo_mensaje_id < S.ultimoMsg) {
+    await pintarMensajes(true);
+  }
+  const otros = (S.campania?.escribiendo || [])
+    .filter(n => n !== S.miNombrePersonaje);
+  const elEsc = $("ui-escribiendo");
+  if (elEsc) elEsc.textContent = otros.length
+    ? (otros.length === 1 ? `${otros[0]} está escribiendo…`
+                          : `${otros.join(", ")} están escribiendo…`) : "";
   await pintarMensajes();
   if (inicial || ++contadorMundo % 4 === 0)
     pintarMundo(await api("GET", `/campaigns/${S.campaignId}/state`));
@@ -532,7 +562,13 @@ function pintarCabecera(c) {
 
 // ---------- log
 
-async function pintarMensajes() {
+async function pintarMensajes(reset = false) {
+  if (reset) {
+    // deshacer/regenerar BORRAN mensajes: re-render completo desde cero
+    S.ultimoMsg = 0;
+    const log0 = $("ui-log");
+    [...log0.querySelectorAll(".msg")].forEach(m => m.remove());
+  }
   const nuevos = await api("GET",
     `/campaigns/${S.campaignId}/messages?since=${S.ultimoMsg}`);
   if (!nuevos.length) return;
@@ -704,15 +740,45 @@ async function accionCombate(tipo, body) {
 
 // ---------- exploración
 
+// heartbeat de "estoy escribiendo" (throttle 3s, solo con texto)
+let ultimoTyping = 0;
+$("inp-accion").addEventListener("input", () => {
+  if (!$("inp-accion").value.trim() || !S.campaignId) return;
+  const ahora = Date.now();
+  if (ahora - ultimoTyping < 3000) return;
+  ultimoTyping = ahora;
+  api("POST", `/campaigns/${S.campaignId}/typing`, {}).catch(()=>{});
+});
+
+$("btn-regen").onclick = async () => {
+  if (!confirm("¿Regenerar la última narración del DM?")) return;
+  try {
+    await api("POST", `/campaigns/${S.campaignId}/narration/regenerate`, {});
+    S.narrando = true; pintarEscribiendo(); acelerarPolling();
+    await pintarMensajes(true);
+  } catch(e){ avisoSistema(e.message); }
+};
+$("btn-undo").onclick = async () => {
+  if (!confirm("¿Deshacer tu última acción y la respuesta del DM?\n(Los efectos ya aplicados no se revierten.)")) return;
+  try {
+    await api("POST", `/campaigns/${S.campaignId}/narration/undo`, {});
+    await pintarMensajes(true);
+  } catch(e){ avisoSistema(e.message); }
+};
+
 $("btn-say").onclick = () => enviarAccion(false);
 $("btn-party").onclick = () => enviarAccion(true);
 $("inp-accion").addEventListener("keydown",(e)=>{
   if (e.key==="Enter" && !e.shiftKey){ e.preventDefault(); enviarAccion(false); }
 });
 
+let enviando = false;
 async function enviarAccion(entreJugadores) {
+  if (enviando) return;               // anti doble-envío (Enter + click, etc.)
   const texto = $("inp-accion").value.trim();
   if (!texto) return;
+  enviando = true;
+  setTimeout(()=>{ enviando = false; }, 800);
   $("inp-accion").value = "";
   try {
     await api("POST", `/campaigns/${S.campaignId}/say`,
@@ -739,6 +805,7 @@ $("btn-skill").onclick = async () => {
 // ---------- ficha
 
 function pintarFicha(f) {
+  S.miNombrePersonaje = f.nombre;
   const pgPct = Math.round(100 * f.pg_actual / f.pg_max);
   const slotsHTML = Object.entries(f.slots).map(([nv,s])=>{
     const puntos = Array.from({length:s.max},(_,i)=>
@@ -780,19 +847,21 @@ function pintarFicha(f) {
     <div class="linea-dato"><span>Monedas</span><span>${f.monedas?.mo ?? 0} mo</span></div>
     ${slotsHTML ? "<h3 style='margin:.8rem 0 .2rem'>Espacios de conjuro</h3>"+slotsHTML : ""}
     ${f.concentracion ? `<div class="linea-dato"><span>Concentración</span><span>${esc(f.concentracion.hechizo)}</span></div>` : ""}
-    ${Object.keys(f.recursos_clase||{}).length ?
+    ${(f.habilidades_activas||[]).length ?
       "<h3 style='margin:.8rem 0 .2rem'>Rasgos de clase</h3>" +
-      Object.entries(f.recursos_clase).map(([n,rec])=>{
-        const ui = HABILIDADES_CLASE_UI[n];
-        const estado = "pool" in rec ? `${rec.pool}/${rec.pool_max}`
-                     : `${rec.max - rec.usados}/${rec.max}`;
-        const agotado = "pool" in rec ? rec.pool <= 0 : rec.usados >= rec.max;
-        const boton = ui ? `<button class="btn" data-clase-hab="${n}"
-          ${agotado ? "disabled" : ""}>${ui.icono} Usar</button>` : "";
+      f.habilidades_activas.map(h=>{
+        const ui = HABILIDADES_CLASE_UI[h.nombre] || {icono:"✦", label:h.nombre.replaceAll("_"," ")};
+        const estado = h.max !== null ? `${h.restante}/${h.max}` : "";
+        const agotado = h.max !== null && h.restante <= 0;
+        const fueraDeCombate = h.combate && S.campania?.estado !== "combate";
         return `<div class="recurso-linea">
-          <span>${ui ? ui.label : esc(n.replaceAll("_"," "))}
-          <span class="party-pg">${estado}</span></span>${boton}</div>`;
-      }).join("") : ""}
+          <span>${ui.label} <span class="party-pg">${estado}</span></span>
+          <button class="btn" data-clase-hab="${h.nombre}"
+            ${agotado || fueraDeCombate ? "disabled" : ""}
+            title="${fueraDeCombate ? "Solo en combate" : ""}">${ui.icono} Usar</button>
+        </div>`;
+      }).join("") +
+      (f.subclase && "<p class='nota'>"+esc(f.subclase.replaceAll("_"," "))+"</p>" || "") : ""}
     <div class="ficha-acciones">
       ${(f.preparados.length || f.conocidos.length || Object.keys(f.slots).length) ?
         `<button class="btn" id="btn-gestionar-conjuros" ${enCombate?"disabled":""}>📜 Conjuros</button>` : ""}
@@ -845,7 +914,8 @@ function pintarFicha(f) {
   $("btn-gestionar-conjuros")?.addEventListener("click", ()=>abrirPanelConjuros(f));
   document.querySelectorAll("[data-clase-hab]").forEach(b=>b.onclick = async ()=>{
     const nombre = b.dataset.claseHab;
-    const ui = HABILIDADES_CLASE_UI[nombre] || {};
+    const ui = {...(HABILIDADES_CLASE_UI[nombre] || {}),
+                ...((f.habilidades_activas||[]).find(h=>h.nombre===nombre) || {})};
     const body = { nombre };
     if (ui.aliado) {
       const candidatos = S.campania.personajes.filter(p =>
@@ -948,6 +1018,13 @@ async function abrirPanelConjuros(f) {
 function pintarMundo(st) {
   const quests = st.quests.filter(q=>q.estado==="activa");
   const hechas = st.quests.filter(q=>q.estado!=="activa");
+  const abiertos = S.seccionesAbiertas || (S.seccionesAbiertas = {party:true, misiones:true});
+  const sec = (id, titulo, badge, html) => `
+    <details data-sec="${id}" ${abiertos[id] ? "open" : ""}>
+      <summary>${titulo} <span class="badge">${badge}</span></summary>
+      <div class="sec-cuerpo">${html}</div>
+    </details>`;
+
   const party = (S.campania?.personajes || []).map(p => {
     const conds = p.condiciones?.length ? " · " + p.condiciones.join(", ") : "";
     return `<div class="party-linea">
@@ -956,24 +1033,38 @@ function pintarMundo(st) {
         ${esc((p.alineamiento||"").replaceAll("_"," "))}${conds}</div></span>
       <span class="party-pg">${p.pg_actual}/${p.pg_max} PG</span>
     </div>`;
-  }).join("");
-  $("ui-mundo").innerHTML = `
-    <h3>La party</h3>${party || '<p class="nota">Nadie en la mesa.</p>'}` + `
-    <h3>Misiones</h3>
-    ${quests.length ? "<ul>"+quests.map(q=>
-      `<li class="${q.principal?"q-principal":""}"><b>${esc(q.titulo)}</b>
-       ${q.descripcion?"— "+esc(q.descripcion):""}</li>`).join("")+"</ul>"
-      : '<p class="nota">Ninguna todavía. Salí a buscar problemas.</p>'}
-    ${hechas.length ? `<p class="nota">${hechas.length} completada(s)/fallida(s)</p>` : ""}
-    <h3>Personajes conocidos</h3>
-    ${st.npcs_conocidos.length ? "<ul>"+st.npcs_conocidos.map(n=>
-      `<li><b>${esc(n.nombre)}</b> ${n.rol?"· "+esc(n.rol):""}
-       <span class="actitud">${esc(n.actitud)}${n.en_escena?" · presente":""}</span></li>`).join("")+"</ul>"
-      : '<p class="nota">Nadie con nombre, aún.</p>'}
-    ${st.consecuencias_pendientes ? `<h3>Presagios</h3>
-      <p class="nota">Hay ${st.consecuencias_pendientes} consecuencia(s) pendiente(s) sobre el grupo…</p>` : ""}
-    ${st.resumen ? `<h3>Crónica</h3><div class="resumen-caja">${esc(st.resumen)}</div>` : ""}
-  `;
+  }).join("") || '<p class="nota">Nadie en la mesa.</p>';
+
+  const misiones = quests.map(q =>
+    `<p class="quest"><b>${esc(q.titulo)}</b> — ${esc(q.descripcion)}</p>`
+  ).join("") + (hechas.length
+    ? `<p class="nota">${hechas.length} completada(s)</p>` : "")
+    || '<p class="nota">Sin misiones activas.</p>';
+
+  const npcs = st.npcs_conocidos.map(n =>
+    `<p class="npc-linea"><b>${esc(n.nombre)}</b> · ${esc(n.descripcion||"")}
+     <span class="party-meta">${esc(n.actitud)}${n.en_escena?" · presente":""}</span></p>`
+  ).join("") || '<p class="nota">Nadie todavía.</p>';
+
+  const presagios = st.consecuencias_pendientes > 0
+    ? `<p class="nota">Hay ${st.consecuencias_pendientes} consecuencia(s) pendiente(s) sobre el grupo…</p>`
+    : '<p class="nota">El horizonte está despejado. Por ahora.</p>';
+
+  const cronica = st.resumen
+    ? `<div class="cronica-caja">${esc(st.resumen)}</div>`
+    : '<p class="nota">La historia recién empieza.</p>';
+
+  $("ui-mundo").innerHTML =
+    sec("party", "La party", (S.campania?.personajes||[]).length, party) +
+    sec("misiones", "Misiones", quests.length, misiones) +
+    sec("npcs", "Personajes conocidos", st.npcs_conocidos.length, npcs) +
+    sec("presagios", "Presagios", st.consecuencias_pendientes || "", presagios) +
+    sec("cronica", "Crónica", st.resumen ? "…" : "", cronica);
+
+  // recordar qué secciones dejó abiertas el jugador
+  $("ui-mundo").querySelectorAll("details").forEach(d =>
+    d.addEventListener("toggle", () =>
+      S.seccionesAbiertas[d.dataset.sec] = d.open));
 }
 
 // ---------- tabs móvil

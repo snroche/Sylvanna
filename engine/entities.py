@@ -62,6 +62,8 @@ class Criatura:
     ca_alternativa: Optional[str] = None   # "barbaro" (10+DES+CON) | "monje" (10+DES+SAB)
     estilo_combate: Optional[str] = None   # "defensa" | "duelo" | "arqueria"
     nivel_furtivo: int = 0          # pícaro: dados de ataque furtivo disponibles
+    crit_min: int = 20              # Campeón nv3: crítico con 19-20
+    subclase: Optional[str] = None
     spell_state: Optional[SpellState] = None
     dados_golpe_disp: int = 0
     dado_golpe: str = "d8"          # "d6" | "d8" | "d10" | "d12"

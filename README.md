@@ -146,6 +146,36 @@ de juego ≈ 1 request, más 1 de resumen cada 40 mensajes.
 
 **Contenido:** 12 monstruos (goblin→ogro), armas naturales, consumibles.
 
+## Fixes de la sesión de testeo en profundidad
+
+- **Encoding (Windows):** el importador ahora escribe UTF-8 explícito, y el
+  loader tolera archivos ya escritos en cp1252 — tu `conjuros_srd.json`
+  actual carga sin regenerarlo (aunque re-correr el script lo deja limpio).
+- **JSON escapado en la narración:** causa raíz: el modelo se quedaba sin
+  tokens a mitad del bloque JSON → fence sin cerrar → el parser no lo
+  reconocía y se filtraba a la mesa. Triple fix: parser que amputa bloques
+  colgados, presupuesto de tokens 700→1100, y prompt que exige JSON breve
+  al final ("si falta espacio se acorta la narración, jamás el JSON").
+- **El DM ahora pide tiradas y saca items:** dos efectos nuevos en el
+  contrato: `pedir_tirada` (acciones inciertas sin tirada → el DM la pide
+  en vez de resolver) y `quitar_item` (objetos dejados/entregados/rotos
+  salen del inventario, con match tolerante de nombre).
+- **Tiradas visibles para todos:** cada skill-check emite un mensaje de
+  sistema con el desglose (d20+bono=total → éxito/fallo).
+- **"X está escribiendo…":** heartbeat liviano (3s de throttle) visible
+  para el resto de la mesa.
+- **↺ Regenerar / ⌫ Deshacer:** botones junto al composer. Solo sobre pares
+  acción→narración simples (con tiradas o combate en el medio se bloquea:
+  los dados no se re-tiran). Los demás clientes detectan el borrado por
+  retroceso de ids y re-renderizan solos.
+- **Doble envío:** guard de in-flight en el cliente.
+- **UI:** chat hasta 90ch de ancho, panel lateral con secciones colapsables
+  (La party, Misiones, Personajes, Presagios, Crónica) que recuerdan su
+  estado — la ficha ya no queda enterrada.
+- **Crónica:** el resumen NO se regenera entero: cada `RESUMIR_CADA`
+  mensajes (env, default 40) integra el lote nuevo al resumen existente.
+  Una llamada extra al modelo cada ~40 acciones.
+
 ## Experiencia completa hasta nivel 5
 
 **Nivel 5 mecánico:**

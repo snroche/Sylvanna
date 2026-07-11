@@ -436,14 +436,14 @@ def test_raza_con_subrazas_la_requiere():
 
 def test_semielfo_eleccion():
     base = {a: 10 for a in ("FUE", "DES", "CON", "INT", "SAB", "CAR")}
-    finales, _, _ = aplicar_bonos_raciales(base, "semielfo", None,
+    finales, _, _ = aplicar_bonos_raciales(base, "semielfo", "estandar",
                                            bonos_eleccion=["FUE", "INT"])
     assert finales["CAR"] == 12 and finales["FUE"] == 11 and finales["INT"] == 11
     with pytest.raises(ValueError):  # no puede elegir CAR (ya lo tiene)
-        aplicar_bonos_raciales(base, "semielfo", None,
+        aplicar_bonos_raciales(base, "semielfo", "estandar",
                                bonos_eleccion=["CAR", "FUE"])
     with pytest.raises(ValueError):  # deben ser dos distintos
-        aplicar_bonos_raciales(base, "semielfo", None,
+        aplicar_bonos_raciales(base, "semielfo", "estandar",
                                bonos_eleccion=["FUE", "FUE"])
 
 

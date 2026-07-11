@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db import get_db
@@ -104,6 +104,11 @@ async def ver_campania(campaign_id: int, player: Player = Depends(jugador_actual
         "ubicacion": camp.ubicacion_actual,
         "tiempo_juego_min": camp.tiempo_juego_min,
         "narrando": camp.narrando,
+        "ultimo_mensaje_id": (await db.execute(
+            select(func.max(Message.id)).where(
+                Message.campaign_id == camp.id))).scalar() or 0,
+        "escribiendo": [n for n, ts in (camp.typing or {}).items()
+                        if __import__("time").time() - ts < 6],
         "combate": camp.combate,
         "personajes": [
             {"id": c.id, "nombre": c.nombre, "clase": c.clase, "nivel": c.nivel,

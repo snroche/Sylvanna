@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from engine.content import MONSTRUOS
 
-from .models import NPC, Campaign, Character, PendingConsequence, Quest
+from .models import (NPC, Campaign, Character, Message, PendingConsequence,
+                     Quest)
 
 XP_NARRATIVO_TOPE_POR_NIVEL = 50   # tope: 50 × nivel_promedio por evento
 ACTITUDES = {"amistoso", "neutral", "desconfiado", "hostil"}
@@ -146,6 +147,41 @@ async def aplicar_efectos(db: AsyncSession, camp: Campaign,
                     inv.append({"nombre": nombre, "cantidad": cant})
                 log["aplicados"].append(("loot", f"{nombre} x{cant}"))
             receptor.inventario = inv
+
+    quitar = efectos.get("quitar_item")
+    if isinstance(quitar, list) and quitar and actor is not None:
+        inv = list(actor.inventario)
+        for item in quitar[:5]:
+            if not isinstance(item, dict) or not item.get("nombre"):
+                continue
+            nombre = str(item["nombre"])[:60].lower()
+            cant = min(int(item.get("cantidad", 1) or 1), 10)
+            # match por nombre exacto o inclusión (el DM no siempre calca el nombre)
+            existente = next(
+                (x for x in inv if x.get("nombre", "").lower() == nombre), None
+            ) or next(
+                (x for x in inv if nombre in x.get("nombre", "").lower()
+                 or x.get("nombre", "").lower() in nombre), None)
+            if existente is None:
+                log["rechazados"].append(("quitar_item", nombre))
+                continue
+            existente["cantidad"] = existente.get("cantidad", 1) - cant
+            if existente["cantidad"] <= 0:
+                inv.remove(existente)
+            log["aplicados"].append(("quitar_item",
+                                     f"{existente['nombre']} x{cant}"))
+        actor.inventario = inv
+
+    tirada = efectos.get("pedir_tirada")
+    if isinstance(tirada, dict) and tirada.get("habilidad"):
+        quien = str(tirada.get("a_quien", "") or
+                    (actor.nombre if actor else "el grupo"))[:60]
+        hab = str(tirada["habilidad"])[:30]
+        db.add(Message(
+            campaign_id=camp.id, autor="sistema", autor_nombre="Sistema",
+            contenido=f"🎲 El DM pide una tirada de **{hab}** a {quien}. "
+                      f"(Usá el botón Tirada en la mesa.)"))
+        log["aplicados"].append(("pedir_tirada", f"{hab} → {quien}"))
 
     oro = efectos.get("otorgar_monedas")
     if isinstance(oro, int) and oro > 0:

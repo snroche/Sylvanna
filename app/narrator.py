@@ -26,6 +26,15 @@ jugador se dirige a otro jugador, no respondas en su nombre: narrá a lo sumo \
 la reacción del entorno o de los NPCs presentes, o dejá el espacio abierto.
 - Usá los nombres de conjuros, armas y objetos tal como aparecen en el estado \
 (pueden estar en inglés): no inventes traducciones rebuscadas de términos de juego.
+- Si la acción declarada tiene resultado INCIERTO (buscar, convencer, trepar, \
+notar, forzar cerraduras...) y NO vino con una tirada ya resuelta, NO decidas \
+el resultado: narrá el intento y emití pedir_tirada. Cuando llegue la tirada \
+resuelta, narrá según ese resultado.
+- Mantené el inventario coherente con la ficción: si un PJ deja, entrega, \
+pierde, rompe o consume un objeto, emití quitar_item; si recibe o recupera \
+algo, emití loot.
+- El bloque JSON va SIEMPRE al final, COMPLETO y BREVE (máximo 5 campos). Si \
+te falta espacio, acortá la narración: el JSON no se corta jamás.
 - Respondé en 1-3 párrafos de narración, sin listas ni encabezados.
 
 CONTRATO DE SALIDA:
@@ -44,6 +53,8 @@ Campos permitidos (todos opcionales):
 - "npcs_salen_de_escena": [int, ...]
 - "otorgar_xp": int  (solo hitos narrativos; el XP de combate lo calcula el sistema)
 - "loot": [{"nombre": str, "cantidad": int}]  (objetos que el grupo encuentra/recibe; máx 5)
+- "quitar_item": [{"nombre": str, "cantidad": int}]  (objetos que el PJ actor deja, entrega, pierde o consume en la ficción)
+- "pedir_tirada": {"habilidad": str, "a_quien": str}  (pedile una tirada al PJ nombrado, o "todos"; NO resuelvas el resultado todavía)
 - "otorgar_monedas": int  (monedas de oro encontradas/pagadas; usá con mesura)
 - "avanzar_tiempo_min": int
 - "nueva_ubicacion": str
@@ -150,6 +161,7 @@ CAMPOS_PERMITIDOS = {
     "consecuencia_pendiente", "resolver_consecuencia", "inicia_combate",
     "npcs_salen_de_escena", "otorgar_xp", "avanzar_tiempo_min",
     "nueva_ubicacion", "loot", "otorgar_monedas",
+    "quitar_item", "pedir_tirada",
 }
 
 _JSON_BLOQUE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
@@ -164,16 +176,27 @@ def parsear_salida(texto: str) -> tuple[str, dict]:
     if not m:
         m = _JSON_SUELTO.search(texto.strip())
     if not m:
-        return texto.strip(), {}
+        return _limpiar_json_colgado(texto), {}
     try:
         crudo = json.loads(m.group(1))
     except json.JSONDecodeError:
-        return texto.replace(m.group(0), "").strip(), {}
+        return _limpiar_json_colgado(texto.replace(m.group(0), "")), {}
     if not isinstance(crudo, dict):
-        return texto.replace(m.group(0), "").strip(), {}
+        return _limpiar_json_colgado(texto.replace(m.group(0), "")), {}
     efectos = {k: v for k, v in crudo.items() if k in CAMPOS_PERMITIDOS}
     narracion = texto.replace(m.group(0), "").strip()
-    return narracion, efectos
+    return _limpiar_json_colgado(narracion), efectos
+
+
+_JSON_COLGADO = re.compile(r"```(?:json)?\s*\{[^`]*$", re.S)
+
+
+def _limpiar_json_colgado(texto: str) -> str:
+    """Si el modelo se quedó sin tokens a mitad del bloque JSON, el fence
+    queda sin cerrar y no matchea el parser: acá lo amputamos para que
+    nunca se filtre JSON crudo a la mesa."""
+    texto = _JSON_COLGADO.sub("", texto)
+    return texto.replace("```", "").strip()
 
 
 async def narrar(contexto: str, accion: str) -> tuple[str, dict]:
@@ -183,7 +206,7 @@ async def narrar(contexto: str, accion: str) -> tuple[str, dict]:
     - Con API key y error → propaga NarradorError (el caller lo muestra).
     """
     crudo = await completar(f"{contexto}\n\n---\nACCIÓN A NARRAR:\n{accion}",
-                            system=SYSTEM_PROMPT)
+                            system=SYSTEM_PROMPT, max_tokens=1100)
     if crudo is None:
         return f"[DM dummy] Resuelto: {accion[:200]}", {}
     return parsear_salida(crudo)

@@ -43,7 +43,8 @@ async def catalogo():
             "bonos_a_eleccion": r.get("bonos_a_eleccion", 0),
             "subrazas": {sk: {"bonos": sv.get("bonos", {}),
                               "rasgo": sv.get("rasgo", ""),
-                              "velocidad_m": sv.get("velocidad_m")}
+                              "velocidad_m": sv.get("velocidad_m"),
+                              "bonos_a_eleccion": sv.get("bonos_a_eleccion")}
                          for sk, sv in r["subrazas"].items()},
         }
     return {
@@ -55,6 +56,8 @@ async def catalogo():
         "armaduras": oficiales,
         "razas": razas,
         "subclases": SUBCLASES_SRD,
+        "objetos_magicos": len(__import__("engine.content",
+                                          fromlist=["x"]).OBJETOS_MAGICOS),
         "nivel_subclase": NIVEL_SUBCLASE,
     }
 

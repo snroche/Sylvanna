@@ -505,3 +505,93 @@ async def test_content_razas_completas(client):
     assert elfo["subrazas"]["alto_elfo"]["rasgo"]  # info completa, no placeholder
     assert d["razas"]["semielfo"]["bonos_a_eleccion"] == 2
     assert "campeon" in d["subclases"]["guerrero"]
+
+
+# ---------------------------------------------------------------- fixes del testeo
+
+@pytest.mark.anyio
+async def test_skill_check_se_broadcastea(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    await c.post("/api/characters", json=GUERRERO2, headers=h)
+    await c.post(f"/api/campaigns/{cid}/skill-check",
+                 json={"habilidad": "atletismo", "cd": 10,
+                       "descripcion": "trepo el muro"}, headers=h)
+    msgs = (await c.get(f"/api/campaigns/{cid}/messages?since=0",
+                        headers=h)).json()
+    broadcast = [m for m in msgs if m["autor"] == "sistema"
+                 and "🎲" in m["contenido"] and "atletismo" in m["contenido"]]
+    assert broadcast, "la tirada debe verse como mensaje de sistema para todos"
+    assert "d20=" in broadcast[0]["contenido"]
+
+
+@pytest.mark.anyio
+async def test_undo_y_regenerate(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    await c.post("/api/characters", json=GUERRERO2, headers=h)
+    await c.post(f"/api/campaigns/{cid}/say",
+                 json={"texto": "miro el cielo"}, headers=h)
+    n_antes = len((await c.get(f"/api/campaigns/{cid}/messages?since=0",
+                               headers=h)).json())
+    # regenerar: borra el dm y re-narra (dummy: instantáneo)
+    r = await c.post(f"/api/campaigns/{cid}/narration/regenerate",
+                     json={}, headers=h)
+    assert r.status_code == 200
+    # deshacer el par acción→dm
+    r = await c.post(f"/api/campaigns/{cid}/narration/undo",
+                     json={}, headers=h)
+    assert r.status_code == 200
+    msgs = (await c.get(f"/api/campaigns/{cid}/messages?since=0",
+                        headers=h)).json()
+    assert not any(m["contenido"] == "miro el cielo" for m in msgs)
+
+
+@pytest.mark.anyio
+async def test_typing_heartbeat(client):
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    await c.post("/api/characters", json=GUERRERO2, headers=h)
+    await c.post(f"/api/campaigns/{cid}/typing", json={}, headers=h)
+    est = (await c.get(f"/api/campaigns/{cid}", headers=h)).json()
+    assert "Borin" in est["escribiendo"]
+
+
+@pytest.mark.anyio
+async def test_efecto_quitar_item(client):
+    from app.effects import aplicar_efectos
+    from app.db import SessionLocal
+    from app.models import Campaign, Character
+    c = client
+    d = (await c.post("/api/campaigns", json={
+        "nombre": "t", "nombre_jugador": "s"})).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    char_id = (await c.post("/api/characters", json=GUERRERO2,
+                            headers=h)).json()["character_id"]
+    async with SessionLocal() as db:
+        camp = await db.get(Campaign, cid)
+        char = await db.get(Character, char_id)
+        char.inventario = [{"nombre": "Antorcha", "cantidad": 2},
+                           {"nombre": "Cuerda de cáñamo (15m)", "cantidad": 1}]
+        # match exacto + match por inclusión + inexistente ignorado
+        log = await aplicar_efectos(db, camp, {
+            "quitar_item": [{"nombre": "antorcha", "cantidad": 1},
+                            {"nombre": "cuerda", "cantidad": 1},
+                            {"nombre": "banjo", "cantidad": 1}]}, char)
+        await db.commit()
+        aplicados = [a for a in log["aplicados"] if a[0] == "quitar_item"]
+        assert len(aplicados) == 2
+        assert ("quitar_item", "banjo") in log["rechazados"]
+    ficha = (await c.get(f"/api/characters/{char_id}/sheet", headers=h)).json()
+    inv = {i["nombre"]: i["cantidad"] for i in ficha["inventario"]}
+    assert inv.get("Antorcha") == 1 and "Cuerda de cáñamo (15m)" not in inv

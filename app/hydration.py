@@ -13,6 +13,11 @@ from .models import NPC, Character
 
 def hidratar_personaje(c: Character) -> Criatura:
     nivel_furtivo = (c.nivel + 1) // 2 if c.clase == "picaro" else 0
+    ca_alt = c.clase if c.clase in ("barbaro", "monje") else None
+    if c.clase == "hechicero" and c.subclase == "linaje_draconico":
+        ca_alt = "draconico"
+    crit_min = 19 if (c.clase == "guerrero" and c.subclase == "campeon"
+                      and c.nivel >= 3) else 20
     return Criatura(
         id=f"pj_{c.id}",
         nombre=c.nombre,
@@ -25,9 +30,11 @@ def hidratar_personaje(c: Character) -> Criatura:
         condiciones=[dict(x) for x in c.condiciones],
         armadura=ARMADURAS.get(c.armadura) if c.armadura else None,
         escudo=c.escudo,
-        ca_alternativa=c.clase if c.clase in ("barbaro", "monje") else None,
+        ca_alternativa=ca_alt,
         estilo_combate=c.estilo_combate,
         nivel_furtivo=nivel_furtivo,
+        crit_min=crit_min,
+        subclase=c.subclase,
         spell_state=SpellState(
             slots={k: dict(v) for k, v in c.slots.items()},
             conocidos=list(c.conocidos),

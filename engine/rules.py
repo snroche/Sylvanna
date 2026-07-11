@@ -50,6 +50,8 @@ def calcular_ca(c: Criatura) -> int:
             base = 10 + des + mod(c.atributos["CON"])
         elif c.ca_alternativa == "monje" and not c.escudo:
             base = 10 + des + mod(c.atributos["SAB"])
+        elif c.ca_alternativa == "draconico":
+            base = 13 + des
     elif c.armadura.des_max == 0:      # pesada: DES no aplica
         base = c.armadura.ca_base
     elif c.armadura.des_max is None:   # ligera: DES completa
@@ -169,6 +171,10 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
     bono_ataque = m + (bc(atacante.nivel) if competente else 0)
     if atacante.estilo_combate == "arqueria" and arma.distancia:
         bono_ataque += 2
+    arma_sagrada = next((c for c in atacante.condiciones
+                         if c.get("tipo") == "arma_sagrada"), None)
+    if arma_sagrada:
+        bono_ataque += arma_sagrada.get("valor", 0)
 
     # ventaja/desventaja situacional + condiciones
     bonos = 1 if ventaja > 0 else 0
@@ -201,8 +207,9 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
         inspiracion = insp["dados"][0]
         total += inspiracion
         atacante.quitar_condicion("inspirado")
-    impacta = t["critico"] or (not t["pifia"] and total >= ca)
-    critico = t["critico"] or (impacta and critico_auto)
+    crit_natural = t["natural"] >= atacante.crit_min
+    impacta = crit_natural or (not t["pifia"] and total >= ca)
+    critico = crit_natural or (impacta and critico_auto)
 
     resultado = {
         "tipo": "ataque", "atacante_id": atacante.id, "objetivo_id": objetivo.id,
@@ -227,6 +234,12 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
         if atacante.estilo_combate == "duelo" and not arma.distancia \
                 and not dos_manos:
             extras.append({"motivo": "duelo", "valor": 2})
+        # Presa del cazador (ranger Cazador nv3): +1d8 vs heridos
+        if atacante.subclase == "cazador" and atacante.nivel >= 3 \
+                and objetivo.pg_actual < objetivo.pg_max:
+            pc = roll("2d8" if critico else "1d8")
+            extras.append({"motivo": "presa_del_cazador", "valor": pc["total"],
+                           "dados": pc["dados"]})
         # Ataque furtivo del pícaro (dobla dados en crítico)
         if furtivo and atacante.nivel_furtivo > 0 \
                 and (arma.finura or arma.distancia):

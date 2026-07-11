@@ -32,6 +32,7 @@ class CrearPersonaje(BaseModel):
     arma_equipada: str | None = None
     alineamiento: str = "neutral"
     estilo_combate: str | None = None   # solo guerrero
+    subclase: str | None = None         # requerida si la clase elige a nivel 1
     inventario: list[dict] = []
 
 
@@ -61,6 +62,12 @@ def _validar(body: CrearPersonaje):
     from engine.content import ALINEAMIENTOS, ESTILOS_COMBATE
     if body.alineamiento not in ALINEAMIENTOS:
         raise HTTPException(400, f"Alineamiento inválido: {ALINEAMIENTOS}")
+    from engine.content import NIVEL_SUBCLASE, SUBCLASES_SRD
+    if NIVEL_SUBCLASE.get(body.clase) == 1:
+        if not (body.subclase or "").strip():
+            raise HTTPException(400, f"{body.clase} elige subclase a nivel 1. "
+                                     f"Del SRD: {SUBCLASES_SRD[body.clase]} "
+                                     f"(o texto libre)")
     if body.clase == "guerrero":
         if body.estilo_combate not in ESTILOS_COMBATE:
             raise HTTPException(400, "El guerrero elige estilo de combate: "
@@ -110,6 +117,9 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
     pg_max = int(dado[1:]) + mod(atributos_finales["CON"])
     if body.subraza == "enano_de_las_colinas":
         pg_max += 1  # +1 PG por nivel
+    if body.clase == "hechicero" and \
+            (body.subclase or "").strip() == "linaje_draconico":
+        pg_max += 1  # resiliencia dracónica
 
     # salvaciones por clase (simplificación 5e estándar)
     SALVACIONES = {
@@ -161,6 +171,7 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
         conocidos=body.conocidos, preparados=body.preparados,
         alineamiento=body.alineamiento,
         estilo_combate=body.estilo_combate,
+        subclase=(body.subclase or "").strip()[:60] or None,
         recursos_clase=__import__("engine.content", fromlist=["x"])
             .recursos_clase_iniciales(body.clase, 1,
                                       mod(atributos_finales["CAR"])),
@@ -200,6 +211,48 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
             "velocidad_m": velocidad, "rasgos": rasgos}
 
 
+def _habilidades_activas(c: Character) -> list[dict]:
+    """Botones de habilidad que la UI debe mostrar, con su recurso y estado."""
+    rec = c.recursos_clase or {}
+    out = []
+
+    def usos(nombre):
+        r = rec.get(nombre)
+        if r is None:
+            return None
+        return (r["pool"], r["pool_max"]) if "pool" in r \
+            else (r["max"] - r["usados"], r["max"])
+
+    def agregar(nombre, recurso=None, **extra):
+        u = usos(recurso) if recurso else None
+        out.append({"nombre": nombre, "recurso": recurso,
+                    "restante": u[0] if u else None,
+                    "max": u[1] if u else None, **extra})
+
+    if c.clase == "barbaro":
+        agregar("furia", "furia", combate=True)
+        if c.subclase == "senda_del_berserker" and c.nivel >= 3:
+            agregar("frenesi", None, combate=True)
+    if c.clase == "guerrero":
+        agregar("nuevo_aliento", "nuevo_aliento")
+        if c.nivel >= 2:
+            agregar("oleada_de_accion", "oleada_de_accion", combate=True)
+    if c.clase == "monje" and c.nivel >= 2:
+        agregar("rafaga_de_golpes", "ki", combate=True)
+        agregar("defensa_paciente", "ki", combate=True)
+    if c.clase == "clerigo" and c.nivel >= 2:
+        agregar("canalizar_divinidad", "canalizar_divinidad", aliado=True)
+    if c.clase == "paladin":
+        agregar("imposicion_de_manos", "imposicion_de_manos",
+                aliado=True, cantidad=True)
+        if c.subclase == "juramento_de_devocion" and c.nivel >= 3:
+            agregar("arma_sagrada", "canalizar_divinidad", combate=True)
+    if c.clase == "bardo":
+        agregar("inspiracion_bardica", "inspiracion_bardica",
+                aliado=True, requiere_aliado=True)
+    return out
+
+
 @router.get("/{character_id}/sheet")
 async def ficha(character_id: int, player: Player = Depends(jugador_actual),
                 db: AsyncSession = Depends(get_db)):
@@ -227,6 +280,7 @@ async def ficha(character_id: int, player: Player = Depends(jugador_actual),
         "subclase": c.subclase,
         "estilo_combate": c.estilo_combate,
         "recursos_clase": c.recursos_clase or {},
+        "habilidades_activas": _habilidades_activas(c),
         "feats": c.feats or [],
         "vivo": c.vivo,
     }

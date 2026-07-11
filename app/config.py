@@ -14,7 +14,8 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     openrouter_api_key: str = ""          # vacío → narrador dummy (útil en dev)
     openrouter_model: str = "meta-llama/llama-3.3-70b-instruct:free"
-    openrouter_model_summarizer: str = ""  # vacío → usa openrouter_model
+    openrouter_model_summarizer: str = ""
+    resumir_cada: int = 40   # mensajes sin resumir antes de actualizar la crónica
     database_url: str = "sqlite+aiosqlite:///./local.db"  # default para dev local
 
     model_config = {"env_file": ".env", "extra": "ignore"}

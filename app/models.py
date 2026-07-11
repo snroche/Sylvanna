@@ -31,6 +31,7 @@ class Campaign(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nombre: Mapped[str] = mapped_column(String(120))
     descripcion: Mapped[str] = mapped_column(Text, default="")
+    typing: Mapped[dict] = mapped_column(JSON, default=dict)
     estado: Mapped[str] = mapped_column(String(20), default="exploracion")
     resumen_actual: Mapped[str] = mapped_column(Text, default="")
     tiempo_juego_min: Mapped[int] = mapped_column(Integer, default=0)
@@ -136,6 +137,7 @@ class Quest(Base):
     campaign_id: Mapped[int] = mapped_column(ForeignKey("campaigns.id"))
     titulo: Mapped[str] = mapped_column(String(160))
     descripcion: Mapped[str] = mapped_column(Text, default="")
+    typing: Mapped[dict] = mapped_column(JSON, default=dict)
     estado: Mapped[str] = mapped_column(String(20), default="activa")  # activa|completada|fallida
     principal: Mapped[bool] = mapped_column(Boolean, default=False)
     npc_origen_id: Mapped[int | None] = mapped_column(ForeignKey("npcs.id"),

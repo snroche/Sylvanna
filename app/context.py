@@ -17,8 +17,15 @@ from .models import (NPC, Campaign, Character, Message, PendingConsequence,
                      Quest)
 
 MENSAJES_RECIENTES = 12
-UMBRAL_RESUMEN = 40      # mensajes sin resumir que disparan el resumen rodante
+# umbral configurable por env RESUMIR_CADA (default 40). Nota: NO regenera
+# la crónica entera cada vez: integra el lote nuevo al resumen existente.
 MAX_PALABRAS_RESUMEN = 600
+
+
+def _umbral() -> int:
+    """Configurable por env RESUMIR_CADA (default 40). El resumen NO se
+    regenera entero: integra el lote nuevo a la crónica existente."""
+    return get_settings().resumir_cada
 
 
 async def construir_contexto(db: AsyncSession, camp: Campaign) -> str:
@@ -104,16 +111,16 @@ async def construir_contexto(db: AsyncSession, camp: Campaign) -> str:
 
 async def actualizar_resumen_si_corresponde(db: AsyncSession,
                                             camp: Campaign) -> bool:
-    """Resumen rodante: cada UMBRAL_RESUMEN mensajes sin resumir, reescribe
+    """Resumen rodante: cada _umbral() mensajes sin resumir, reescribe
     el resumen integrando lo nuevo. Devuelve True si resumió."""
     res = await db.execute(select(Message).where(
         Message.campaign_id == camp.id,
         Message.resumido == False).order_by(Message.id))  # noqa: E712
     pendientes = res.scalars().all()
-    if len(pendientes) < UMBRAL_RESUMEN:
+    if len(pendientes) < _umbral():
         return False
 
-    lote = pendientes[:UMBRAL_RESUMEN]
+    lote = pendientes[:_umbral()]
     crudos = "\n".join(f"[{m.autor_nombre or m.autor}] {m.contenido[:300]}"
                        for m in lote)
     prompt = (

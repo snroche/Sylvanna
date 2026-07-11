@@ -200,6 +200,11 @@ async def accion_habilidad(campaign_id: int, body: AccionHabilidad,
     persistir_personaje(cr, char)
     _msg(db, campaign_id, "jugador", char.nombre,
          f"[{body.habilidad}] {body.descripcion}")
+    exito = "✓ éxito" if r["exito"] else "✗ fallo"
+    detalle_insp = f" +{r['inspiracion']}🎵" if r.get("inspiracion") else ""
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"🎲 {char.nombre} — {body.habilidad}: d20={r['natural']} "
+         f"+{r['bono']}{detalle_insp} = {r['total']} → {exito}")
     _roll(db, campaign_id, r, char.id)
     encolar_narracion(
         bg, camp,
@@ -290,9 +295,11 @@ async def _post_accion_combate(db: AsyncSession, camp: Campaign,
         res_furia = await db.execute(select(Character).where(
             Character.campaign_id == camp.id))
         for c in res_furia.scalars().all():
-            if any(x.get("tipo") == "furia" for x in c.condiciones):
+            if any(x.get("tipo") in ("furia", "arma_sagrada")
+                   for x in c.condiciones):
                 c.condiciones = [x for x in c.condiciones
-                                 if x.get("tipo") != "furia"]
+                                 if x.get("tipo") not in ("furia",
+                                                          "arma_sagrada")]
         res = await db.execute(select(NPC).where(
             NPC.campaign_id == camp.id, NPC.tipo == "monstruo",
             NPC.vivo == False, NPC.en_escena == True))  # noqa: E712
@@ -512,6 +519,9 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
         d = roll(conjuro["curacion"])
         total = d["total"] + (mod(cr_pj.atributos[atributo])
                               if conjuro.get("suma_mod_magico") else 0)
+        # Discípulo de la Vida: +2 + nivel del conjuro
+        if char.subclase == "dominio_de_la_vida" and conjuro["nivel"] >= 1:
+            total += 2 + (body.nivel_slot or conjuro["nivel"])
         cur = curar(cr_obj, total)
         resoluciones.append({"tipo": "curacion", **d, "total_final": total, **cur})
         if obj.id != char.id:
@@ -620,6 +630,105 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
     combate.turno_ts = time.time()
     camp.combate = combate.to_dict() if combate.activo else None
     return eventos
+
+
+# ================================================================ deshacer / regenerar
+
+def _es_marcador(m) -> bool:
+    return m.autor == "sistema" and m.contenido[:1] in ("↺", "⌫")
+
+
+def _par_narrativo(msgs: list):
+    """Devuelve (accion, dm) si el final del log es jugador→dm (ignorando
+    nuestros marcadores ↺/⌫), o None si hay mecánica en el medio."""
+    limpio = [m for m in msgs if not _es_marcador(m)]
+    if len(limpio) >= 2 and limpio[-1].autor == "dm" \
+            and limpio[-2].autor == "jugador":
+        return limpio[-2], limpio[-1]
+    return None
+
+
+async def _ultimos_mensajes(db, campaign_id, n=6):
+    res = await db.execute(
+        select(Message).where(Message.campaign_id == campaign_id)
+        .order_by(Message.id.desc()).limit(n))
+    return list(reversed(res.scalars().all()))
+
+
+@router.post("/narration/regenerate")
+async def regenerar_narracion(campaign_id: int, bg: BackgroundTasks,
+                              player: Player = Depends(jugador_actual),
+                              db: AsyncSession = Depends(get_db)):
+    """Borra la última respuesta del DM y vuelve a narrar la misma acción.
+    Solo si el final del log es (acción de jugador → dm), sin mecánica en
+    el medio: las tiradas y el combate no se re-tiran."""
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    if camp.narrando:
+        raise HTTPException(409, "El DM está narrando: esperá")
+    if camp.estado == "combate":
+        raise HTTPException(409, "No se regenera narración en combate")
+    msgs = await _ultimos_mensajes(db, campaign_id)
+    par = _par_narrativo(msgs)
+    if par is None:
+        raise HTTPException(409, "Solo se puede regenerar la respuesta a una "
+                                 "acción narrativa simple (sin tiradas ni "
+                                 "mecánica en el medio)")
+    accion, dm = par
+    await db.delete(dm)
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"↺ {char.nombre} pidió regenerar la última narración.")
+    encolar_narracion(bg, camp,
+                      f"{accion.autor_nombre} dice/hace: {accion.contenido} "
+                      f"(REGENERACIÓN: narrá esta acción de nuevo, distinto "
+                      f"al intento anterior)", char.id)
+    await db.commit()
+    return {"ok": True, "narrando": True}
+
+
+@router.post("/narration/undo")
+async def deshacer_accion(campaign_id: int,
+                          player: Player = Depends(jugador_actual),
+                          db: AsyncSession = Depends(get_db)):
+    """Borra el último par (acción del jugador → respuesta del DM).
+    Mismas restricciones que regenerate. Los efectos ya aplicados por esa
+    narración (XP, loot) no se revierten: es un deshacer de conversación."""
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    if camp.narrando:
+        raise HTTPException(409, "El DM está narrando: esperá")
+    if camp.estado == "combate":
+        raise HTTPException(409, "No se deshace en combate")
+    msgs = await _ultimos_mensajes(db, campaign_id)
+    par = _par_narrativo(msgs)
+    if par is None:
+        raise HTTPException(409, "Solo se puede deshacer un par acción→"
+                                 "narración simple")
+    accion, dm = par
+    await db.delete(dm)
+    await db.delete(accion)
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"⌫ {char.nombre} deshizo la última acción.")
+    await db.commit()
+    return {"ok": True}
+
+
+# ================================================================ typing
+
+@router.post("/typing")
+async def escribiendo(campaign_id: int,
+                      player: Player = Depends(jugador_actual),
+                      db: AsyncSession = Depends(get_db)):
+    """Heartbeat liviano: 'este jugador está tipeando'. El cliente lo manda
+    cada ~3s mientras el input tiene texto; expira solo a los 6s."""
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    t = dict(camp.typing or {})
+    t[char.nombre] = time.time()
+    # limpiar vencidos para que el JSON no crezca
+    camp.typing = {k: v for k, v in t.items() if time.time() - v < 10}
+    await db.commit()
+    return {"ok": True}
 
 
 # ================================================================ habilidades de clase
@@ -735,6 +844,63 @@ async def habilidad_clase(campaign_id: int, body: UsarHabilidadClase,
         resultado["efecto"] = f"{obj.nombre} suma {dado_insp} a su próxima tirada"
         _msg(db, campaign_id, "sistema", "Sistema",
              f"🎵 {char.nombre} inspira a {obj.nombre} (+1d6 próxima tirada).")
+
+    elif body.nombre == "rafaga_de_golpes":
+        if not en_combate:
+            raise HTTPException(409, "Solo en combate")
+        ki = recursos.get("ki")
+        if not ki or ki["usados"] >= ki["max"]:
+            raise HTTPException(400, "Sin puntos de ki (descanso corto)")
+        ki["usados"] += 1
+        char.condiciones = list(char.condiciones) + [
+            {"tipo": "oleada", "origen": "ki"}]
+        resultado["efecto"] = "un ataque extra este turno"
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"👊 {char.nombre} desata una ráfaga de golpes.")
+
+    elif body.nombre == "defensa_paciente":
+        if not en_combate:
+            raise HTTPException(409, "Solo en combate")
+        ki = recursos.get("ki")
+        if not ki or ki["usados"] >= ki["max"]:
+            raise HTTPException(400, "Sin puntos de ki")
+        ki["usados"] += 1
+        _quitar_esquivando(char)
+        char.condiciones = list(char.condiciones) + [
+            {"tipo": "esquivando", "origen": "ki"}]
+        resultado["efecto"] = "esquivás sin perder el turno"
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"🧘 {char.nombre} adopta defensa paciente (y aún puede actuar).")
+
+    elif body.nombre == "frenesi":
+        if not en_combate:
+            raise HTTPException(409, "Solo en combate")
+        if char.subclase != "senda_del_berserker" or char.nivel < 3:
+            raise HTTPException(400, "Requiere Berserker nivel 3")
+        if not any(c.get("tipo") == "furia" for c in char.condiciones):
+            raise HTTPException(409, "El frenesí requiere estar en furia")
+        if any(c.get("tipo") == "oleada" for c in char.condiciones):
+            raise HTTPException(409, "Ya tenés un ataque extra pendiente")
+        char.condiciones = list(char.condiciones) + [
+            {"tipo": "oleada", "origen": "frenesi"}]
+        resultado["efecto"] = "un ataque extra este turno (frenesí)"
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"🔥 {char.nombre} entra en frenesí.")
+
+    elif body.nombre == "arma_sagrada":
+        if char.subclase != "juramento_de_devocion" or char.nivel < 3:
+            raise HTTPException(400, "Requiere Juramento de Devoción nivel 3")
+        cd_rec = recursos.get("canalizar_divinidad")
+        if not cd_rec or cd_rec["usados"] >= cd_rec["max"]:
+            raise HTTPException(400, "Sin usos de Canalizar (descanso corto)")
+        cd_rec["usados"] += 1
+        valor = max(1, mod(char.atributos["CAR"]))
+        char.condiciones = [c for c in char.condiciones
+                            if c.get("tipo") != "arma_sagrada"] + [
+            {"tipo": "arma_sagrada", "origen": "devocion", "valor": valor}]
+        resultado["efecto"] = f"+{valor} a tus ataques hasta el fin del combate"
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"✨ El arma de {char.nombre} resplandece (+{valor} al ataque).")
 
     else:
         raise HTTPException(400, f"Habilidad sin efecto activo: {body.nombre}")
@@ -1221,6 +1387,9 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
     else:
         ganancia = max(1, (caras // 2 + 1) + con)
         detalle = {"metodo": "fijo", "valor": caras // 2 + 1}
+    # PG extra por rasgos: enano de las colinas y linaje dracónico
+    if "colinas" in (char.raza or "") or char.subclase == "linaje_draconico":
+        ganancia += 1
     char.pg_max += ganancia
     char.pg_actual += ganancia
     char.dados_golpe_disp = min(char.nivel, char.dados_golpe_disp + 1)

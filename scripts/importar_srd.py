@@ -158,11 +158,12 @@ def importar_conjuros(cliente: httpx.Client, nivel_max: int) -> dict:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--cr-max", default="10",
-                   help="CR máximo de monstruos (default 10)")
-    p.add_argument("--nivel-max", type=int, default=5,
-                   help="Nivel máximo de conjuros (default 5)")
-    p.add_argument("--solo", choices=["monstruos", "conjuros"], default=None)
+    p.add_argument("--cr-max", default="30",
+                   help="CR máximo de monstruos (default 30 = todos)")
+    p.add_argument("--nivel-max", type=int, default=9,
+                   help="Nivel máximo de conjuros (default 9 = todos)")
+    p.add_argument("--solo", choices=["monstruos", "conjuros", "objetos"],
+                   default=None)
     args = p.parse_args()
 
     if args.cr_max not in CR_ORDEN:
@@ -174,17 +175,33 @@ def main():
             print(f"Importando monstruos hasta CR {args.cr_max}…")
             monstruos = importar_monstruos(cliente, args.cr_max)
             (DATA / "monstruos_srd.json").write_text(
-                json.dumps(monstruos, ensure_ascii=False, indent=1))
+                json.dumps(monstruos, ensure_ascii=False, indent=1),
+                encoding="utf-8")
             print(f"  → {len(monstruos)} monstruos en data/monstruos_srd.json")
         if args.solo in (None, "conjuros"):
             print(f"Importando conjuros hasta nivel {args.nivel_max}…")
             conjuros = importar_conjuros(cliente, args.nivel_max)
             (DATA / "conjuros_srd.json").write_text(
-                json.dumps(conjuros, ensure_ascii=False, indent=1))
+                json.dumps(conjuros, ensure_ascii=False, indent=1),
+                encoding="utf-8")
             con_mecanica = sum(1 for c in conjuros.values()
                                if c["resolucion"] != "auto")
             print(f"  → {len(conjuros)} conjuros ({con_mecanica} con "
                   f"resolución mecánica deducida)")
+        if args.solo in (None, "objetos"):
+            print("Importando objetos mágicos…")
+            objetos = {}
+            for o in paginar(cliente,
+                             f"{API}/magicitems/?document__slug=wotc-srd&limit=100"):
+                objetos[slug(o["name"])] = {
+                    "nombre": o["name"], "tipo": o.get("type", ""),
+                    "rareza": o.get("rarity", ""),
+                    "descripcion": (o.get("desc") or "")[:400],
+                }
+            (DATA / "objetos_magicos_srd.json").write_text(
+                json.dumps(objetos, ensure_ascii=False, indent=1),
+                encoding="utf-8")
+            print(f"  → {len(objetos)} objetos mágicos")
     print("Listo. Los archivos se cargan solos al reiniciar el servidor.")
 
 

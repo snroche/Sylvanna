@@ -332,9 +332,17 @@ CONJUROS: dict[str, dict] = {
 # velocidad_m: sobreescribe la base de 9m si difiere.
 RAZAS: dict[str, dict] = {
     "humano": {
-        "bonos": {"FUE": 1, "DES": 1, "CON": 1, "INT": 1, "SAB": 1, "CAR": 1},
-        "velocidad_m": 9, "rasgo": "Versátil: +1 a todos los atributos",
-        "subrazas": {},
+        "bonos": {}, "velocidad_m": 9,
+        "rasgo": "Adaptable y ambicioso",
+        "subrazas": {
+            "estandar": {"bonos": {"FUE": 1, "DES": 1, "CON": 1,
+                                   "INT": 1, "SAB": 1, "CAR": 1},
+                         "rasgo": "+1 a todos los atributos"},
+            "variante": {"bonos": {}, "bonos_a_eleccion": 2,
+                         "rasgo": "+1 a dos atributos a elección, una "
+                                  "competencia de habilidad extra y un feat "
+                                  "(cargá los tuyos en FEATS)"},
+        },
     },
     "elfo": {
         "bonos": {"DES": 2}, "velocidad_m": 9,
@@ -375,9 +383,20 @@ RAZAS: dict[str, dict] = {
     },
     "semielfo": {
         "bonos": {"CAR": 2}, "velocidad_m": 9,
-        "rasgo": "+1 a DOS atributos a elección (además del +2 CAR)",
-        "bonos_a_eleccion": 2,   # el jugador elige 2 atributos distintos de CAR
-        "subrazas": {},
+        "rasgo": "+2 CAR y +1 a DOS atributos a elección; visión en la "
+                 "oscuridad, ventaja contra encantamientos",
+        "bonos_a_eleccion": 2,
+        "subrazas": {
+            "estandar": {"bonos": {},
+                         "rasgo": "Versatilidad: dos competencias de "
+                                  "habilidad extra a elección"},
+            "descendiente_alto_elfo": {"bonos": {},
+                                       "rasgo": "Un truco de la lista de "
+                                                "mago (elegilo en Conjuros)"},
+            "descendiente_drow": {"bonos": {},
+                                  "rasgo": "Magia drow: luces danzantes; "
+                                           "más adelante fuego feérico"},
+        },
     },
     "semiorco": {
         "bonos": {"FUE": 2, "CON": 1}, "velocidad_m": 9,
@@ -443,6 +462,8 @@ def aplicar_bonos_raciales(base: dict, raza: str, subraza: str | None,
         rasgos.append(sr["rasgo"])
 
     n_eleccion = r.get("bonos_a_eleccion", 0)
+    if subraza:
+        n_eleccion = r["subrazas"][subraza].get("bonos_a_eleccion", n_eleccion)
     if n_eleccion:
         elegidos = bonos_eleccion or []
         if len(set(elegidos)) != n_eleccion or                 any(a not in ("FUE", "DES", "CON", "INT", "SAB", "CAR")
@@ -495,6 +516,10 @@ def recursos_clase_iniciales(clase: str, nivel: int, mod_car: int = 0) -> dict:
     if clase == "bardo":
         r["inspiracion_bardica"] = {"usados": 0, "max": max(1, mod_car),
                                     "reset": "largo"}
+    if clase == "monje" and nivel >= 2:
+        r["ki"] = {"usados": 0, "max": nivel, "reset": "corto"}
+    if clase == "paladin" and nivel >= 3:
+        r["canalizar_divinidad"] = {"usados": 0, "max": 1, "reset": "corto"}
     if clase == "mago":
         r["recuperacion_arcana"] = {"usados": 0, "max": 1, "reset": "largo"}
     return r
@@ -515,6 +540,37 @@ HABILIDADES_CLASE_INFO = {
     "recuperacion_arcana": "Mago — En un descanso corto recuperás espacios "
                            "de conjuro (total de niveles = mitad de tu nivel, "
                            "redondeado arriba). Se aplica solo.",
+    "rafaga_de_golpes": "Monje nv2 — 1 ki. Un ataque desarmado extra este "
+                        "turno.",
+    "defensa_paciente": "Monje nv2 — 1 ki. Esquivar sin consumir el turno.",
+    "frenesi": "Berserker nv3 — En furia: un ataque extra este turno, gratis.",
+    "arma_sagrada": "Devoción nv3 — Canalizar divinidad: sumás tu mod CAR a "
+                    "los ataques hasta que termine el combate.",
+}
+
+# Rasgos de subclase (info para ficha y contexto del DM)
+SUBCLASES_INFO = {
+    "campeon": "Crítico mejorado: criticás con 19-20 (mecánico)",
+    "dominio_de_la_vida": "Discípulo de la Vida: tus conjuros de curación "
+                          "curan +2+nivel del conjuro (mecánico)",
+    "cazador": "Presa del cazador: +1d8 de daño contra criaturas heridas "
+               "(mecánico)",
+    "linaje_draconico": "Resiliencia dracónica: +1 PG por nivel y CA 13+DES "
+                        "sin armadura (mecánico)",
+    "senda_del_berserker": "Frenesí: en furia, un ataque extra por turno "
+                           "(mecánico)",
+    "juramento_de_devocion": "Arma Sagrada: canalizás para sumar CAR a tus "
+                             "ataques (mecánico)",
+    "camino_de_la_mano_abierta": "Técnica de la mano abierta (narrativo v1)",
+    "colegio_del_saber": "Tres competencias extra y palabras cortantes "
+                         "(narrativo v1)",
+    "circulo_de_la_tierra": "Recuperación natural y conjuros de círculo "
+                            "(narrativo v1)",
+    "ladron": "Manos rápidas y trepar de segundo piso (narrativo v1)",
+    "escuela_de_evocacion": "Esculpir conjuros: tus aliados esquivan tus "
+                            "evocaciones (narrativo v1: avisale al DM)",
+    "patron_infernal": "Bendición del oscuro: PG temporales al abatir "
+                       "enemigos (narrativo v1)",
 }
 
 # ---------------------------------------------------------------- feats
@@ -549,21 +605,34 @@ FEATS: dict[str, dict] = {
 import json as _json
 import pathlib as _pathlib
 
+# Objetos mágicos importados del SRD (catálogo para loot/tiendas futuras)
+OBJETOS_MAGICOS: dict[str, dict] = {}
+
 _DATA = _pathlib.Path(__file__).resolve().parent.parent / "data"
 for _archivo, _destino in (("monstruos_srd.json", MONSTRUOS),
-                           ("conjuros_srd.json", CONJUROS)):
+                           ("conjuros_srd.json", CONJUROS),
+                           ("objetos_magicos_srd.json", OBJETOS_MAGICOS)):
     _p = _DATA / _archivo
     if _p.exists():
         try:
-            for _k, _v in _json.loads(_p.read_text()).items():
+            try:
+                _texto = _p.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                _texto = _p.read_text(encoding="cp1252")  # escrito en Windows
+            for _k, _v in _json.loads(_texto).items():
                 _destino.setdefault(_k, _v)
         except Exception as _e:  # un JSON roto no debe tirar el server
             print(f"[content] no pude cargar {_archivo}: {_e}")
 
-# XP por CR extendida (para monstruos importados de CR alto)
+# XP por CR completa (tabla estándar; monstruos importados llegan a CR 30)
 XP_POR_CR.update({
     "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900,
+    "11": 7200, "12": 8400, "13": 10000, "14": 11500, "15": 13000,
+    "16": 15000, "17": 18000, "18": 20000, "19": 22000, "20": 25000,
+    "21": 33000, "22": 41000, "23": 50000, "24": 62000, "25": 75000,
+    "26": 90000, "27": 105000, "28": 120000, "29": 135000, "30": 155000,
 })
+
 
 
 # ---------------------------------------------------------------- nivel 5
