@@ -23,6 +23,8 @@ HABILIDADES = {
 XP_POR_NIVEL = {
     1: 0, 2: 300, 3: 900, 4: 2_700, 5: 6_500,
     6: 14_000, 7: 23_000, 8: 34_000, 9: 48_000, 10: 64_000,
+    11: 85_000, 12: 100_000, 13: 120_000, 14: 140_000, 15: 165_000,
+    16: 195_000, 17: 225_000, 18: 265_000, 19: 305_000, 20: 355_000,
 }
 
 # Condiciones que imponen desventaja al atacar
@@ -85,9 +87,17 @@ def tirada_habilidad(c: Criatura, habilidad: str, cd: int, ventaja: int = 0) -> 
     bono = mod(c.atributos[atributo])
     if habilidad in c.competencias.get("habilidades", []):
         bono += bc(c.nivel)
+        # Expertise (pícaro/bardo): duplica el bonus de competencia
+        if habilidad in c.competencias.get("expertise", []):
+            bono += bc(c.nivel)
 
     penal = 1 if c.tiene_condicion("envenenado") or c.tiene_condicion("asustado") else 0
-    t = d20(_ventaja_neta(1 if ventaja > 0 else 0, penal + (1 if ventaja < 0 else 0)))
+    # Inspiración Heroica: ventaja en la tirada, se consume
+    bonos_v = 1 if ventaja > 0 else 0
+    if c.tiene_condicion("inspiracion_heroica"):
+        bonos_v += 1
+        c.quitar_condicion("inspiracion_heroica")
+    t = d20(_ventaja_neta(bonos_v, penal + (1 if ventaja < 0 else 0)))
     total = t["natural"] + bono
     inspiracion = None
     cond_insp = next((x for x in c.condiciones
@@ -147,14 +157,50 @@ def tirada_salvacion(c: Criatura, atributo: str, cd: int, ventaja: int = 0) -> d
 
 def iniciativa(c: Criatura) -> dict:
     t = d20()
-    total = t["natural"] + mod(c.atributos["DES"])
+    bono = mod(c.atributos["DES"]) + c.bono_iniciativa
+    total = t["natural"] + bono
     return {"tipo": "iniciativa", "criatura_id": c.id, **t,
-            "bono": mod(c.atributos["DES"]), "total": total}
+            "bono": bono, "total": total}
+
+
+_TIPOS_CASTIGO_DIVINO = {"no_muerto", "infernal", "undead", "fiend"}
+
+
+def dados_castigo_divino(nivel_slot: int, objetivo: Criatura) -> str:
+    """Dados de Castigo Divino (Paladín): 2d8 con slot nivel 1, +1d8 por nivel
+    de slot por encima (máx 5d8) y +1d8 extra si el objetivo es no-muerto o
+    infernal (máx 6d8). SRD."""
+    n = min(2 + max(0, nivel_slot - 1), 5)
+    tipo = (objetivo.tipo_criatura or "").lower()
+    if any(t in tipo for t in _TIPOS_CASTIGO_DIVINO):
+        n = min(n + 1, 6)
+    return f"{n}d8"
+
+
+def _reroll_gwf(dados_expr: str) -> dict:
+    """Tira daño de arma re-tirando 1 y 2 una vez (estilo Gran Arma).
+    Devuelve el mismo formato que roll()."""
+    base = roll(dados_expr)
+    caras = int(dados_expr.split("d")[1].split("+")[0].split("-")[0])
+    nuevos = []
+    for d in base["dados"]:
+        if d <= 2:
+            d = _RNG_ROLL(caras)
+        nuevos.append(d)
+    return {"expr": dados_expr + " (gran arma)", "dados": nuevos,
+            "mod": base["mod"], "total": sum(nuevos) + base["mod"]}
+
+
+def _RNG_ROLL(caras: int) -> int:
+    from .dice import _RNG
+    return _RNG.randint(1, caras)
 
 
 def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
                     ventaja: int = 0, dos_manos: bool = False,
-                    furtivo: bool = False) -> dict:
+                    furtivo: bool = False, smite_dados: str | None = None,
+                    mano_secundaria: bool = False,
+                    imprudente: bool = False) -> dict:
     """Ataque completo: impacto + daño. Muta pg del objetivo si impacta.
 
     Rasgos que se aplican solos (condiciones/campos del atacante):
@@ -162,7 +208,13 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
     - "inspirado": +1d6 al total de ataque (se consume)
     - "furia": +2 daño melé
     - estilo "duelo": +2 daño melé a una mano; "arqueria": +2 ataque a distancia
+    - estilo "gran_arma": re-tira 1 y 2 en los dados de daño melé a dos manos
     - furtivo=True (lo decide la capa de juego): +Nd6 de daño del pícaro
+    - smite_dados ("3d8"): Castigo Divino del paladín (radiante, solo melé)
+    - mano_secundaria=True: ataque con arma secundaria (no suma mod de daño
+      salvo estilo de dos armas)
+    - imprudente=True: Ataque Temerario del bárbaro (ventaja al atacar; la capa
+      de juego marca la condición 'imprudente' para dar ventaja a los enemigos)
     """
     # atributo de ataque
     if arma.distancia:
@@ -184,9 +236,14 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
 
     # ventaja/desventaja situacional + condiciones
     bonos = 1 if ventaja > 0 else 0
+    if imprudente and not arma.distancia:
+        bonos += 1   # Ataque Temerario: ventaja al atacar cuerpo a cuerpo
     if atacante.tiene_condicion("ayudado"):
         bonos += 1
         atacante.quitar_condicion("ayudado")
+    if atacante.tiene_condicion("inspiracion_heroica"):
+        bonos += 1   # Inspiración Heroica: ventaja, se consume
+        atacante.quitar_condicion("inspiracion_heroica")
     penal = 1 if ventaja < 0 else 0
     if atacante.tiene_condicion("envenenado") or atacante.tiene_condicion("cegado") \
             or atacante.tiene_condicion("asustado") \
@@ -199,6 +256,8 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
         bonos += 1
     if objetivo.tiene_condicion("cegado"):
         bonos += 1
+    if objetivo.tiene_condicion("imprudente"):
+        bonos += 1   # bárbaro expuesto por su Ataque Temerario
     if objetivo.tiene_condicion("derribado"):
         if arma.distancia:
             penal += 1
@@ -232,9 +291,13 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
     }
     if impacta:
         dado = arma.dos_manos if (dos_manos and arma.dos_manos) else arma.dado_danio
-        d = roll(dado)
+        # Estilo Gran Arma: re-tira 1 y 2 en los dados de daño (melé a dos manos)
+        gwf = (atacante.estilo_combate == "gran_arma" and not arma.distancia
+               and (dos_manos or arma.dos_manos_fijo))
+        _tira = _reroll_gwf if gwf else roll
+        d = _tira(dado)
         if critico:
-            extra = roll(dado)
+            extra = _tira(dado)
             d = {"expr": f"{dado} x2 (crítico)",
                  "dados": d["dados"] + extra["dados"], "mod": 0,
                  "total": d["total"] + extra["total"]}
@@ -242,9 +305,9 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
         # Furia del bárbaro: +2 daño melé
         if atacante.tiene_condicion("furia") and not arma.distancia:
             extras.append({"motivo": "furia", "valor": 2})
-        # Estilo Duelo: +2 daño melé a una mano
+        # Estilo Duelo: +2 daño melé a una mano (no con ataque de mano secundaria)
         if atacante.estilo_combate == "duelo" and not arma.distancia \
-                and not dos_manos:
+                and not dos_manos and not mano_secundaria:
             extras.append({"motivo": "duelo", "valor": 2})
         # Presa del cazador (ranger Cazador nv3): +1d8 vs heridos
         if atacante.subclase == "cazador" and atacante.nivel >= 3 \
@@ -259,12 +322,34 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
             f = roll(f"{n}d6")
             extras.append({"motivo": "furtivo", "valor": f["total"],
                            "dados": f["dados"]})
-        danio_total = max(1, d["total"] + m + sum(e["valor"] for e in extras))
+        # Mano secundaria (dos armas): no suma el mod de atributo al daño salvo
+        # que el mod sea negativo o que tengas el estilo de Combate con Dos Armas
+        mod_danio = m
+        if mano_secundaria and atacante.estilo_combate != "dos_armas":
+            mod_danio = min(m, 0)
+        danio_total = max(1, d["total"] + mod_danio + sum(e["valor"] for e in extras))
         danio_total, resistido = danio_con_resistencia(
             objetivo, danio_total, arma.tipo_danio)
-        resultado["danio"] = {**d, "mod_atributo": m, "total_final": danio_total,
+        # Castigo Divino: paquete de daño radiante aparte (resistencia propia)
+        smite = None
+        if smite_dados and not arma.distancia:
+            sd = roll(smite_dados)
+            if critico:
+                sx = roll(smite_dados)
+                sd = {"dados": sd["dados"] + sx["dados"],
+                      "total": sd["total"] + sx["total"]}
+            smite_val, smite_resist = danio_con_resistencia(
+                objetivo, sd["total"], "radiante")
+            danio_total += smite_val
+            smite = {"motivo": "castigo_divino", "valor": smite_val,
+                     "dados": sd["dados"], "tipo_danio": "radiante",
+                     "resistido": smite_resist}
+            extras.append(smite)
+        resultado["danio"] = {**d, "mod_atributo": mod_danio,
+                              "total_final": danio_total,
                               "tipo_danio": arma.tipo_danio,
                               "resistido": resistido,
+                              "castigo_divino": smite,
                               "extras": extras}
         resultado["efectos"] = aplicar_danio(objetivo, danio_total)["eventos"]
     return resultado
@@ -386,8 +471,36 @@ def cd_salvacion_magica(c: Criatura, atributo_clave: str) -> int:
     return 8 + bc(c.nivel) + mod(c.atributos[atributo_clave])
 
 
+def tirar_danio_conjuro(base_expr: str, escalado_expr: str | None = None,
+                        niveles_extra: int = 0, empoderar: int = 0) -> dict:
+    """Tira el daño (o curación) de un conjuro con:
+    - escalado por upcasting: +escalado_expr por cada nivel de slot extra.
+    - Conjuro Empoderado: re-tira los 'empoderar' dados más bajos y usa el nuevo
+      valor (asume dados del mismo tamaño que el daño base).
+    Devuelve el mismo formato que roll() más metadatos.
+    """
+    d = roll(base_expr)
+    dados = list(d["dados"])
+    mod_base = d["mod"]
+    caras = int(base_expr.lower().split("d")[1].split("+")[0].split("-")[0])
+    if escalado_expr and niveles_extra > 0:
+        n, c = escalado_expr.lower().split("d")
+        e = roll(f"{int(n) * niveles_extra}d{c}")
+        dados += e["dados"]
+    if empoderar > 0:
+        orden = sorted(range(len(dados)), key=lambda i: dados[i])[:empoderar]
+        for i in orden:
+            dados[i] = _RNG_ROLL(caras)
+    return {"expr": base_expr, "escalado": escalado_expr,
+            "niveles_extra": niveles_extra, "empoderado": empoderar,
+            "dados": dados, "mod": mod_base, "total": sum(dados) + mod_base}
+
+
 def ataque_magico(lanzador: Criatura, objetivo: Criatura, atributo_clave: str,
-                  dado_danio: str, tipo_danio: str, ventaja: int = 0) -> dict:
+                  dado_danio: str, tipo_danio: str, ventaja: int = 0,
+                  bono_danio: int = 0) -> dict:
+    """Ataque de conjuro. bono_danio suma un plano al daño (p. ej. Explosión
+    Agonizante del brujo: +mod de CAR)."""
     bono = mod(lanzador.atributos[atributo_clave]) + bc(lanzador.nivel)
     t = d20(ventaja)
     ca = calcular_ca(objetivo)
@@ -403,8 +516,10 @@ def ataque_magico(lanzador: Criatura, objetivo: Criatura, atributo_clave: str,
             d = {"expr": f"{dado_danio} x2 (crítico)",
                  "dados": d["dados"] + extra["dados"], "mod": 0,
                  "total": d["total"] + extra["total"]}
-        resultado["danio"] = {**d, "total_final": d["total"], "tipo_danio": tipo_danio}
-        resultado["efectos"] = aplicar_danio(objetivo, d["total"])["eventos"]
+        danio_final = max(0, d["total"] + bono_danio)
+        resultado["danio"] = {**d, "total_final": danio_final,
+                              "bono_danio": bono_danio, "tipo_danio": tipo_danio}
+        resultado["efectos"] = aplicar_danio(objetivo, danio_final)["eventos"]
     return resultado
 
 
@@ -464,10 +579,11 @@ def danio_con_resistencia(objetivo: Criatura, total: int,
 
 def ataque_statblock(atacante: Criatura, objetivo: Criatura, nombre: str,
                      bono: int, danio_expr: str,
-                     tipo_danio: str = "?") -> dict:
+                     tipo_danio: str = "?", ventaja: int = 0) -> dict:
     """Ataque de monstruo con números de stat block (importados del SRD):
     bono de ataque fijo y expresión de daño con modificador incluido."""
-    bonos = penal = 0
+    bonos = 1 if ventaja > 0 else 0
+    penal = 1 if ventaja < 0 else 0
     if objetivo.tiene_condicion("esquivando"):
         penal += 1
     if objetivo.tiene_condicion("derribado"):
@@ -477,6 +593,8 @@ def ataque_statblock(atacante: Criatura, objetivo: Criatura, nombre: str,
             or objetivo.tiene_condicion("paralizado"):
         bonos += 1
     if objetivo.tiene_condicion("cegado"):
+        bonos += 1
+    if objetivo.tiene_condicion("imprudente"):
         bonos += 1
     t = d20(_ventaja_neta(bonos, penal))
     ca = calcular_ca(objetivo)

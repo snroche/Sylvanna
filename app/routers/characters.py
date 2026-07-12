@@ -33,6 +33,9 @@ class CrearPersonaje(BaseModel):
     alineamiento: str = "neutral"
     estilo_combate: str | None = None   # solo guerrero
     subclase: str | None = None         # requerida si la clase elige a nivel 1
+    trasfondo: str | None = None        # clave de engine.content.TRASFONDOS
+    feat: str | None = None             # dote inicial (solo humano variante)
+    feat_atributo: str | None = None
     inventario: list[dict] = []
 
 
@@ -59,9 +62,12 @@ def _validar(body: CrearPersonaje):
         raise HTTPException(400, f"Armadura inválida. Opciones: {list(ARMADURAS)}")
     if body.arma_equipada and body.arma_equipada not in ARMAS:
         raise HTTPException(400, f"Arma inválida. Opciones: {list(ARMAS)}")
-    from engine.content import ALINEAMIENTOS, ESTILOS_COMBATE
+    from engine.content import ALINEAMIENTOS, ESTILOS_COMBATE, TRASFONDOS
     if body.alineamiento not in ALINEAMIENTOS:
         raise HTTPException(400, f"Alineamiento inválido: {ALINEAMIENTOS}")
+    if body.trasfondo and body.trasfondo not in TRASFONDOS:
+        raise HTTPException(400, f"Trasfondo inválido. Opciones: "
+                                 f"{list(TRASFONDOS)}")
     from engine.content import NIVEL_SUBCLASE, SUBCLASES_SRD
     if NIVEL_SUBCLASE.get(body.clase) == 1:
         if not (body.subclase or "").strip():
@@ -149,6 +155,27 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
         "hechicero": [], "mago": [], "brujo": ["ligera"],
     }
 
+    # Trasfondo: competencias, equipo, oro inicial y rasgo narrativo
+    from engine.content import TRASFONDOS
+    tras = TRASFONDOS.get(body.trasfondo) if body.trasfondo else None
+    habilidades = list(dict.fromkeys(
+        body.habilidades[:4] + (tras["competencias"] if tras else [])))
+    inventario = _inventario_inicial(body)
+    monedas = {"mo": 0, "mp": 0, "mc": 0}
+    opciones = {}
+    if tras:
+        for item in tras.get("equipo", []):
+            ex = next((x for x in inventario
+                       if x.get("nombre") == item["nombre"]), None)
+            if ex:
+                ex["cantidad"] = ex.get("cantidad", 1) + item.get("cantidad", 1)
+            else:
+                inventario.append(dict(item))
+        monedas["mo"] = tras.get("oro", 0)
+        opciones = {"trasfondo": body.trasfondo,
+                    "rasgo_trasfondo": tras["rasgo"],
+                    "rasgo_trasfondo_desc": tras["rasgo_desc"]}
+
     char = Character(
         campaign_id=player.campaign_id, player_id=player.id,
         nombre=body.nombre,
@@ -159,14 +186,16 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
         pg_actual=max(1, pg_max), pg_max=max(1, pg_max),
         dado_golpe=dado, dados_golpe_disp=1,
         competencias={
-            "habilidades": body.habilidades[:4],
+            "habilidades": habilidades,
             "salvaciones": SALVACIONES[body.clase],
             "armas": ARMAS_COMP[body.clase],
             "armaduras": ARMADURAS_COMP[body.clase],
         },
         armadura=body.armadura, escudo=body.escudo,
         arma_equipada=body.arma_equipada,
-        inventario=_inventario_inicial(body),
+        inventario=inventario,
+        monedas=monedas,
+        opciones_clase=opciones,
         slots=slots_iniciales(body.clase, 1),
         conocidos=body.conocidos, preparados=body.preparados,
         alineamiento=body.alineamiento,
@@ -181,6 +210,16 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
                                                 if body.subraza else ""), 1),
         },
     )
+    # Dote inicial: solo el humano variante la tiene a nivel 1
+    if body.feat:
+        if not (body.raza == "humano" and body.subraza == "variante"):
+            raise HTTPException(400, "Solo el humano variante recibe una dote "
+                                     "inicial a nivel 1")
+        from ..feats import aplicar_feat
+        try:
+            aplicar_feat(char, body.feat, body.feat_atributo)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
     # el monje pelea con artes marciales por defecto
     if body.clase == "monje" and not body.arma_equipada:
         char.arma_equipada = "artes_marciales"
@@ -245,8 +284,15 @@ def _habilidades_activas(c: Character) -> list[dict]:
     if c.clase == "monje" and c.nivel >= 2:
         agregar("rafaga_de_golpes", "ki", combate=True)
         agregar("defensa_paciente", "ki", combate=True)
+    if c.clase == "druida" and c.nivel >= 2:
+        from engine.content import formas_salvajes_disponibles
+        transformado = bool((c.recursos_clase or {}).get("_forma_salvaje"))
+        agregar("forma_salvaje", "forma_salvaje", combate=True,
+                transformado=transformado,
+                formas=formas_salvajes_disponibles(c.nivel))
     if c.clase == "clerigo" and c.nivel >= 2:
         agregar("canalizar_divinidad", "canalizar_divinidad", aliado=True)
+        agregar("expulsar_no_muertos", "canalizar_divinidad", combate=True)
     if c.clase == "paladin":
         agregar("imposicion_de_manos", "imposicion_de_manos",
                 aliado=True, cantidad=True)
@@ -255,6 +301,16 @@ def _habilidades_activas(c: Character) -> list[dict]:
     if c.clase == "bardo":
         agregar("inspiracion_bardica", "inspiracion_bardica",
                 aliado=True, requiere_aliado=True)
+    if c.clase == "hechicero" and c.nivel >= 2:
+        from engine.content import METAMAGIA, metamagias_conocidas_max
+        ph = rec.get("puntos_hechiceria", {})
+        conocidas = (c.opciones_clase or {}).get("metamagia", [])
+        out.append({"nombre": "fuente_de_magia", "recurso": "puntos_hechiceria",
+                    "restante": ph.get("pool"), "max": ph.get("pool_max"),
+                    "metamagia_conocida": conocidas,
+                    "metamagia_max": metamagias_conocidas_max(c.nivel),
+                    "metamagia_opciones": {k: v["nombre"]
+                                           for k, v in METAMAGIA.items()}})
     from engine.content import aliento_de_raza
     if aliento_de_raza(c.raza):
         agregar("aliento_de_dragon", "aliento_de_dragon",
@@ -288,8 +344,11 @@ async def ficha(character_id: int, player: Player = Depends(jugador_actual),
         "alineamiento": c.alineamiento,
         "subclase": c.subclase,
         "estilo_combate": c.estilo_combate,
-        "recursos_clase": c.recursos_clase or {},
+        "recursos_clase": {k: v for k, v in (c.recursos_clase or {}).items()
+                           if not k.startswith("_")},
+        "forma_salvaje": (c.recursos_clase or {}).get("_forma_salvaje"),
         "habilidades_activas": _habilidades_activas(c),
         "feats": c.feats or [],
+        "opciones_clase": c.opciones_clase or {},
         "vivo": c.vivo,
     }

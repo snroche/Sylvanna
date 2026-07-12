@@ -234,6 +234,24 @@ async def aplicar_efectos(db: AsyncSession, camp: Campaign,
                     log["aplicados"].append(("quitar_condicion",
                                              f"{tipo}←{objetivo_n}"))
 
+    insp = efectos.get("otorgar_inspiracion")
+    if isinstance(insp, str) and insp.strip():
+        objetivo_n = insp.strip().lower()
+        res_c = await db.execute(select(Character).where(
+            Character.campaign_id == camp.id, Character.vivo == True))  # noqa: E712
+        for pj in res_c.scalars().all():
+            if pj.nombre.lower() == objetivo_n:
+                if not any(c.get("tipo") == "inspiracion_heroica"
+                           for c in pj.condiciones):
+                    pj.condiciones = list(pj.condiciones) + [
+                        {"tipo": "inspiracion_heroica", "origen": "dm"}]
+                db.add(Message(
+                    campaign_id=camp.id, autor="sistema", autor_nombre="Sistema",
+                    contenido=f"✨ {pj.nombre} gana Inspiración Heroica: "
+                              f"ventaja en su próxima tirada."))
+                log["aplicados"].append(("inspiracion", pj.nombre))
+                break
+
     gasto = efectos.get("quitar_monedas")
     if isinstance(gasto, (int, float)) and gasto > 0 and actor is not None:
         gasto = min(int(gasto), 10000)

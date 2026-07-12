@@ -19,8 +19,10 @@ class Arma:
     finura: bool = False
     distancia: bool = False         # arma de ataque a distancia
     dos_manos: Optional[str] = None  # dado alternativo a dos manos, ej "1d10"
+    dos_manos_fijo: bool = False     # arma inherentemente a dos manos (mandoble)
     arrojadiza: bool = False
     alcance_m: Optional[int] = None
+    ligera: bool = False             # apta para combate con dos armas
 
 
 @dataclass
@@ -50,6 +52,7 @@ class Criatura:
     pg_actual: int
     pg_max: int
     velocidad_m: int = 9
+    tipo_criatura: Optional[str] = None   # "no_muerto" | "infernal" | "Undead"...
     # competencias: {"habilidades": [...], "salvaciones": ["FUE"], "armas": ["simple"],
     #                "armaduras": ["ligera"]}
     competencias: dict = field(default_factory=lambda: {
@@ -68,6 +71,7 @@ class Criatura:
     spell_state: Optional[SpellState] = None
     dados_golpe_disp: int = 0
     dado_golpe: str = "d8"          # "d6" | "d8" | "d10" | "d12"
+    bono_iniciativa: int = 0        # dotes/rasgos que suman a la iniciativa
     # salvaciones de muerte (solo PJs)
     muerte_exitos: int = 0
     muerte_fallos: int = 0

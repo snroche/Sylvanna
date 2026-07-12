@@ -87,7 +87,9 @@ def _inicio_de_turno(char: Character):
     tick_condiciones(cr_tmp)
     char.condiciones = [c for c in cr_tmp.condiciones
                         if c.get("tipo") not in ("esquivando", "ya_ataco",
-                                                 "derribado")]
+                                                 "ataques_hechos", "derribado",
+                                                 "imprudente", "off_usada",
+                                                 "reaccion_usada")]
 
 
 # ---------------- narración en background (fix de latencia) ----------------
@@ -342,6 +344,10 @@ async def _post_accion_combate(db: AsyncSession, camp: Campaign,
 class Atacar(BaseModel):
     objetivo_npc_id: int
     dos_manos: bool = False
+    castigo_slot: int | None = None   # Paladín: Castigo Divino con ese slot
+    imprudente: bool = False          # Bárbaro: Ataque Temerario
+    mano_secundaria: bool = False     # ataque con arma de mano secundaria
+    golpe_aturdidor: bool = False     # Monje: Golpe Aturdidor (1 ki)
 
 
 @router.post("/combat/attack")
@@ -364,6 +370,43 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
     _quitar_esquivando(char)
     cr_pj = hidratar_personaje(char)
     cr_npc = hidratar_npc(npc)
+    arma = ARMAS[char.arma_equipada]
+
+    # Ataque Temerario (Bárbaro nv2+): ventaja al atacar melé; a cambio, los
+    # ataques contra el bárbaro tienen ventaja hasta el inicio de su turno.
+    imprudente = False
+    if body.imprudente:
+        if char.clase != "barbaro" or char.nivel < 2:
+            raise HTTPException(400, "El Ataque Temerario es del Bárbaro (nivel 2+)")
+        if arma.distancia:
+            raise HTTPException(400, "El Ataque Temerario es solo cuerpo a cuerpo")
+        imprudente = True
+
+    # Combate con Dos Armas: el ataque de mano secundaria es una acción adicional
+    # (declaralo ANTES del ataque principal que cierra el turno). Requiere ligera.
+    if body.mano_secundaria:
+        if not arma.ligera:
+            raise HTTPException(400, "El ataque de mano secundaria requiere un "
+                                     "arma ligera")
+        if any(c.get("tipo") == "off_usada" for c in char.condiciones):
+            raise HTTPException(400, "Ya usaste tu ataque de mano secundaria "
+                                     "este turno")
+
+    # Castigo Divino (Paladín): gasta un espacio de conjuro para +Nd8 radiante.
+    # El slot se descuenta SOLO si el ataque impacta (se declara tras ver el golpe).
+    smite_dados = None
+    if body.castigo_slot:
+        if char.clase != "paladin":
+            raise HTTPException(400, "El Castigo Divino es del Paladín")
+        if arma.distancia:
+            raise HTTPException(400, "El Castigo Divino requiere un arma cuerpo a cuerpo")
+        ss = cr_pj.spell_state
+        s = ss.slots.get(str(body.castigo_slot)) if ss else None
+        if not s or s["usados"] >= s["max"]:
+            raise HTTPException(400, "Sin espacio de conjuro para el Castigo Divino")
+        from engine.rules import dados_castigo_divino
+        smite_dados = dados_castigo_divino(body.castigo_slot, cr_npc)
+
     # ataque furtivo: pícaro con un aliado consciente en combate (flanqueo v1)
     furtivo = False
     if char.clase == "picaro":
@@ -372,26 +415,72 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
             Character.vivo == True, Character.pg_actual > 0))  # noqa: E712
         furtivo = res_al.scalars().first() is not None \
             or cr_pj.tiene_condicion("ayudado")
-    r = resolver_ataque(cr_pj, cr_npc, ARMAS[char.arma_equipada],
-                        dos_manos=body.dos_manos, furtivo=furtivo)
+    r = resolver_ataque(cr_pj, cr_npc, arma,
+                        dos_manos=body.dos_manos, furtivo=furtivo,
+                        smite_dados=smite_dados,
+                        mano_secundaria=body.mano_secundaria,
+                        imprudente=imprudente)
+    if smite_dados and r["impacta"]:
+        gastar_slot(cr_pj, body.castigo_slot)
+        r["castigo_slot"] = body.castigo_slot
+    if imprudente:
+        cr_pj.condiciones = [c for c in cr_pj.condiciones
+                             if c.get("tipo") != "imprudente"] + [
+            {"tipo": "imprudente", "origen": "temerario"}]
+
+    # Golpe Aturdidor (Monje nv5+): al impactar melé, gasta 1 ki; el objetivo
+    # hace salvación de CON (CD ki) o queda aturdido hasta tu próximo turno.
+    recursos_monje = None
+    if body.golpe_aturdidor:
+        if char.clase != "monje" or char.nivel < 5:
+            raise HTTPException(400, "El Golpe Aturdidor es del Monje (nivel 5+)")
+        if arma.distancia:
+            raise HTTPException(400, "El Golpe Aturdidor requiere un ataque melé")
+        import copy
+        recursos_monje = copy.deepcopy(char.recursos_clase or {})
+        ki = recursos_monje.get("ki")
+        if not ki or ki["usados"] >= ki["max"]:
+            raise HTTPException(400, "Sin puntos de ki")
+        if r["impacta"]:
+            from engine.rules import bc, tirada_salvacion
+            ki["usados"] += 1
+            cd = 8 + bc(char.nivel) + mod(char.atributos["SAB"])
+            salv = tirada_salvacion(cr_npc, "CON", cd)
+            r["golpe_aturdidor"] = {"cd": cd, "salvacion": salv}
+            if not salv["exito"]:
+                cr_npc.condiciones = [c for c in cr_npc.condiciones
+                                      if c.get("tipo") != "aturdido"] + [
+                    {"tipo": "aturdido", "origen": "golpe_aturdidor", "rondas": 2}]
+                r["golpe_aturdidor"]["aturdido"] = True
+            char.recursos_clase = recursos_monje
+
     persistir_personaje(cr_pj, char)
     persistir_npc(cr_npc, npc)
     _msg(db, campaign_id, "jugador", char.nombre, f"[ataque] contra {npc.nombre}")
     _roll(db, campaign_id, r, char.id)
 
-    from engine.content import ATAQUE_EXTRA_NV5
+    from engine.content import ataques_por_accion
     tiene_oleada = any(c.get("tipo") == "oleada" for c in char.condiciones)
-    extra_pendiente = (char.clase in ATAQUE_EXTRA_NV5 and char.nivel >= 5
-                       and not any(c.get("tipo") == "ya_ataco"
-                                   for c in char.condiciones))
-    if tiene_oleada or extra_pendiente:
-        # este ataque NO consume el turno (Oleada de Acción / Ataque Extra nv5)
-        if tiene_oleada:
+    off_hand = body.mano_secundaria
+    ataques_max = ataques_por_accion(char.clase, char.nivel)
+    hechos = next((c.get("n", 1) for c in char.condiciones
+                   if c.get("tipo") == "ataques_hechos"), 0)
+    # ¿quedan ataques del rasgo Ataque Extra después de éste?
+    extra_pendiente = (not off_hand and not tiene_oleada
+                       and (hechos + 1) < ataques_max)
+    if tiene_oleada or extra_pendiente or off_hand:
+        # este ataque NO consume el turno (Oleada de Acción / Ataque Extra /
+        # mano secundaria como acción adicional de Combate con Dos Armas)
+        if off_hand:
+            char.condiciones = list(char.condiciones) + [
+                {"tipo": "off_usada", "origen": "dos_armas"}]
+        elif tiene_oleada:
             char.condiciones = [c for c in char.condiciones
                                 if c.get("tipo") != "oleada"]
         else:
-            char.condiciones = list(char.condiciones) + [
-                {"tipo": "ya_ataco", "origen": "ataque_extra"}]
+            char.condiciones = [c for c in char.condiciones
+                                if c.get("tipo") != "ataques_hechos"] + [
+                {"tipo": "ataques_hechos", "n": hechos + 1}]
         if (npc.pg_actual or 0) == 0:
             combate.remover(f"npc_{npc.id}")
         eventos, fin = ([], None)
@@ -401,7 +490,7 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
             camp.combate = combate.to_dict()
     else:
         char.condiciones = [c for c in char.condiciones
-                            if c.get("tipo") != "ya_ataco"]
+                            if c.get("tipo") != "ataques_hechos"]
         eventos, fin = await _post_accion_combate(db, camp, combate, char, npc)
     encolar_narracion(
         bg, camp,
@@ -420,7 +509,9 @@ class Lanzar(BaseModel):
     conjuro: str
     objetivo_npc_id: int | None = None
     objetivo_character_id: int | None = None
+    objetivos_npc_ids: list[int] | None = None   # conjuros de área / multiobjetivo
     nivel_slot: int | None = None
+    metamagia: list[str] = []                     # hechicero
 
 
 @router.post("/combat/cast")
@@ -444,6 +535,8 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
     val = puede_lanzar(cr_pj, body.conjuro)
     if not val["ok"]:
         raise HTTPException(400, f"No podés lanzarlo: {val['motivo']}")
+    # Conjuro Sutil (metamagia) evita componentes V/S, pero no el material costoso
+    _verificar_componente(char, conjuro)
 
     nivel = conjuro["nivel"]
     gasto = None
@@ -457,6 +550,38 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
 
     atributo = CLASES[char.clase]["atributo_magico"] or "INT"
 
+    # Metamagia (Hechicero): gasta Puntos de Hechicería y modifica la resolución.
+    save_ventaja = 0     # elevado: desventaja del objetivo en su salvación
+    empoderar = 0        # empoderado: cantidad de dados de daño a re-tirar
+    meta_aplicadas: list[str] = []
+    if body.metamagia:
+        import copy
+        from engine.content import METAMAGIA, costo_metamagia
+        if char.clase != "hechicero":
+            raise HTTPException(400, "Solo el Hechicero usa Metamagia")
+        conocidas = (char.opciones_clase or {}).get("metamagia", [])
+        recursos_h = copy.deepcopy(char.recursos_clase or {})
+        ph = recursos_h.get("puntos_hechiceria")
+        seleccion = list(dict.fromkeys(body.metamagia))
+        costo_total = 0
+        for mm in seleccion:
+            if mm not in METAMAGIA:
+                raise HTTPException(400, f"Metamagia desconocida: {mm}")
+            if mm not in conocidas:
+                raise HTTPException(400, f"No conocés la metamagia '{mm}'")
+            costo_total += costo_metamagia(mm, conjuro["nivel"])
+        if not ph or ph["pool"] < costo_total:
+            raise HTTPException(400, f"Sin Puntos de Hechicería "
+                                     f"({costo_total} necesarios)")
+        ph["pool"] -= costo_total
+        for mm in seleccion:
+            if mm == "elevado":
+                save_ventaja = -1
+            elif mm == "empoderado":
+                empoderar = max(1, mod(cr_pj.atributos[atributo]))
+            meta_aplicadas.append(mm)
+        char.recursos_clase = recursos_h
+
     # trucos escalan a nivel 5: se duplican los dados de daño
     conjuro = dict(conjuro)
     if conjuro["nivel"] == 0 and char.nivel >= 5 and conjuro.get("danio"):
@@ -464,64 +589,28 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
         conjuro["danio"] = _re.sub(
             r"^(\d+)d", lambda m: f"{int(m.group(1)) * 2}d", conjuro["danio"])
 
+    # niveles por encima del base = upcasting
+    niveles_extra = 0
+    if nivel > 0:
+        niveles_extra = max(0, (body.nivel_slot or nivel) - nivel)
+
+    from engine.rules import aplicar_danio, tirar_danio_conjuro
+
     resoluciones: list[dict] = []
     objetivo_nombre = None
-    npc = None
+    objetivos_npc: list[NPC] = []
 
     tipo = conjuro["resolucion"]
-    if tipo in ("ataque", "salvacion") or (tipo == "auto" and conjuro.get("proyectiles")):
-        npc = await db.get(NPC, body.objetivo_npc_id or -1)
-        if npc is None or npc.campaign_id != campaign_id or not npc.vivo:
-            raise HTTPException(404, "Objetivo inválido")
-        objetivo_nombre = npc.nombre
-        cr_npc = hidratar_npc(npc)
+    es_area = bool(conjuro.get("area"))
 
-        if tipo == "ataque":
-            r = ataque_magico(cr_pj, cr_npc, atributo,
-                              conjuro["danio"], conjuro["tipo_danio"])
-            resoluciones.append(r)
-        elif tipo == "salvacion":
-            cd = cd_salvacion_magica(cr_pj, atributo)
-            salv = tirada_salvacion(cr_npc, conjuro["salvacion"], cd)
-            resoluciones.append(salv)
-            if conjuro.get("danio"):
-                d = roll(conjuro["danio"])
-                final = d["total"]
-                if salv["exito"]:
-                    final = final // 2 if conjuro.get(
-                        "en_salvacion_exitosa") == "mitad" else 0
-                if final:
-                    from engine.rules import aplicar_danio
-                    ev = aplicar_danio(cr_npc, final)
-                    resoluciones.append({"tipo": "danio_conjuro", **d,
-                                         "final": final,
-                                         "efectos": ev["eventos"]})
-            elif not salv["exito"]:
-                cond = ("paralizado" if "inmovilizar" in body.conjuro
-                        else "hechizado")
-                cr_npc.condiciones.append({"tipo": cond, "origen": body.conjuro})
-                resoluciones.append({"tipo": "condicion_aplicada",
-                                     "conjuro": body.conjuro})
-        else:  # auto con proyectiles (proyectil mágico)
-            from engine.rules import aplicar_danio
-            total, dados = 0, []
-            for _ in range(conjuro["proyectiles"]):
-                d = roll(conjuro["danio"])
-                dados.append(d["dados"])
-                total += d["total"]
-            ev = aplicar_danio(cr_npc, total)
-            resoluciones.append({"tipo": "danio_auto", "dados": dados,
-                                 "total_final": total,
-                                 "efectos": ev["eventos"]})
-        persistir_npc(cr_npc, npc)
-
-    elif tipo == "curacion":
+    if tipo == "curacion":
         obj = await db.get(Character, body.objetivo_character_id or char.id)
         if obj is None or obj.campaign_id != campaign_id:
             raise HTTPException(404, "Objetivo inválido")
         objetivo_nombre = obj.nombre
         cr_obj = hidratar_personaje(obj) if obj.id != char.id else cr_pj
-        d = roll(conjuro["curacion"])
+        d = tirar_danio_conjuro(conjuro["curacion"],
+                                conjuro.get("escalado_curacion"), niveles_extra)
         total = d["total"] + (mod(cr_pj.atributos[atributo])
                               if conjuro.get("suma_mod_magico") else 0)
         # Discípulo de la Vida: +2 + nivel del conjuro
@@ -532,9 +621,90 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
         if obj.id != char.id:
             persistir_personaje(cr_obj, obj)
 
+    elif tipo == "salvacion":
+        cd = cd_salvacion_magica(cr_pj, atributo)
+        ids = body.objetivos_npc_ids or (
+            [body.objetivo_npc_id] if body.objetivo_npc_id else [])
+        if not ids:
+            raise HTTPException(404, "Objetivo inválido")
+        if len(ids) > 1 and not es_area:
+            raise HTTPException(400, "Este conjuro apunta a un solo objetivo")
+        # el daño de área se tira UNA vez y se reparte (mitad en salvación exitosa)
+        dmg = (tirar_danio_conjuro(conjuro["danio"], conjuro.get("escalado_danio"),
+                                   niveles_extra, empoderar)
+               if conjuro.get("danio") else None)
+        for nid in dict.fromkeys(ids[:8]):
+            t = await db.get(NPC, nid)
+            if t is None or t.campaign_id != campaign_id or not t.vivo:
+                resoluciones.append({"tipo": "objetivo_invalido", "npc_id": nid})
+                continue
+            cr_t = hidratar_npc(t)
+            salv = tirada_salvacion(cr_t, conjuro["salvacion"], cd,
+                                    ventaja=save_ventaja)
+            salv["objetivo"] = t.nombre
+            resoluciones.append(salv)
+            if dmg:
+                final = dmg["total"]
+                if salv["exito"]:
+                    final = (final // 2
+                             if conjuro.get("en_salvacion_exitosa") == "mitad"
+                             else 0)
+                if final:
+                    ev = aplicar_danio(cr_t, final)
+                    resoluciones.append({"tipo": "danio_conjuro",
+                                         "objetivo": t.nombre,
+                                         "dados": dmg["dados"], "final": final,
+                                         "tipo_danio": conjuro.get("tipo_danio"),
+                                         "efectos": ev["eventos"]})
+            elif not salv["exito"]:
+                cond = ("paralizado" if "inmovilizar" in body.conjuro
+                        else "hechizado")
+                cr_t.condiciones.append({"tipo": cond, "origen": body.conjuro})
+                resoluciones.append({"tipo": "condicion_aplicada",
+                                     "objetivo": t.nombre,
+                                     "conjuro": body.conjuro})
+            persistir_npc(cr_t, t)
+            objetivos_npc.append(t)
+        objetivo_nombre = ", ".join(t.nombre for t in objetivos_npc) or None
+
+    elif tipo == "ataque" or (tipo == "auto" and conjuro.get("proyectiles")):
+        t = await db.get(NPC, body.objetivo_npc_id or -1)
+        if t is None or t.campaign_id != campaign_id or not t.vivo:
+            raise HTTPException(404, "Objetivo inválido")
+        objetivo_nombre = t.nombre
+        cr_t = hidratar_npc(t)
+        if tipo == "ataque":
+            # Explosión Agonizante (brujo): +mod de CAR al daño de la explosión
+            bono_danio = 0
+            if char.clase == "brujo" and body.conjuro == "explosion_sobrenatural" \
+                    and "explosion_agonizante" in (
+                        char.opciones_clase or {}).get("invocaciones", []):
+                bono_danio = max(0, mod(cr_pj.atributos[atributo]))
+            r = ataque_magico(cr_pj, cr_t, atributo,
+                              conjuro["danio"], conjuro["tipo_danio"],
+                              bono_danio=bono_danio)
+            resoluciones.append(r)
+        else:  # proyectil mágico: N proyectiles automáticos (upcasting: +1 c/u)
+            n_proj = conjuro["proyectiles"] + \
+                conjuro.get("escalado_proyectiles", 0) * niveles_extra
+            total, dados = 0, []
+            for _ in range(n_proj):
+                d = roll(conjuro["danio"])
+                dados.append(d["dados"])
+                total += d["total"]
+            ev = aplicar_danio(cr_t, total)
+            resoluciones.append({"tipo": "danio_auto", "proyectiles": n_proj,
+                                 "dados": dados, "total_final": total,
+                                 "efectos": ev["eventos"]})
+        persistir_npc(cr_t, t)
+        objetivos_npc.append(t)
+
     else:  # auto sin proyectiles (escudo, bendecir...)
         resoluciones.append({"tipo": "efecto_auto",
                              "efecto": conjuro.get("efecto", body.conjuro)})
+
+    if meta_aplicadas:
+        resoluciones.append({"tipo": "metamagia", "aplicadas": meta_aplicadas})
 
     if conjuro.get("concentracion"):
         cr_pj.spell_state.concentracion_activa = {
@@ -547,7 +717,11 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
     for r in resoluciones:
         _roll(db, campaign_id, r, char.id)
 
-    eventos, fin = await _post_accion_combate(db, camp, combate, char, npc)
+    # sacar del orden a los objetivos que hayan caído (área puede matar a varios)
+    for t in objetivos_npc:
+        if (t.pg_actual or 0) == 0:
+            combate.remover(f"npc_{t.id}")
+    eventos, fin = await _post_accion_combate(db, camp, combate, char, None)
     encolar_narracion(
         bg, camp,
         f"{char.nombre} lanza {body.conjuro}"
@@ -588,6 +762,12 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
                     camp.combate = combate.to_dict()
                     continue
                 break
+            if any(c.get("tipo") == "estable" for c in char.condiciones):
+                # estabilizado: no tira salvaciones de muerte, pasa el turno
+                combate.avanzar_turno()
+                combate.turno_ts = time.time()
+                camp.combate = combate.to_dict()
+                continue
             cr = hidratar_personaje(char)
             r = salvacion_muerte(cr)
             persistir_personaje(cr, char)
@@ -631,21 +811,48 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
             continue
         persistir_npc(cr_npc, npc)
         cr_pj = hidratar_personaje(objetivo)
+        # Estilo Protección: un aliado con escudo puede gastar su reacción para
+        # imponer desventaja al ataque enemigo contra este objetivo.
+        protector = None
+        res_prot = await db.execute(select(Character).where(
+            Character.campaign_id == camp.id, Character.id != objetivo.id,
+            Character.vivo == True, Character.pg_actual > 0))  # noqa: E712
+        for p in res_prot.scalars().all():
+            if p.estilo_combate == "proteccion" and p.escudo and not any(
+                    c.get("tipo") == "reaccion_usada" for c in p.condiciones):
+                protector = p
+                break
+        prot_ventaja = -1 if protector else 0
         ataques_sb = (npc.stats or {}).get("ataques") or []
         if ataques_sb:
             from engine.rules import ataque_statblock
             a = ataques_sb[0]
             r = ataque_statblock(cr_npc, cr_pj, a["nombre"], a["bono"],
-                                 a["danio"])
+                                 a["danio"], ventaja=prot_ventaja)
         else:
             arma_nombre = (npc.stats or {}).get("armas", ["garrote"])[0]
             arma = ARMAS.get(arma_nombre, ARMAS["garrote"])
-            r = resolver_ataque(cr_npc, cr_pj, arma)
+            r = resolver_ataque(cr_npc, cr_pj, arma, ventaja=prot_ventaja)
+        if protector:
+            protector.condiciones = list(protector.condiciones) + [
+                {"tipo": "reaccion_usada", "origen": "proteccion"}]
+            _msg(db, camp.id, "sistema", "Sistema",
+                 f"🛡 {protector.nombre} interpone su escudo para proteger a "
+                 f"{objetivo.nombre} (desventaja al ataque).")
         if "requiere_check_concentracion" in r.get("efectos", []):
             conc = check_concentracion(cr_pj, r["danio"]["total_final"])
             eventos.append({"actor": objetivo.nombre, "concentracion": conc})
             _roll(db, camp.id, conc, objetivo.id)
         persistir_personaje(cr_pj, objetivo)
+        # Forma Salvaje: si la bestia cae a 0 PG, el druida revierte (no queda
+        # inconsciente) en vez de morir.
+        if objetivo.pg_actual == 0 and \
+                (objetivo.recursos_clase or {}).get("_forma_salvaje"):
+            _revertir_forma_salvaje(objetivo)
+            eventos.append({"actor": objetivo.nombre, "revierte_forma": True})
+            _msg(db, camp.id, "sistema", "Sistema",
+                 f"✨ La forma salvaje de {objetivo.nombre} se deshace por el "
+                 f"daño; vuelve a su forma natural.")
         persistir_npc(cr_npc, npc)
         eventos.append({"actor": npc.nombre, "ataque": r,
                         "objetivo": objetivo.nombre})
@@ -987,6 +1194,110 @@ async def habilidad_clase(campaign_id: int, body: UsarHabilidadClase,
     return resultado
 
 
+# ================================================================ forma salvaje
+
+def _revertir_forma_salvaje(char: Character) -> dict | None:
+    """Devuelve la forma a la que estaba transformado y restaura los stats
+    originales. None si no estaba transformado."""
+    import copy
+    recursos = copy.deepcopy(char.recursos_clase or {})
+    forma = recursos.pop("_forma_salvaje", None)
+    if not forma:
+        return None
+    b = forma["backup"]
+    char.atributos = b["atributos"]
+    char.pg_max = b["pg_max"]
+    char.pg_actual = b["pg_actual"]     # vuelve con los PG previos a transformarse
+    char.arma_equipada = b["arma_equipada"]
+    char.armadura = b["armadura"]
+    char.escudo = b["escudo"]
+    char.velocidad_m = b["velocidad_m"]
+    # al revertir ya no está inconsciente por la bestia caída
+    char.condiciones = [c for c in char.condiciones
+                        if c.get("tipo") not in ("inconsciente", "derribado")]
+    char.recursos_clase = recursos
+    return forma
+
+
+class FormaSalvaje(BaseModel):
+    bestia: str
+
+
+@router.post("/wild-shape")
+async def forma_salvaje(campaign_id: int, body: FormaSalvaje,
+                        player: Player = Depends(jugador_actual),
+                        db: AsyncSession = Depends(get_db)):
+    from engine.content import formas_salvajes_disponibles
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    if char.clase != "druida" or char.nivel < 2:
+        raise HTTPException(400, "La Forma Salvaje es del Druida (nivel 2+)")
+    import copy
+    recursos = copy.deepcopy(char.recursos_clase or {})
+    if "_forma_salvaje" in recursos:
+        raise HTTPException(409, "Ya estás transformado (revertí primero)")
+    rec = recursos.get("forma_salvaje")
+    if not rec or rec["usados"] >= rec["max"]:
+        raise HTTPException(400, "Sin usos de Forma Salvaje (descanso corto)")
+    disponibles = formas_salvajes_disponibles(char.nivel)
+    if body.bestia not in disponibles:
+        raise HTTPException(400, f"Forma no disponible a tu nivel. "
+                                 f"Opciones: {disponibles}")
+    en_combate = camp.estado == "combate" and camp.combate
+    if en_combate:
+        combate = Combat.from_dict(camp.combate)
+        if not combate.es_turno_de(f"pj_{char.id}"):
+            raise HTTPException(409, "En combate, solo en tu turno")
+
+    beast = MONSTRUOS[body.bestia]
+    rec["usados"] += 1
+    recursos["_forma_salvaje"] = {
+        "beast": body.bestia, "nombre": beast["nombre"],
+        "ca_fija": beast.get("ca_fija"),
+        "backup": {"pg_actual": char.pg_actual, "pg_max": char.pg_max,
+                   "atributos": dict(char.atributos),
+                   "arma_equipada": char.arma_equipada,
+                   "armadura": char.armadura, "escudo": char.escudo,
+                   "velocidad_m": char.velocidad_m}}
+    char.atributos = {**char.atributos,
+                      **{k: beast["atributos"][k] for k in ("FUE", "DES", "CON")}}
+    char.pg_max = beast["pg"]
+    char.pg_actual = beast["pg"]
+    char.armadura = None
+    char.escudo = False
+    char.arma_equipada = (beast.get("armas") or ["garra"])[0]
+    char.velocidad_m = beast["velocidad_m"]
+    char.recursos_clase = recursos
+    _quitar_esquivando(char)
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"🐾 {char.nombre} adopta la forma de {beast['nombre']} "
+         f"({beast['pg']} PG, CA {beast.get('ca_fija')}).")
+    resultado = {"forma": beast["nombre"], "pg": beast["pg"],
+                 "ca": beast.get("ca_fija"),
+                 "usos_restantes": rec["max"] - rec["usados"]}
+    _roll(db, campaign_id, {"tipo": "forma_salvaje", **resultado}, char.id)
+    eventos = []
+    if en_combate:   # transformarse consume la acción
+        eventos = await _cerrar_turno(db, camp, combate, char)
+    await db.commit()
+    return {**resultado, "turnos_npc": eventos}
+
+
+@router.post("/wild-shape/revert")
+async def revertir_forma(campaign_id: int,
+                         player: Player = Depends(jugador_actual),
+                         db: AsyncSession = Depends(get_db)):
+    char = await _mi_personaje(campaign_id, player, db)
+    forma = _revertir_forma_salvaje(char)
+    if forma is None:
+        raise HTTPException(400, "No estás transformado")
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"✨ {char.nombre} vuelve a su forma natural "
+         f"({char.pg_actual}/{char.pg_max} PG).")
+    await db.commit()
+    return {"ok": True, "pg_actual": char.pg_actual, "pg_max": char.pg_max}
+
+
 # ================================================================ acciones de combate
 
 def _combate_activo(camp: Campaign, char: Character) -> Combat:
@@ -1137,6 +1448,148 @@ async def huir(campaign_id: int, bg: BackgroundTasks,
     return {"resolucion": r, "escapo": r["exito"], "turnos_npc": eventos}
 
 
+# ================================================================ clérigo / medicina
+
+def _es_no_muerto(npc: NPC) -> bool:
+    tipo = ((npc.stats or {}).get("tipo_criatura") or "").lower()
+    return "no_muerto" in tipo or "undead" in tipo
+
+
+def _verificar_componente(char: Character, conjuro: dict) -> None:
+    """Exige (y consume, si corresponde) el componente material costoso de un
+    conjuro. Lanza HTTPException si falta en el inventario."""
+    comp = conjuro.get("componente_costoso")
+    if not comp:
+        return
+    inv = [dict(x) for x in (char.inventario or [])]
+    item = next((x for x in inv if x.get("nombre") == comp["nombre"]
+                 and x.get("cantidad", 0) > 0), None)
+    if item is None:
+        raise HTTPException(400, f"Este conjuro requiere un componente material: "
+                                 f"{comp['nombre']} ({comp['costo']} po)")
+    if comp.get("consumido"):
+        item["cantidad"] -= 1
+        char.inventario = [x for x in inv if x.get("cantidad", 0) > 0]
+
+
+@router.post("/channel/turn-undead")
+async def expulsar_no_muertos(campaign_id: int,
+                              player: Player = Depends(jugador_actual),
+                              db: AsyncSession = Depends(get_db)):
+    """Expulsar Muertos Vivientes (Clérigo nv2, Canalizar Divinidad). Cada
+    no-muerto en combate hace salvación de SAB (CD del clérigo) o queda expulsado
+    (asustado). A nivel 5+ los de CR ≤ 1/2 que fallan son destruidos."""
+    from engine.content import cr_a_numero
+    from engine.rules import bc
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    if char.clase != "clerigo" or char.nivel < 2:
+        raise HTTPException(400, "Expulsar Muertos Vivientes es del Clérigo (nv2+)")
+    if camp.estado != "combate" or not camp.combate:
+        raise HTTPException(409, "Se usa en combate")
+    combate = Combat.from_dict(camp.combate)
+    if not combate.es_turno_de(f"pj_{char.id}"):
+        raise HTTPException(409, "Solo en tu turno")
+    import copy
+    recursos = copy.deepcopy(char.recursos_clase or {})
+    cd_rec = recursos.get("canalizar_divinidad")
+    if not cd_rec or cd_rec["usados"] >= cd_rec["max"]:
+        raise HTTPException(400, "Sin usos de Canalizar Divinidad (descanso corto)")
+    cd_rec["usados"] += 1
+    dc = 8 + bc(char.nivel) + mod(char.atributos["SAB"])
+    activos = set(combate.npcs_restantes())
+    res = await db.execute(select(NPC).where(
+        NPC.campaign_id == campaign_id, NPC.vivo == True,  # noqa: E712
+        NPC.tipo == "monstruo"))
+    resultados = []
+    destruidos = []
+    for npc in res.scalars().all():
+        if f"npc_{npc.id}" not in activos or not _es_no_muerto(npc):
+            continue
+        cr_npc = hidratar_npc(npc)
+        salv = tirada_salvacion(cr_npc, "SAB", dc)
+        entry = {"npc": npc.nombre, "salvacion": salv}
+        if not salv["exito"]:
+            if char.nivel >= 5 and cr_a_numero((npc.stats or {}).get("cr", "0")) <= 0.5:
+                cr_npc.pg_actual = 0
+                entry["destruido"] = True
+                destruidos.append(f"npc_{npc.id}")
+            else:
+                cr_npc.condiciones = [c for c in cr_npc.condiciones
+                                      if c.get("tipo") not in ("asustado",
+                                                               "expulsado")] + [
+                    {"tipo": "asustado", "origen": "expulsar", "rondas": 3},
+                    {"tipo": "expulsado", "origen": "clerigo", "rondas": 3}]
+                entry["expulsado"] = True
+        persistir_npc(cr_npc, npc)
+        resultados.append(entry)
+    char.recursos_clase = recursos
+    _quitar_esquivando(char)
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"☀️ {char.nombre} canaliza divinidad y expulsa a los muertos "
+         f"vivientes (CD {dc}). "
+         f"{sum(1 for r in resultados if r.get('destruido'))} destruidos, "
+         f"{sum(1 for r in resultados if r.get('expulsado'))} expulsados.")
+    _roll(db, campaign_id, {"tipo": "expulsar_no_muertos", "cd": dc,
+                            "resultados": resultados}, char.id)
+    for nid in destruidos:
+        combate.remover(nid)
+    eventos, fin = await _post_accion_combate(db, camp, combate, char, None)
+    await db.commit()
+    camp = await db.get(Campaign, campaign_id)
+    return {"cd": dc, "resultados": resultados, "turnos_npc": eventos,
+            "fin_combate": fin, "combate": camp.combate}
+
+
+class Estabilizar(BaseModel):
+    objetivo_character_id: int
+
+
+@router.post("/medicine/stabilize")
+async def estabilizar(campaign_id: int, body: Estabilizar,
+                      player: Player = Depends(jugador_actual),
+                      db: AsyncSession = Depends(get_db)):
+    """Estabiliza a un aliado inconsciente con una tirada de Medicina (CD 10).
+    En combate consume tu turno."""
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    obj = await db.get(Character, body.objetivo_character_id)
+    if obj is None or obj.campaign_id != campaign_id:
+        raise HTTPException(404, "Objetivo inválido")
+    if not (obj.pg_actual == 0 and obj.vivo):
+        raise HTTPException(400, "El objetivo no está agonizando")
+    if any(c.get("tipo") == "estable" for c in obj.condiciones):
+        raise HTTPException(400, "Ya está estabilizado")
+    en_combate = camp.estado == "combate" and camp.combate
+    combate = None
+    if en_combate:
+        combate = Combat.from_dict(camp.combate)
+        if not combate.es_turno_de(f"pj_{char.id}"):
+            raise HTTPException(409, "En combate, solo en tu turno")
+    cr = hidratar_personaje(char)
+    r = tirada_habilidad(cr, "medicina", 10)
+    _roll(db, campaign_id, r, char.id)
+    if r["exito"]:
+        obj.muerte_exitos = 0
+        obj.muerte_fallos = 0
+        obj.condiciones = [c for c in obj.condiciones
+                           if c.get("tipo") != "estable"] + [
+            {"tipo": "estable", "origen": "medicina"}]
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"🩹 {char.nombre} estabiliza a {obj.nombre} (Medicina "
+             f"{r['total']} ≥ 10): deja de tirar salvaciones de muerte.")
+    else:
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"🩹 {char.nombre} no logra estabilizar a {obj.nombre} "
+             f"(Medicina {r['total']} < 10).")
+    eventos = []
+    if en_combate:
+        _quitar_esquivando(char)
+        eventos = await _cerrar_turno(db, camp, combate, char)
+    await db.commit()
+    return {"resolucion": r, "estabilizado": r["exito"], "turnos_npc": eventos}
+
+
 # ================================================================ descansos
 
 class DescansoCorto(BaseModel):
@@ -1151,6 +1604,8 @@ async def rest_short(campaign_id: int, body: DescansoCorto,
     camp = await db.get(Campaign, campaign_id)
     if camp.estado == "combate":
         raise HTTPException(409, "No se descansa en combate")
+    if (char.recursos_clase or {}).get("_forma_salvaje"):
+        _revertir_forma_salvaje(char)   # descansar deshace la Forma Salvaje
     cr = hidratar_personaje(char)
     r = descanso_corto(cr, body.dados)
     if not r["ok"]:
@@ -1209,13 +1664,19 @@ async def rest_long(campaign_id: int, bg: BackgroundTasks,
     resultados = {}
     from engine.content import recursos_clase_iniciales, recursos_raciales
     for c in res.scalars().all():
+        if (c.recursos_clase or {}).get("_forma_salvaje"):
+            _revertir_forma_salvaje(c)   # descansar deshace la Forma Salvaje
         cr = hidratar_personaje(c)
         r = descanso_largo(cr)
         persistir_personaje(cr, c)
         c.pg_actual = c.pg_max  # persistir_personaje ya lo hace; explícito
-        c.recursos_clase = {**recursos_clase_iniciales(
-            c.clase, c.nivel, mod(c.atributos["CAR"])),
-            **recursos_raciales(c.raza, c.nivel)}
+        breakdown = (c.opciones_clase or {}).get("multiclase") or {c.clase: c.nivel}
+        rec: dict = {}
+        for cls, lvl in breakdown.items():
+            rec.update(recursos_clase_iniciales(cls, lvl,
+                                                mod(c.atributos["CAR"])))
+        rec.update(recursos_raciales(c.raza, c.nivel))
+        c.recursos_clase = rec
         resultados[c.nombre] = {"pg": c.pg_max, "dados": c.dados_golpe_disp}
     camp.tiempo_juego_min += 480
     camp.ultimo_descanso_largo_min = camp.tiempo_juego_min
@@ -1413,13 +1874,224 @@ async def gestionar_conjuros(campaign_id: int, body: GestionarConjuros,
             "lista": final}
 
 
+class LanzarRitual(BaseModel):
+    conjuro: str
+
+
+@router.post("/spells/ritual")
+async def lanzar_ritual(campaign_id: int, body: LanzarRitual,
+                        bg: BackgroundTasks,
+                        player: Player = Depends(jugador_actual),
+                        db: AsyncSession = Depends(get_db)):
+    """Lanza un conjuro con la etiqueta ritual SIN gastar espacio de conjuro,
+    tomando 10 minutos extra. Solo fuera de combate."""
+    from engine.content import CLASES_RITUALISTAS
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    if camp.estado == "combate":
+        raise HTTPException(409, "Los rituales tardan 10 minutos: no en combate")
+    conjuro = CONJUROS.get(body.conjuro)
+    if conjuro is None:
+        raise HTTPException(400, f"Conjuro desconocido: {body.conjuro}")
+    if not conjuro.get("ritual"):
+        raise HTTPException(400, f"{body.conjuro} no es un conjuro ritual")
+    if char.clase not in CLASES_RITUALISTAS:
+        raise HTTPException(400, "Tu clase no puede lanzar rituales")
+    if body.conjuro not in (char.preparados or []) \
+            and body.conjuro not in (char.conocidos or []):
+        raise HTTPException(400, "No tenés ese conjuro preparado/conocido")
+    _verificar_componente(char, conjuro)
+    camp.tiempo_juego_min += 10
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"🔯 {char.nombre} lanza el ritual {body.conjuro} (sin gastar espacio, "
+         f"+10 min): {conjuro.get('efecto', '')}")
+    _roll(db, campaign_id, {"tipo": "ritual", "conjuro": body.conjuro}, char.id)
+    encolar_narracion(bg, camp,
+                      f"{char.nombre} realiza el ritual de {body.conjuro}. "
+                      f"Efecto mecánico: {conjuro.get('efecto', '')}. "
+                      f"Narrá el ritual y su resultado en la ficción.",
+                      char.id)
+    await db.commit()
+    return {"ok": True, "conjuro": body.conjuro,
+            "efecto": conjuro.get("efecto"), "narrando": True}
+
+
+# ================================================================ hechicería
+
+class SeleccionMetamagia(BaseModel):
+    opciones: list[str]
+
+
+@router.post("/metamagic/select")
+async def seleccionar_metamagia(campaign_id: int, body: SeleccionMetamagia,
+                                player: Player = Depends(jugador_actual),
+                                db: AsyncSession = Depends(get_db)):
+    """Elige las opciones de Metamagia conocidas (Hechicero nv3+)."""
+    from engine.content import METAMAGIA, metamagias_conocidas_max
+    char = await _mi_personaje(campaign_id, player, db)
+    if char.clase != "hechicero" or char.nivel < 3:
+        raise HTTPException(400, "La Metamagia es del Hechicero (nivel 3+)")
+    maxn = metamagias_conocidas_max(char.nivel)
+    opciones = list(dict.fromkeys(body.opciones))
+    for o in opciones:
+        if o not in METAMAGIA:
+            raise HTTPException(400, f"Metamagia desconocida: {o}. "
+                                     f"Opciones: {list(METAMAGIA)}")
+    if len(opciones) > maxn:
+        raise HTTPException(400, f"A nivel {char.nivel} conocés hasta {maxn} "
+                                 f"metamagias")
+    opc = dict(char.opciones_clase or {})
+    opc["metamagia"] = opciones
+    char.opciones_clase = opc
+    await db.commit()
+    return {"metamagia": opciones, "max": maxn}
+
+
+class FuenteDeMagia(BaseModel):
+    direccion: str      # "slot_a_puntos" | "puntos_a_slot"
+    nivel: int
+
+
+@router.post("/sorcery/font")
+async def fuente_de_magia(campaign_id: int, body: FuenteDeMagia,
+                          player: Player = Depends(jugador_actual),
+                          db: AsyncSession = Depends(get_db)):
+    """Fuente de Magia (Hechicero nv2+): convierte espacios de conjuro en
+    Puntos de Hechicería y viceversa. Es una acción adicional: no cierra turno."""
+    from engine.content import COSTO_SLOT_EN_PH
+    char = await _mi_personaje(campaign_id, player, db)
+    if char.clase != "hechicero" or char.nivel < 2:
+        raise HTTPException(400, "La Fuente de Magia es del Hechicero (nivel 2+)")
+    import copy
+    recursos = copy.deepcopy(char.recursos_clase or {})
+    ph = recursos.get("puntos_hechiceria")
+    if not ph:
+        raise HTTPException(400, "No tenés Puntos de Hechicería")
+    slots = copy.deepcopy(char.slots or {})
+
+    if body.direccion == "slot_a_puntos":
+        s = slots.get(str(body.nivel))
+        if body.nivel < 1 or not s or s["usados"] >= s["max"]:
+            raise HTTPException(400, f"Sin espacio de nivel {body.nivel} para "
+                                     f"convertir")
+        s["usados"] += 1
+        ph["pool"] = min(ph["pool_max"], ph["pool"] + body.nivel)
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"🔮 {char.nombre} sacrifica un espacio de nivel {body.nivel}: "
+             f"+{body.nivel} Puntos de Hechicería ({ph['pool']}/{ph['pool_max']}).")
+    elif body.direccion == "puntos_a_slot":
+        costo = COSTO_SLOT_EN_PH.get(body.nivel)
+        if costo is None:
+            raise HTTPException(400, "Podés crear espacios de nivel 1 a 5")
+        if ph["pool"] < costo:
+            raise HTTPException(400, f"Necesitás {costo} PH (tenés {ph['pool']})")
+        ph["pool"] -= costo
+        s = slots.get(str(body.nivel))
+        if s and s["usados"] > 0:
+            s["usados"] -= 1
+        elif s:
+            s["max"] += 1
+        else:
+            slots[str(body.nivel)] = {"usados": 0, "max": 1}
+        _msg(db, campaign_id, "sistema", "Sistema",
+             f"🔮 {char.nombre} teje {costo} Puntos de Hechicería en un espacio "
+             f"de conjuro de nivel {body.nivel}.")
+    else:
+        raise HTTPException(400, "direccion: 'slot_a_puntos' o 'puntos_a_slot'")
+
+    char.recursos_clase = recursos
+    char.slots = slots
+    await db.commit()
+    return {"puntos_hechiceria": ph["pool"], "slots": slots}
+
+
+# ================================================================ brujo / pícaro / bardo
+
+class SeleccionInvocaciones(BaseModel):
+    invocaciones: list[str]
+
+
+@router.post("/invocations/select")
+async def seleccionar_invocaciones(campaign_id: int, body: SeleccionInvocaciones,
+                                   player: Player = Depends(jugador_actual),
+                                   db: AsyncSession = Depends(get_db)):
+    """Elige las Invocaciones Sobrenaturales conocidas (Brujo nv2+)."""
+    from engine.content import INVOCACIONES, invocaciones_conocidas_max
+    char = await _mi_personaje(campaign_id, player, db)
+    if char.clase != "brujo" or char.nivel < 2:
+        raise HTTPException(400, "Las Invocaciones son del Brujo (nivel 2+)")
+    maxn = invocaciones_conocidas_max(char.nivel)
+    elegidas = list(dict.fromkeys(body.invocaciones))
+    conocidos = set(char.conocidos or [])
+    for inv in elegidas:
+        meta = INVOCACIONES.get(inv)
+        if not meta:
+            raise HTTPException(400, f"Invocación desconocida: {inv}. "
+                                     f"Opciones: {list(INVOCACIONES)}")
+        if char.nivel < meta["nivel_min"]:
+            raise HTTPException(400, f"{meta['nombre']} requiere nivel "
+                                     f"{meta['nivel_min']}")
+        req = meta.get("requisito_conjuro")
+        if req and req not in conocidos:
+            raise HTTPException(400, f"{meta['nombre']} requiere conocer {req}")
+    if len(elegidas) > maxn:
+        raise HTTPException(400, f"A nivel {char.nivel} conocés hasta {maxn} "
+                                 f"invocaciones")
+    opc = dict(char.opciones_clase or {})
+    opc["invocaciones"] = elegidas
+    char.opciones_clase = opc
+    await db.commit()
+    return {"invocaciones": elegidas, "max": maxn}
+
+
+class SeleccionExpertise(BaseModel):
+    habilidades: list[str]
+
+
+@router.post("/expertise/select")
+async def seleccionar_expertise(campaign_id: int, body: SeleccionExpertise,
+                                player: Player = Depends(jugador_actual),
+                                db: AsyncSession = Depends(get_db)):
+    """Elige las habilidades con Expertise (doble competencia). Pícaro: 2 a nv1,
+    4 a nv6. Bardo: 2 a nv3, 4 a nv10."""
+    from engine.rules import HABILIDADES
+    char = await _mi_personaje(campaign_id, player, db)
+    if char.clase == "picaro":
+        maxn = 4 if char.nivel >= 6 else 2
+    elif char.clase == "bardo":
+        maxn = 4 if char.nivel >= 10 else (2 if char.nivel >= 3 else 0)
+    else:
+        raise HTTPException(400, "Expertise es de Pícaro o Bardo")
+    if maxn == 0:
+        raise HTTPException(400, "Todavía no tenés Expertise a este nivel")
+    elegidas = list(dict.fromkeys(body.habilidades))
+    props = set(char.competencias.get("habilidades", []))
+    for h in elegidas:
+        if h not in HABILIDADES:
+            raise HTTPException(400, f"Habilidad desconocida: {h}")
+        if h not in props:
+            raise HTTPException(400, "Solo podés poner Expertise en habilidades "
+                                     f"en las que ya tenés competencia: {h}")
+    if len(elegidas) > maxn:
+        raise HTTPException(400, f"A nivel {char.nivel} tenés hasta {maxn} "
+                                 f"expertise")
+    opc = dict(char.opciones_clase or {})
+    opc["expertise"] = elegidas
+    char.opciones_clase = opc
+    await db.commit()
+    return {"expertise": elegidas, "max": maxn}
+
+
 # ================================================================ nivel
 
 class SubirNivel(BaseModel):
     metodo: str = "fijo"   # "fijo" (mitad+1) | "tirar"
-    # Mejora de atributos (niveles 4 y 8): {"FUE": 2} o {"DES": 1, "CON": 1}
+    # Mejora de atributos (niveles 4/8/12/16/19): {"FUE": 2} o {"DES": 1, "CON": 1}
     asi: dict[str, int] | None = None
+    feat: str | None = None            # dote en lugar del +2 (clave de FEATS)
+    feat_atributo: str | None = None   # atributo elegido si la dote lo pide
     subclase: str | None = None   # requerida al llegar al nivel de subclase
+    clase_multiclase: str | None = None  # clase en la que ganás este nivel
 
 
 @router.post("/level-up")
@@ -1432,33 +2104,67 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
         raise HTTPException(400, f"Todavía no tenés XP para subir "
                                  f"(nivel {char.nivel}, {char.xp} XP)")
     nuevo_nivel = char.nivel + 1
-    # subclase al llegar al nivel correspondiente (elección narrativa v1)
+    ya_multiclase = len((char.opciones_clase or {}).get("multiclase") or {}) > 1
+    # subclase al llegar al nivel correspondiente (solo para monoclase; una vez
+    # multiclaseado, las subclases se cargan como texto libre)
     from engine.content import NIVEL_SUBCLASE, SUBCLASES_SRD
-    if nuevo_nivel == NIVEL_SUBCLASE.get(char.clase) and not char.subclase:
+    if not body.clase_multiclase and not ya_multiclase \
+            and nuevo_nivel == NIVEL_SUBCLASE.get(char.clase) and not char.subclase:
         opciones = SUBCLASES_SRD.get(char.clase, [])
         if body.subclase not in opciones and not (body.subclase or "").strip():
             raise HTTPException(400,
                 f"Nivel {nuevo_nivel}: elegí subclase. Del SRD: {opciones} "
                 f"(o escribí la tuya como texto libre)")
         char.subclase = (body.subclase or "").strip()[:60]
-    # ASI en niveles 4 y 8 (SRD): +2 puntos de atributo a repartir
-    if nuevo_nivel in (4, 8):
-        asi = body.asi or {}
-        valido = (sum(asi.values()) == 2
-                  and all(a in ("FUE", "DES", "CON", "INT", "SAB", "CAR")
-                          and 1 <= v <= 2 for a, v in asi.items()))
-        if not valido:
-            raise HTTPException(400,
-                "Nivel {}: mandá 'asi' con +2 puntos a repartir, ej "
-                '{{"FUE": 2}} o {{"DES": 1, "CON": 1}}'.format(nuevo_nivel))
-        atrs = dict(char.atributos)
-        for a, v in asi.items():
-            if atrs[a] + v > 20:
-                raise HTTPException(400, f"{a} superaría 20")
-            atrs[a] += v
-        char.atributos = atrs
+    # Mejora de Puntuación de Característica: niveles 4/8/12/16/19 (SRD).
+    # Se puede elegir una DOTE en lugar del +2 a atributos.
+    feat_res = None
+    if nuevo_nivel in (4, 8, 12, 16, 19):
+        if body.feat:
+            from ..feats import aplicar_feat
+            try:
+                feat_res = aplicar_feat(char, body.feat, body.feat_atributo)
+            except ValueError as e:
+                raise HTTPException(400, str(e))
+        else:
+            asi = body.asi or {}
+            valido = (sum(asi.values()) == 2
+                      and all(a in ("FUE", "DES", "CON", "INT", "SAB", "CAR")
+                              and 1 <= v <= 2 for a, v in asi.items()))
+            if not valido:
+                raise HTTPException(400,
+                    "Nivel {}: mandá 'asi' con +2 puntos a repartir "
+                    '(ej {{"FUE": 2}}) o una \'feat\'.'.format(nuevo_nivel))
+            atrs = dict(char.atributos)
+            for a, v in asi.items():
+                if atrs[a] + v > 20:
+                    raise HTTPException(400, f"{a} superaría 20")
+                atrs[a] += v
+            char.atributos = atrs
     char.nivel = nuevo_nivel
-    caras = int(char.dado_golpe[1:])
+
+    # --- multiclase: registro de niveles por clase ---
+    from engine.content import cumple_requisitos_multiclase
+    opc = dict(char.opciones_clase or {})
+    breakdown = dict(opc.get("multiclase") or {char.clase: nuevo_nivel - 1})
+    if sum(breakdown.values()) != nuevo_nivel - 1:
+        breakdown = {char.clase: nuevo_nivel - 1}   # reconstruir si no cuadra
+    objetivo_clase = body.clase_multiclase or char.clase
+    if objetivo_clase not in CLASES:
+        raise HTTPException(400, f"Clase inválida: {objetivo_clase}")
+    if objetivo_clase not in breakdown:   # abrís una clase nueva: chequeo PHB
+        ok_n, falta_n = cumple_requisitos_multiclase(objetivo_clase, char.atributos)
+        ok_p, falta_p = cumple_requisitos_multiclase(char.clase, char.atributos)
+        if not (ok_n and ok_p):
+            raise HTTPException(400, "No cumplís los requisitos para "
+                                     f"multiclasear en {objetivo_clase} "
+                                     f"(necesitás {falta_n or falta_p})")
+    breakdown[objetivo_clase] = breakdown.get(objetivo_clase, 0) + 1
+    opc["multiclase"] = breakdown
+    char.opciones_clase = opc
+    es_multiclase = len(breakdown) > 1
+
+    caras = int(CLASES[objetivo_clase]["dado_golpe"][1:])   # dado de la clase ganada
     con = mod(char.atributos["CON"])
     if body.metodo == "tirar":
         d = roll(f"1{char.dado_golpe}")
@@ -1470,18 +2176,27 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
     # PG extra por rasgos: enano de las colinas y linaje dracónico
     if "colinas" in (char.raza or "") or char.subclase == "linaje_draconico":
         ganancia += 1
+    # PG extra por dote Vigoroso (+2 por nivel): el nivel nuevo suma su parte
+    from engine.content import efectos_feats
+    ganancia += efectos_feats(char.feats or [])["hp_por_nivel"]
     char.pg_max += ganancia
     char.pg_actual += ganancia
     char.dados_golpe_disp = min(char.nivel, char.dados_golpe_disp + 1)
 
-    # recursos de clase del nuevo nivel (usos gastados se preservan)
-    from engine.content import recursos_clase_iniciales, recursos_raciales
-    nuevos_rec = {**recursos_clase_iniciales(char.clase, char.nivel,
-                                             mod(char.atributos["CAR"])),
-                  **recursos_raciales(char.raza, char.nivel)}
+    # recursos de clase del nuevo nivel: se recalculan por cada clase según su
+    # propio nivel (usos gastados se preservan). Se conserva la Forma Salvaje.
+    from engine.content import (recursos_clase_iniciales, recursos_raciales,
+                                slots_multiclase)
+    nuevos_rec: dict = {}
+    for cls, lvl in breakdown.items():
+        nuevos_rec.update(recursos_clase_iniciales(cls, lvl,
+                                                   mod(char.atributos["CAR"])))
+    nuevos_rec.update(recursos_raciales(char.raza, char.nivel))
     viejos_rec = char.recursos_clase or {}
+    if viejos_rec.get("_forma_salvaje"):
+        nuevos_rec["_forma_salvaje"] = viejos_rec["_forma_salvaje"]
     for nombre, rec in nuevos_rec.items():
-        if nombre in viejos_rec:
+        if nombre in viejos_rec and isinstance(rec, dict):
             if "usados" in rec:
                 rec["usados"] = min(viejos_rec[nombre].get("usados", 0),
                                     rec["max"])
@@ -1491,8 +2206,12 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
                 rec["pool"] = max(0, rec["pool_max"] - gastado)
     char.recursos_clase = nuevos_rec
 
-    # recalcular slots preservando los gastados
-    nuevos = slots_iniciales(char.clase, char.nivel)
+    # recalcular slots preservando los gastados. En multiclase se usa la tabla
+    # combinada del PHB; en monoclase, la tabla propia de la clase.
+    if es_multiclase and any(CLASES[c]["lanzador"] for c in breakdown):
+        nuevos = slots_multiclase(breakdown)
+    else:
+        nuevos = slots_iniciales(char.clase, char.nivel)
     for nv, s in nuevos.items():
         usados_previos = char.slots.get(nv, {}).get("usados", 0)
         s["usados"] = min(usados_previos, s["max"])
@@ -1504,7 +2223,121 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
                             "pg_ganados": ganancia, **detalle}, char.id)
     await db.commit()
     return {"nivel": char.nivel, "pg_ganados": ganancia,
-            "pg_max": char.pg_max, "slots": char.slots, **detalle}
+            "pg_max": char.pg_max, "slots": char.slots,
+            "feat": feat_res, "multiclase": breakdown,
+            "clase_ganada": objetivo_clase, **detalle}
+
+
+# ================================================================ sintonía de objetos
+
+MAX_SINTONIA = 3
+
+
+class Sintonia(BaseModel):
+    item: str
+
+
+@router.post("/attunement/attune")
+async def sintonizar(campaign_id: int, body: Sintonia,
+                     player: Player = Depends(jugador_actual),
+                     db: AsyncSession = Depends(get_db)):
+    """Entra en sintonía con un objeto mágico del inventario (máx 3).
+    Requiere un descanso corto en la ficción; fuera de combate."""
+    from engine.content import OBJETOS_MAGICOS
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    if camp.estado == "combate":
+        raise HTTPException(409, "La sintonía requiere un descanso corto")
+    nombre = body.item.strip()
+    if not any(x.get("nombre") == nombre for x in (char.inventario or [])):
+        raise HTTPException(400, f"No tenés '{nombre}' en el inventario")
+    opc = dict(char.opciones_clase or {})
+    sintonia = list(opc.get("sintonia", []))
+    if nombre in sintonia:
+        raise HTTPException(400, "Ya estás en sintonía con ese objeto")
+    if len(sintonia) >= MAX_SINTONIA:
+        raise HTTPException(400, f"Ya estás en sintonía con {MAX_SINTONIA} "
+                                 f"objetos (el máximo). Terminá una primero.")
+    info = OBJETOS_MAGICOS.get(nombre, {})
+    if info and info.get("requiere_sintonia") is False:
+        raise HTTPException(400, f"'{nombre}' no requiere sintonía")
+    sintonia.append(nombre)
+    opc["sintonia"] = sintonia
+    char.opciones_clase = opc
+    camp.tiempo_juego_min += 60
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"🔗 {char.nombre} entra en sintonía con {nombre} "
+         f"({len(sintonia)}/{MAX_SINTONIA}).")
+    await db.commit()
+    return {"sintonia": sintonia, "max": MAX_SINTONIA}
+
+
+@router.post("/attunement/end")
+async def terminar_sintonia(campaign_id: int, body: Sintonia,
+                            player: Player = Depends(jugador_actual),
+                            db: AsyncSession = Depends(get_db)):
+    char = await _mi_personaje(campaign_id, player, db)
+    opc = dict(char.opciones_clase or {})
+    sintonia = list(opc.get("sintonia", []))
+    if body.item.strip() not in sintonia:
+        raise HTTPException(400, "No estás en sintonía con ese objeto")
+    sintonia.remove(body.item.strip())
+    opc["sintonia"] = sintonia
+    char.opciones_clase = opc
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"🔓 {char.nombre} termina su sintonía con {body.item.strip()}.")
+    await db.commit()
+    return {"sintonia": sintonia, "max": MAX_SINTONIA}
+
+
+# ================================================================ monturas
+
+class Montura(BaseModel):
+    bestia: str
+
+
+@router.post("/mount")
+async def montar(campaign_id: int, body: Montura,
+                 player: Player = Depends(jugador_actual),
+                 db: AsyncSession = Depends(get_db)):
+    """Monta una bestia (montura). Mientras cabalgás usás la velocidad de la
+    montura. La montura tiene sus propios PG y puede ser objetivo."""
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    bestia = MONSTRUOS.get(body.bestia)
+    if bestia is None or bestia.get("tipo_criatura") != "bestia":
+        bestias = [k for k, v in MONSTRUOS.items()
+                   if v.get("tipo_criatura") == "bestia"]
+        raise HTTPException(400, f"Montura inválida. Bestias: {bestias}")
+    opc = dict(char.opciones_clase or {})
+    if opc.get("montura"):
+        raise HTTPException(409, "Ya estás montando (desmontá primero)")
+    opc["montura"] = {"bestia": body.bestia, "nombre": bestia["nombre"],
+                      "pg_actual": bestia["pg"], "pg_max": bestia["pg"],
+                      "velocidad_m": bestia["velocidad_m"],
+                      "ca": bestia.get("ca_fija")}
+    char.opciones_clase = opc
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"🐎 {char.nombre} monta un {bestia['nombre']} "
+         f"(velocidad {bestia['velocidad_m']}m).")
+    await db.commit()
+    return {"montura": opc["montura"]}
+
+
+@router.post("/dismount")
+async def desmontar(campaign_id: int,
+                    player: Player = Depends(jugador_actual),
+                    db: AsyncSession = Depends(get_db)):
+    char = await _mi_personaje(campaign_id, player, db)
+    opc = dict(char.opciones_clase or {})
+    montura = opc.pop("montura", None)
+    if not montura:
+        raise HTTPException(400, "No estás montando")
+    char.opciones_clase = opc
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"🚶 {char.nombre} desmonta de su {montura['nombre']}.")
+    await db.commit()
+    return {"ok": True}
 
 
 # ================================================================ estado

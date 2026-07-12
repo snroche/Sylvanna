@@ -62,6 +62,7 @@ Campos permitidos (todos opcionales):
 - "quitar_monedas": int  (el PJ actor PAGA ese oro: compras, sobornos, peajes. Si no le alcanza, el sistema lo rechaza y debés renegociar)
 - "aplicar_condicion": {"objetivo": str, "tipo": str, "rondas": int}  (tipos válidos: envenenado, asustado, cegado, derribado, restringido, aturdido, paralizado, agarrado; máx 3 rondas; usalo con moderación y justificación en la ficción)
 - "quitar_condicion": {"objetivo": str, "tipo": str}
+- "otorgar_inspiracion": str  (nombre del PJ que gana Inspiración Heroica: ventaja en su próxima tirada; premiá buen rol o ideas creativas, con mesura)
 - "otorgar_monedas": int  (monedas de oro encontradas/pagadas; usá con mesura)
 - "avanzar_tiempo_min": int
 - "nueva_ubicacion": str
@@ -169,7 +170,7 @@ CAMPOS_PERMITIDOS = {
     "npcs_salen_de_escena", "otorgar_xp", "avanzar_tiempo_min",
     "nueva_ubicacion", "loot", "otorgar_monedas",
     "quitar_item", "pedir_tirada", "quitar_monedas",
-    "aplicar_condicion", "quitar_condicion",
+    "aplicar_condicion", "quitar_condicion", "otorgar_inspiracion",
 }
 
 _JSON_BLOQUE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)

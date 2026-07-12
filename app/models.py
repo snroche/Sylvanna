@@ -99,6 +99,9 @@ class Character(Base):
     estilo_combate: Mapped[str | None] = mapped_column(String(30), nullable=True)
     recursos_clase: Mapped[dict] = mapped_column(JSON, default=dict)
     feats: Mapped[list] = mapped_column(JSON, default=list)
+    # elecciones permanentes de clase/personaje: metamagia, invocaciones,
+    # expertise, trasfondo, multiclase, objetos en sintonía, etc.
+    opciones_clase: Mapped[dict] = mapped_column(JSON, default=dict)
 
     muerte_exitos: Mapped[int] = mapped_column(Integer, default=0)
     muerte_fallos: Mapped[int] = mapped_column(Integer, default=0)

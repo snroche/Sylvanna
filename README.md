@@ -11,7 +11,7 @@ uvicorn main:app --reload
 # Sin variables de entorno usa SQLite local y narrador dummy.
 ```
 
-Tests: `pip install pytest && python -m pytest tests/ -q` (77 tests)
+Tests: `pip install pytest && python -m pytest tests/ -q` (183 tests)
 
 ## Deploy en Render (Web Service)
 
@@ -327,10 +327,9 @@ raza, clase/nivel, alineamiento, PG y condiciones.
 **Mejora de atributos (ASI):** en los niveles 4 y 8 el level-up exige
 repartir +2 puntos (+2 a uno o +1/+1), validado server-side con tope 20.
 
-**Feats:** el SRD solo libera uno (Grappler, incluido). Los de PHB/Tasha's/
-Xanathar's son contenido con copyright y no vienen precargados: la
-estructura `FEATS` en `engine/content.py` está lista para que cargues los
-de tu mesa como data (formato documentado ahí mismo).
+**Feats:** ver la sección "Mecánicas D&D 5e completas" más abajo — ahora hay
+una docena de dotes del PHB con efecto mecánico (Vigoroso, Alerta, Resistente,
+Atleta, etc.), elegibles en los niveles de Mejora en vez del +2.
 
 ## Razas, point buy y administración
 
@@ -375,3 +374,106 @@ Vanilla JS sin build step (`static/`): abrí la raíz del sitio y listo.
   concentración. **Mundo**: misiones, NPCs conocidos con actitud, presagios
   (consecuencias pendientes) y la crónica (resumen rodante).
 - Móvil: tabs Juego/Ficha/Mundo. Tolerante al cold start de Render.
+
+## Mecánicas D&D 5e completas (SRD + PHB)
+
+Segunda tanda de reglas oficiales, toda server-side y sobre la infraestructura
+existente (slots, condiciones, resistencias, recursos, hidratación). Nada de
+sistemas paralelos: cada mecánica reusa lo que ya había.
+
+**Rasgos de clase mecánicos (nuevos):**
+- **Castigo Divino** (Paladín): en `combat/attack`, `castigo_slot` gasta un
+  espacio de conjuro para +2d8 radiante (escala a 5d8, +1d8 vs no-muertos/
+  infernales, tope 6d8). El slot se descuenta solo si el golpe impacta; el
+  daño radiante lleva su propia resistencia.
+- **Forma Salvaje** (Druida nv2): `POST /wild-shape {bestia}` adopta el stat
+  block de una bestia (CR tope por nivel: 1/4 → 1/2 → 1 a nv2/4/8), con sus
+  FUE/DES/CON, PG, CA y ataques; conservás tus mentales. `POST /wild-shape/
+  revert` o auto-revierte al caer a 0 PG. El estado se guarda en `recursos_
+  clase` (sin columna nueva). El descanso la deshace.
+- **Puntos de Hechicería + Metamagia** (Hechicero nv2/3): `POST /sorcery/font`
+  convierte espacios ↔ puntos (Fuente de Magia); `POST /metamagic/select`
+  elige las opciones conocidas. Al lanzar, `metamagia: [...]` gasta puntos:
+  **Empoderado** (re-tira los dados más bajos = mod CAR) y **Elevado**
+  (desventaja del objetivo en su salvación) son mecánicos; el resto gasta los
+  puntos y el narrador los describe.
+- **Invocaciones Sobrenaturales** (Brujo nv2): `POST /invocations/select` con
+  validación de nivel/requisito. **Explosión Agonizante** suma tu mod de CAR
+  al daño de la Explosión Sobrenatural; Influencia Seductora da competencias.
+- **Golpe Aturdidor** (Monje nv5): en `combat/attack`, `golpe_aturdidor` gasta
+  1 ki; salvación de CON (CD ki) o el objetivo queda aturdido a tu próximo turno.
+- **Ataque Temerario** y **resistencia de Furia** (Bárbaro): `imprudente` en el
+  ataque da ventaja melé y expone al bárbaro (ventaja en su contra hasta su
+  turno). La Furia además otorga resistencia a daño contundente/perforante/
+  cortante (vía hidratación).
+- **Expertise** (Pícaro/Bardo): `POST /expertise/select` duplica el bonus de
+  competencia en las habilidades elegidas (2 a nv bajo, 4 más adelante).
+- **Expulsar Muertos Vivientes** (Clérigo nv2): `POST /channel/turn-undead`
+  gasta Canalizar Divinidad; cada no-muerto salva SAB o queda expulsado
+  (asustado). A nv5+ los de CR ≤ 1/2 que fallan son destruidos.
+
+**Estilos de combate que faltaban** (además de Defensa/Duelo/Arquería):
+**Gran Arma** (re-tira 1 y 2 en el daño melé a dos manos), **Protección** (con
+escudo, reacción que da desventaja a un ataque contra un aliado) y **Dos Armas**
+(el ataque de mano secundaria — `mano_secundaria` en `combat/attack`, arma
+ligera — suma el mod de atributo con el estilo, y no consume el turno).
+
+**Sistema de conjuros:**
+- **Conjuros de área / multiobjetivo**: `objetivos_npc_ids: [...]` en
+  `combat/cast`; el daño se tira una vez y se reparte (mitad en salvación
+  exitosa), cada objetivo salva por separado.
+- **Upcasting**: `nivel_slot` mayor al base escala daño (`escalado_danio`),
+  curación (`escalado_curacion`) y proyectiles (proyectil mágico +1 por nivel).
+- **Lanzamiento ritual**: `POST /spells/ritual {conjuro}` lanza conjuros con la
+  etiqueta ritual sin gastar espacio (+10 min de juego), fuera de combate;
+  clases ritualistas (bardo/clérigo/druida/mago) con el conjuro preparado/
+  conocido. Se agregaron detectar_magia, identificar, comprender_idiomas, etc.
+- **Componentes materiales costosos**: los conjuros con `componente_costoso`
+  exigen el item en el inventario (y lo consumen si corresponde), tanto en
+  combate como en ritual.
+
+**Inspiración Heroica**: efecto de narrador `otorgar_inspiracion` (premia buen
+rol); da ventaja en la próxima tirada de ataque o habilidad, y se consume sola.
+
+**Estabilizar** (Medicina CD 10): `POST /medicine/stabilize {objetivo_
+character_id}` — un aliado inconsciente deja de tirar salvaciones de muerte;
+en combate consume el turno.
+
+**Progresión 1–20 completa:** tablas de espacios de lanzador completo/medio/
+pacto, XP, conjuros conocidos y usos de recursos (Furia, Canalizar, Oleada,
+ki, puntos de hechicería) hasta nivel 20. Ataque Extra escala a 3 (guerrero
+nv11) y 4 (nv20). Mejora de Característica en 4/8/12/16/19.
+
+**Dotes (PHB):** una docena con efecto mecánico — Vigoroso (+2 PG/nivel),
+Alerta (+5 iniciativa), Resistente (+1 y competencia en una salvación), Atleta,
+Actor, Observador, Robusto, y varias con efecto narrado (Gran Maestro de Armas,
+Tirador Agudo, Centinela, Afortunado). Se eligen en los niveles de Mejora en
+vez del +2, o al crear un humano variante.
+
+**Trasfondos (13 del PHB, incluye Acólito del SRD):** al crear el personaje,
+`trasfondo` otorga 2 competencias de habilidad, equipo, oro inicial y un rasgo
+narrativo que la IA usa. Acólito, Criminal, Soldado, Sabio, Noble, etc.
+
+**Linajes de tiefling (Mordenkainen):** las 9 estirpes infernales como subrazas
+(Asmodeus, Baalzebul, Dispater, Fierna, Glasya, Levistus, Mammon,
+Mephistopheles, Zariel), cada una con su segundo atributo, magia por nivel y
+—Levistus— resistencia al frío. Elegir tiefling ahora pide linaje.
+
+**Multiclase:** `clase_multiclase` en el level-up gana el nivel en otra clase
+(con los requisitos de atributo del PHB). Registra el desglose por clase en
+`opciones_clase`, y calcula los **espacios combinados** con la tabla de
+multiclase (lanzadores completos enteros, medios a mitad; la Magia de Pacto del
+brujo se suma aparte). Dados de golpe y recursos por clase. Nota v1: el atributo
+de conjuro y el límite de conocidos siguen la clase primaria.
+
+**Sintonía de objetos mágicos:** `POST /attunement/attune` / `/end`, máximo 3
+objetos en sintonía (guardados en `opciones_clase`), validando que el objeto
+esté en el inventario.
+
+**Monturas:** `POST /mount {bestia}` / `POST /dismount`; la montura (caballo de
+guerra, pantera, etc.) lleva sus propios PG, CA y velocidad, que usás mientras
+cabalgás.
+
+Todo esto suma **59 tests nuevos** (183 en total) sin romper ninguno de los
+existentes, y **mantiene compatibilidad con partidas viejas**: la única columna
+agregada (`opciones_clase`) entra por la lista idempotente de `MIGRACIONES`.

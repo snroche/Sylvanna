@@ -10,11 +10,12 @@ from .entities import Arma, Armadura
 
 ARMAS: dict[str, Arma] = {
     "daga": Arma("daga", "1d4", "perforante", "simple", finura=True,
-                 arrojadiza=True, alcance_m=6),
-    "espada_corta": Arma("espada_corta", "1d6", "perforante", "marcial", finura=True),
+                 arrojadiza=True, alcance_m=6, ligera=True),
+    "espada_corta": Arma("espada_corta", "1d6", "perforante", "marcial",
+                         finura=True, ligera=True),
     "espada_larga": Arma("espada_larga", "1d8", "cortante", "marcial", dos_manos="1d10"),
     "hacha_de_mano": Arma("hacha_de_mano", "1d6", "cortante", "simple",
-                          arrojadiza=True, alcance_m=6),
+                          arrojadiza=True, alcance_m=6, ligera=True),
     "hacha_de_batalla": Arma("hacha_de_batalla", "1d8", "cortante", "marcial",
                              dos_manos="1d10"),
     "arco_corto": Arma("arco_corto", "1d6", "perforante", "simple",
@@ -22,21 +23,26 @@ ARMAS: dict[str, Arma] = {
     "arco_largo": Arma("arco_largo", "1d8", "perforante", "marcial",
                        distancia=True, alcance_m=45),
     "ballesta_de_mano": Arma("ballesta_de_mano", "1d6", "perforante", "marcial",
-                             distancia=True, alcance_m=9),
+                             distancia=True, alcance_m=9, ligera=True),
     "lanza": Arma("lanza", "1d6", "perforante", "simple", dos_manos="1d8",
                   arrojadiza=True, alcance_m=6),
     "mazo": Arma("mazo", "1d6", "contundente", "simple"),
-    "mandoble": Arma("mandoble", "2d6", "cortante", "marcial"),
+    "mandoble": Arma("mandoble", "2d6", "cortante", "marcial",
+                     dos_manos_fijo=True),
+    "hacha_grande": Arma("hacha_grande", "1d12", "cortante", "marcial",
+                         dos_manos_fijo=True),
     "baston": Arma("baston", "1d6", "contundente", "simple", dos_manos="1d8"),
-    "cimitarra": Arma("cimitarra", "1d6", "cortante", "marcial", finura=True),
-    "garrote": Arma("garrote", "1d4", "contundente", "simple"),
+    "cimitarra": Arma("cimitarra", "1d6", "cortante", "marcial", finura=True,
+                      ligera=True),
+    "garrote": Arma("garrote", "1d4", "contundente", "simple", ligera=True),
     # armas naturales de monstruos
     "mordida": Arma("mordida", "1d6", "perforante", "simple"),
     "garra": Arma("garra", "1d6", "cortante", "simple"),
     "mordida_grande": Arma("mordida_grande", "2d4", "perforante", "simple"),
-    "clava_grande": Arma("clava_grande", "2d8", "contundente", "simple"),
+    "clava_grande": Arma("clava_grande", "2d8", "contundente", "simple",
+                         dos_manos_fijo=True),
     "artes_marciales": Arma("artes_marciales", "1d4", "contundente", "simple",
-                            finura=True),
+                            finura=True, ligera=True),
 }
 
 ARMADURAS: dict[str, Armadura] = {
@@ -74,7 +80,7 @@ CLASES: dict[str, dict] = {
     "brujo":     {"dado_golpe": "d6",  "lanzador": "brujo",  "atributo_magico": "CAR"},
 }
 
-# Slots de lanzador completo por nivel de personaje (niveles 1-10)
+# Slots de lanzador completo por nivel de personaje (niveles 1-20, SRD/PHB)
 SLOTS_COMPLETO: dict[int, dict[str, int]] = {
     1:  {"1": 2},
     2:  {"1": 3},
@@ -86,9 +92,19 @@ SLOTS_COMPLETO: dict[int, dict[str, int]] = {
     8:  {"1": 4, "2": 3, "3": 3, "4": 2},
     9:  {"1": 4, "2": 3, "3": 3, "4": 3, "5": 1},
     10: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2},
+    11: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1},
+    12: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1},
+    13: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1},
+    14: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1},
+    15: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1},
+    16: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1},
+    17: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2, "6": 1, "7": 1, "8": 1, "9": 1},
+    18: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 1, "7": 1, "8": 1, "9": 1},
+    19: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 2, "7": 1, "8": 1, "9": 1},
+    20: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 3, "6": 2, "7": 2, "8": 1, "9": 1},
 }
 
-# Slots de medio lanzador (Paladín / Ranger) por nivel de personaje
+# Slots de medio lanzador (Paladín / Ranger) por nivel de personaje (1-20)
 SLOTS_MEDIO: dict[int, dict[str, int]] = {
     1: {},
     2: {"1": 2},
@@ -100,13 +116,58 @@ SLOTS_MEDIO: dict[int, dict[str, int]] = {
     8: {"1": 4, "2": 3},
     9: {"1": 4, "2": 3, "3": 2},
     10: {"1": 4, "2": 3, "3": 2},
+    11: {"1": 4, "2": 3, "3": 3},
+    12: {"1": 4, "2": 3, "3": 3},
+    13: {"1": 4, "2": 3, "3": 3, "4": 1},
+    14: {"1": 4, "2": 3, "3": 3, "4": 1},
+    15: {"1": 4, "2": 3, "3": 3, "4": 2},
+    16: {"1": 4, "2": 3, "3": 3, "4": 2},
+    17: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 1},
+    18: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 1},
+    19: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2},
+    20: {"1": 4, "2": 3, "3": 3, "4": 3, "5": 2},
 }
 
-# Brujo: (cantidad de slots, nivel de esos slots) por nivel de personaje
+# Brujo: (cantidad de slots, nivel de esos slots) por nivel de personaje (1-20)
 SLOTS_BRUJO: dict[int, tuple[int, int]] = {
-    1: (1, 1), 2: (1, 1), 3: (2, 2), 4: (2, 2), 5: (2, 3),
+    1: (1, 1), 2: (2, 1), 3: (2, 2), 4: (2, 2), 5: (2, 3),
     6: (2, 3), 7: (2, 4), 8: (2, 4), 9: (2, 5), 10: (2, 5),
+    11: (3, 5), 12: (3, 5), 13: (3, 5), 14: (3, 5), 15: (3, 5),
+    16: (3, 5), 17: (4, 5), 18: (4, 5), 19: (4, 5), 20: (4, 5),
 }
+
+
+def cr_a_numero(cr: str) -> float:
+    """'1/4' → 0.25; '2' → 2.0. Para comparar Challenge Ratings."""
+    cr = str(cr).strip()
+    if "/" in cr:
+        n, d = cr.split("/")
+        return int(n) / int(d)
+    try:
+        return float(cr)
+    except ValueError:
+        return 0.0
+
+
+# Bestias elegibles como Forma Salvaje (druida). El tope de CR sube por nivel.
+FORMAS_SALVAJES = ["rata_gigante", "jabali", "lobo", "pantera",
+                   "arania_gigante", "oso_pardo"]
+
+
+def cr_max_forma_salvaje(nivel: int) -> float:
+    """Tope de CR de Forma Salvaje por nivel de druida (SRD, sin movilidad
+    especial en v1): nv2 → 1/4, nv4 → 1/2, nv8 → 1."""
+    if nivel >= 8:
+        return 1.0
+    if nivel >= 4:
+        return 0.5
+    return 0.25
+
+
+def formas_salvajes_disponibles(nivel: int) -> list[str]:
+    tope = cr_max_forma_salvaje(nivel)
+    return [b for b in FORMAS_SALVAJES
+            if b in MONSTRUOS and cr_a_numero(MONSTRUOS[b]["cr"]) <= tope]
 
 
 def slots_iniciales(clase: str, nivel: int) -> dict:
@@ -116,11 +177,11 @@ def slots_iniciales(clase: str, nivel: int) -> dict:
     if tipo is None:
         return {}
     if tipo == "completo":
-        tabla = SLOTS_COMPLETO[min(nivel, 10)]
+        tabla = SLOTS_COMPLETO[min(max(nivel, 1), 20)]
     elif tipo == "medio":
-        tabla = SLOTS_MEDIO[min(nivel, 10)]
+        tabla = SLOTS_MEDIO[min(max(nivel, 1), 20)]
     else:  # brujo
-        cant, nv = SLOTS_BRUJO[min(nivel, 10)]
+        cant, nv = SLOTS_BRUJO[min(max(nivel, 1), 20)]
         return {str(nv): {"usados": 0, "max": cant}}
     return {nv: {"usados": 0, "max": m} for nv, m in tabla.items()}
 
@@ -154,12 +215,12 @@ MONSTRUOS: dict[str, dict] = {
     "esqueleto": {
         "nombre": "Esqueleto", "cr": "1/4", "pg": 13, "ca_fija": 13, "velocidad_m": 9,
         "atributos": {"FUE": 10, "DES": 14, "CON": 15, "INT": 6, "SAB": 8, "CAR": 5},
-        "armas": ["espada_corta", "arco_corto"],
+        "armas": ["espada_corta", "arco_corto"], "tipo_criatura": "no_muerto",
     },
     "zombi": {
         "nombre": "Zombi", "cr": "1/4", "pg": 22, "ca_fija": 8, "velocidad_m": 6,
         "atributos": {"FUE": 13, "DES": 6, "CON": 16, "INT": 3, "SAB": 6, "CAR": 5},
-        "armas": ["garrote"],
+        "armas": ["garrote"], "tipo_criatura": "no_muerto",
     },
     "orco": {
         "nombre": "Orco", "cr": "1/2", "pg": 15, "ca_fija": 13, "velocidad_m": 9,
@@ -190,6 +251,28 @@ MONSTRUOS: dict[str, dict] = {
         "nombre": "Ogro", "cr": "2", "pg": 59, "ca_fija": 11, "velocidad_m": 12,
         "atributos": {"FUE": 19, "DES": 8, "CON": 16, "INT": 5, "SAB": 7, "CAR": 7},
         "armas": ["clava_grande"],
+    },
+    # bestias (para Forma Salvaje del druida y monturas)
+    "oso_pardo": {
+        "nombre": "Oso pardo", "cr": "1", "pg": 34, "ca_fija": 11, "velocidad_m": 12,
+        "atributos": {"FUE": 19, "DES": 10, "CON": 16, "INT": 2, "SAB": 13, "CAR": 7},
+        "armas": ["garra"], "tipo_criatura": "bestia",
+    },
+    "jabali": {
+        "nombre": "Jabalí", "cr": "1/4", "pg": 11, "ca_fija": 11, "velocidad_m": 12,
+        "atributos": {"FUE": 13, "DES": 11, "CON": 12, "INT": 2, "SAB": 9, "CAR": 5},
+        "armas": ["mordida"], "tipo_criatura": "bestia",
+    },
+    "caballo_de_guerra": {
+        "nombre": "Caballo de guerra", "cr": "1/2", "pg": 19, "ca_fija": 11,
+        "velocidad_m": 18,
+        "atributos": {"FUE": 18, "DES": 12, "CON": 13, "INT": 2, "SAB": 12, "CAR": 7},
+        "armas": ["garra"], "tipo_criatura": "bestia", "montura": True,
+    },
+    "pantera": {
+        "nombre": "Pantera", "cr": "1/4", "pg": 13, "ca_fija": 12, "velocidad_m": 15,
+        "atributos": {"FUE": 14, "DES": 15, "CON": 10, "INT": 3, "SAB": 14, "CAR": 7},
+        "armas": ["mordida"], "tipo_criatura": "bestia",
     },
 }
 
@@ -240,21 +323,25 @@ CONJUROS: dict[str, dict] = {
         "nivel": 1, "resolucion": "auto", "danio": "1d4+1", "proyectiles": 3,
         "tipo_danio": "fuerza", "concentracion": False,
         "escalado": "+1 proyectil por nivel de slot extra",
+        "escalado_proyectiles": 1,
     },
     "curar_heridas": {
         "nivel": 1, "resolucion": "curacion", "curacion": "1d8",
         "suma_mod_magico": True, "concentracion": False,
         "escalado": "+1d8 por nivel de slot extra",
+        "escalado_curacion": "1d8",
     },
     "palabra_de_curacion": {
         "nivel": 1, "resolucion": "curacion", "curacion": "1d4",
         "suma_mod_magico": True, "concentracion": False, "accion": "adicional",
+        "escalado_curacion": "1d4",
     },
     "manos_ardientes": {
         "nivel": 1, "resolucion": "salvacion", "salvacion": "DES",
         "danio": "3d6", "tipo_danio": "fuego", "en_salvacion_exitosa": "mitad",
         "area": "cono 4.5m", "concentracion": False,
         "escalado": "+1d6 por nivel de slot extra",
+        "escalado_danio": "1d6",
     },
     "escudo": {
         "nivel": 1, "resolucion": "auto", "concentracion": False,
@@ -283,6 +370,7 @@ CONJUROS: dict[str, dict] = {
         "danio": "2d8", "tipo_danio": "trueno", "en_salvacion_exitosa": "mitad",
         "area": "cubo 4.5m", "concentracion": False,
         "efecto_extra": "empuja 3m si falla la salvación",
+        "escalado_danio": "1d8",
     },
     "hechizar_persona": {
         "nivel": 1, "resolucion": "salvacion", "salvacion": "SAB",
@@ -323,7 +411,47 @@ CONJUROS: dict[str, dict] = {
         "nivel": 2, "resolucion": "auto", "concentracion": False,
         "efecto": "+5 PG max y actuales a 3 criaturas por 8 horas",
     },
+
+    # -------- conjuros rituales (se lanzan sin gastar espacio, +10 min) -------
+    "detectar_magia": {
+        "nivel": 1, "resolucion": "auto", "concentracion": True, "ritual": True,
+        "componentes": "VS",
+        "efecto": "Percibís la presencia de magia a 9m durante 10 minutos.",
+    },
+    "comprender_idiomas": {
+        "nivel": 1, "resolucion": "auto", "concentracion": False, "ritual": True,
+        "componentes": "VSM",
+        "efecto": "Entendés cualquier idioma hablado que oigas por 1 hora.",
+    },
+    "hablar_con_animales": {
+        "nivel": 1, "resolucion": "auto", "concentracion": False, "ritual": True,
+        "componentes": "VS",
+        "efecto": "Podés comunicarte con bestias durante 10 minutos.",
+    },
+    "alarma": {
+        "nivel": 1, "resolucion": "auto", "concentracion": False, "ritual": True,
+        "componentes": "VSM",
+        "efecto": "Creás una alarma en un área por 8 horas.",
+    },
+    "identificar": {
+        "nivel": 1, "resolucion": "auto", "concentracion": False, "ritual": True,
+        "componentes": "VSM",
+        "componente_costoso": {"nombre": "perla", "costo": 100,
+                               "consumido": False},
+        "efecto": "Aprendés las propiedades de un objeto mágico.",
+    },
+    "augurio": {
+        "nivel": 2, "resolucion": "auto", "concentracion": False, "ritual": True,
+        "componentes": "VSM",
+        "componente_costoso": {"nombre": "varillas_de_augurio", "costo": 25,
+                               "consumido": False},
+        "efecto": "Recibís un presagio sobre una acción en la próxima hora "
+                  "(buenaventura, infortunio, ambos o nada).",
+    },
 }
+
+# Clases que pueden lanzar rituales (con el conjuro conocido/preparado)
+CLASES_RITUALISTAS = {"bardo", "clerigo", "druida", "mago"}
 
 
 # ---------------------------------------------------------------- razas
@@ -432,10 +560,42 @@ RAZAS: dict[str, dict] = {
         },
     },
     "tiefling": {
-        "bonos": {"CAR": 2, "INT": 1}, "velocidad_m": 9,
-        "rasgo": "Resistencia al fuego, visión en la oscuridad",
+        "bonos": {"CAR": 2}, "velocidad_m": 9,
+        "rasgo": "Resistencia al fuego, visión en la oscuridad. Tu linaje "
+                 "infernal define tu segundo atributo y tu magia.",
         "resistencias": ["fuego"],
-        "subrazas": {},
+        # Linajes de Mordenkainen (todos suman CAR+2 en la base y un +1 propio).
+        "subrazas": {
+            "asmodeus": {"bonos": {"INT": 1},
+                         "rasgo": "Legado de Asmodeus: truco Taumaturgia; a nv3 "
+                                  "Reprensión Infernal, a nv5 Oscuridad (CAR)."},
+            "baalzebul": {"bonos": {"INT": 1},
+                          "rasgo": "Legado de Baalzebul: truco Toque Gélido; a "
+                                   "nv3 Rayo Enfermizo, a nv5 Rayo de Debilidad."},
+            "dispater": {"bonos": {"DES": 1},
+                         "rasgo": "Legado de Dispater: truco Taumaturgia; a nv3 "
+                                  "Disfrazarse, a nv5 Detectar Pensamientos."},
+            "fierna": {"bonos": {"SAB": 1},
+                       "rasgo": "Legado de Fierna: truco Amistad; a nv3 "
+                                "Hechizar Persona, a nv5 Sugestión."},
+            "glasya": {"bonos": {"DES": 1},
+                       "rasgo": "Legado de Glasya: truco Ilusión Menor; a nv3 "
+                                "Disfrazarse, a nv5 Invisibilidad."},
+            "levistus": {"bonos": {"CON": 1},
+                         "rasgo": "Legado de Levistus: truco Rayo de Escarcha; "
+                                  "a nv3 Perdición, a nv5 Inmovilizar Persona.",
+                         "resistencias": ["frio"]},
+            "mammon": {"bonos": {"INT": 1},
+                       "rasgo": "Legado de Mammon: truco Mano de Mago; a nv3 "
+                                "Detectar Objetos, a nv5 Aureola de Monedas."},
+            "mephistopheles": {"bonos": {"INT": 1},
+                               "rasgo": "Legado de Mephistopheles: truco Manos "
+                                        "Ardientes-menor; a nv3 Manos Ardientes, "
+                                        "a nv5 Flecha Ácida de Melf."},
+            "zariel": {"bonos": {"FUE": 1},
+                       "rasgo": "Legado de Zariel: truco Llama Sagrada; a nv3 "
+                                "Fe Militante, a nv5 Franja Abrasadora."},
+        },
     },
 }
 RAZAS["tiflin"] = RAZAS["tiefling"]  # alias de compatibilidad
@@ -480,6 +640,124 @@ def recursos_raciales(raza_str: str, nivel: int) -> dict:
     if aliento_de_raza(raza_str):
         r["aliento_de_dragon"] = {"usados": 0, "max": 1, "reset": "corto"}
     return r
+
+
+# ---------------------------------------------------------------- trasfondos
+# Trasfondos (SRD Acólito + los 13 del PHB). Otorgan 2 competencias de
+# habilidad, equipo, oro inicial y un rasgo narrativo que la IA puede usar.
+# "competencias" usa las claves de HABILIDADES.
+TRASFONDOS: dict[str, dict] = {
+    "acolito": {
+        "nombre": "Acólito", "competencias": ["perspicacia", "religion"],
+        "idiomas": 2, "oro": 15,
+        "equipo": [{"nombre": "simbolo_sagrado", "cantidad": 1},
+                   {"nombre": "libro_de_oraciones", "cantidad": 1},
+                   {"nombre": "vestiduras", "cantidad": 1}],
+        "rasgo": "Refugio de los Fieles",
+        "rasgo_desc": "Templos afines te dan cobijo, curación básica y apoyo "
+                      "(pero no dinero) a vos y a tus compañeros."},
+    "charlatan": {
+        "nombre": "Charlatán", "competencias": ["engano", "juego_de_manos"],
+        "herramientas": ["kit_de_disfraz", "kit_de_falsificacion"], "oro": 15,
+        "equipo": [{"nombre": "kit_de_disfraz", "cantidad": 1}],
+        "rasgo": "Identidad Falsa",
+        "rasgo_desc": "Tenés una segunda identidad creíble y sabés falsificar "
+                      "documentos."},
+    "criminal": {
+        "nombre": "Criminal", "competencias": ["engano", "sigilo"],
+        "herramientas": ["kit_de_ladron"], "oro": 15,
+        "equipo": [{"nombre": "palanca", "cantidad": 1}],
+        "rasgo": "Contacto Criminal",
+        "rasgo_desc": "Tenés un contacto confiable en el bajomundo que hace de "
+                      "enlace con otros criminales."},
+    "artista": {
+        "nombre": "Artista", "competencias": ["acrobacias", "actuacion"],
+        "herramientas": ["kit_de_disfraz", "instrumento_musical"], "oro": 15,
+        "equipo": [{"nombre": "instrumento_musical", "cantidad": 1}],
+        "rasgo": "Por Demanda Popular",
+        "rasgo_desc": "Siempre encontrás dónde actuar; a cambio te dan hospedaje "
+                      "y comida, y la gente del lugar te aprecia."},
+    "heroe_del_pueblo": {
+        "nombre": "Héroe del Pueblo",
+        "competencias": ["trato_con_animales", "supervivencia"],
+        "herramientas": ["herramientas_de_artesano"], "oro": 10,
+        "equipo": [{"nombre": "herramientas_de_artesano", "cantidad": 1},
+                   {"nombre": "pala", "cantidad": 1}],
+        "rasgo": "Hospitalidad Rústica",
+        "rasgo_desc": "La gente común te esconde y ayuda: podés refugiarte "
+                      "entre ellos mientras no atraigas a sus enemigos."},
+    "gremio_artesano": {
+        "nombre": "Artesano de Gremio",
+        "competencias": ["perspicacia", "persuasion"],
+        "herramientas": ["herramientas_de_artesano"], "idiomas": 1, "oro": 15,
+        "equipo": [{"nombre": "herramientas_de_artesano", "cantidad": 1}],
+        "rasgo": "Membresía de Gremio",
+        "rasgo_desc": "Tu gremio te da apoyo político y social, alojamiento en "
+                      "sus casas y contactos, a cambio de cuotas."},
+    "ermitano": {
+        "nombre": "Ermitaño", "competencias": ["medicina", "religion"],
+        "herramientas": ["kit_de_herboristeria"], "idiomas": 1, "oro": 5,
+        "equipo": [{"nombre": "kit_de_herboristeria", "cantidad": 1}],
+        "rasgo": "Descubrimiento",
+        "rasgo_desc": "En tu aislamiento hallaste una verdad única y poderosa "
+                      "(un secreto, una reliquia o una revelación)."},
+    "noble": {
+        "nombre": "Noble", "competencias": ["historia", "persuasion"],
+        "herramientas": ["set_de_juego"], "idiomas": 1, "oro": 25,
+        "equipo": [{"nombre": "anillo_de_sello", "cantidad": 1},
+                   {"nombre": "ropa_fina", "cantidad": 1}],
+        "rasgo": "Posición de Privilegio",
+        "rasgo_desc": "La gente te trata con deferencia; conseguís audiencias, "
+                      "hospedaje entre nobles y acceso a la alta sociedad."},
+    "forastero": {
+        "nombre": "Forastero", "competencias": ["atletismo", "supervivencia"],
+        "herramientas": ["instrumento_musical"], "idiomas": 1, "oro": 10,
+        "equipo": [{"nombre": "baston", "cantidad": 1},
+                   {"nombre": "trampa_de_caza", "cantidad": 1}],
+        "rasgo": "Errante",
+        "rasgo_desc": "Recordás la geografía, ríos y asentamientos; podés "
+                      "hallar comida y agua para el grupo en la naturaleza."},
+    "sabio": {
+        "nombre": "Sabio", "competencias": ["arcanos", "historia"],
+        "idiomas": 2, "oro": 10,
+        "equipo": [{"nombre": "frasco_de_tinta", "cantidad": 1},
+                   {"nombre": "pluma", "cantidad": 1}],
+        "rasgo": "Investigador",
+        "rasgo_desc": "Aunque no sepas un dato, sabés dónde y de quién "
+                      "obtenerlo: bibliotecas, universidades, colegas."},
+    "marinero": {
+        "nombre": "Marinero", "competencias": ["atletismo", "percepcion"],
+        "herramientas": ["herramientas_de_navegante"], "oro": 10,
+        "equipo": [{"nombre": "cuerda_de_seda", "cantidad": 1},
+                   {"nombre": "amuleto_de_la_suerte", "cantidad": 1}],
+        "rasgo": "Pasaje de Barco",
+        "rasgo_desc": "Podés conseguir pasaje gratis en un barco para vos y el "
+                      "grupo, a cambio de ayudar con la tripulación."},
+    "soldado": {
+        "nombre": "Soldado", "competencias": ["atletismo", "intimidacion"],
+        "herramientas": ["set_de_juego"], "oro": 10,
+        "equipo": [{"nombre": "insignia_de_rango", "cantidad": 1},
+                   {"nombre": "set_de_juego", "cantidad": 1}],
+        "rasgo": "Rango Militar",
+        "rasgo_desc": "Tu rango es reconocido: soldados leales a tu antiguo "
+                      "ejército te obedecen en asuntos menores."},
+    "huerfano": {
+        "nombre": "Pilluelo", "competencias": ["juego_de_manos", "sigilo"],
+        "herramientas": ["kit_de_disfraz", "kit_de_ladron"], "oro": 10,
+        "equipo": [{"nombre": "mapa_de_la_ciudad", "cantidad": 1},
+                   {"nombre": "cuchillo", "cantidad": 1}],
+        "rasgo": "Secretos de la Ciudad",
+        "rasgo_desc": "Conocés los pasajes secretos de la urbe: te movés por "
+                      "ella al doble de velocidad entre callejones."},
+}
+
+
+def aplicar_trasfondo(clave: str) -> dict:
+    """Devuelve los datos del trasfondo o lanza ValueError si no existe."""
+    if clave not in TRASFONDOS:
+        raise ValueError(f"Trasfondo desconocido: {clave}. "
+                         f"Opciones: {list(TRASFONDOS)}")
+    return TRASFONDOS[clave]
 
 
 # ---------------------------------------------------------------- point buy
@@ -559,36 +837,174 @@ ESTILOS_COMBATE = {
     "defensa": "+1 CA mientras usás armadura",
     "duelo": "+2 al daño con arma melé a una mano",
     "arqueria": "+2 a las tiradas de ataque a distancia",
+    "gran_arma": "Re-tirás los 1 y 2 en los dados de daño de un arma melé a dos manos",
+    "proteccion": "Con escudo, usás tu reacción para dar desventaja a un ataque "
+                  "contra un aliado cercano",
+    "dos_armas": "Sumás tu modificador de atributo al daño del ataque con la "
+                 "mano secundaria",
 }
 
 # ---------------------------------------------------------------- recursos de clase (SRD, niveles 1-4)
 # tipo: "corto" se recupera con descanso corto; "largo" con descanso largo.
 
+def _usos_furia(nivel: int) -> int:
+    """Usos de Furia por nivel (SRD). Ilimitada a nivel 20."""
+    if nivel >= 20:
+        return 99
+    if nivel >= 17:
+        return 6
+    if nivel >= 12:
+        return 5
+    if nivel >= 6:
+        return 4
+    if nivel >= 3:
+        return 3
+    return 2
+
+
+def _usos_canalizar_clerigo(nivel: int) -> int:
+    """Usos de Canalizar Divinidad del clérigo por nivel (SRD)."""
+    if nivel >= 18:
+        return 3
+    if nivel >= 6:
+        return 2
+    return 1
+
+
 def recursos_clase_iniciales(clase: str, nivel: int, mod_car: int = 0) -> dict:
     """Recursos activos de clase para clase/nivel. Se guarda en Character."""
     r: dict = {}
     if clase == "barbaro":
-        r["furia"] = {"usados": 0, "max": 3 if nivel >= 3 else 2,
-                      "reset": "largo"}
+        r["furia"] = {"usados": 0, "max": _usos_furia(nivel), "reset": "largo"}
     if clase == "guerrero":
         r["nuevo_aliento"] = {"usados": 0, "max": 1, "reset": "corto"}
         if nivel >= 2:
-            r["oleada_de_accion"] = {"usados": 0, "max": 1, "reset": "corto"}
+            r["oleada_de_accion"] = {"usados": 0,
+                                     "max": 2 if nivel >= 17 else 1,
+                                     "reset": "corto"}
     if clase == "clerigo" and nivel >= 2:
-        r["canalizar_divinidad"] = {"usados": 0, "max": 1, "reset": "corto"}
+        r["canalizar_divinidad"] = {"usados": 0,
+                                    "max": _usos_canalizar_clerigo(nivel),
+                                    "reset": "corto"}
     if clase == "paladin":
         r["imposicion_de_manos"] = {"pool": 5 * nivel, "pool_max": 5 * nivel,
                                     "reset": "largo"}
     if clase == "bardo":
         r["inspiracion_bardica"] = {"usados": 0, "max": max(1, mod_car),
-                                    "reset": "largo"}
+                                    "reset": "corto" if nivel >= 5 else "largo"}
     if clase == "monje" and nivel >= 2:
         r["ki"] = {"usados": 0, "max": nivel, "reset": "corto"}
+    if clase == "druida" and nivel >= 2:
+        r["forma_salvaje"] = {"usados": 0, "max": 2, "reset": "corto"}
+    if clase == "hechicero" and nivel >= 2:
+        r["puntos_hechiceria"] = {"pool": nivel, "pool_max": nivel,
+                                  "reset": "largo"}
     if clase == "paladin" and nivel >= 3:
-        r["canalizar_divinidad"] = {"usados": 0, "max": 1, "reset": "corto"}
+        r["canalizar_divinidad"] = {"usados": 0,
+                                    "max": 2 if nivel >= 18 else 1,
+                                    "reset": "corto"}
     if clase == "mago":
         r["recuperacion_arcana"] = {"usados": 0, "max": 1, "reset": "largo"}
     return r
+
+
+# ---------------------------------------------------------------- hechicero
+# Fuente de Magia: costo en Puntos de Hechicería para CREAR un espacio de
+# conjuro de cada nivel (SRD). Convertir un espacio en puntos da PH = nivel.
+COSTO_SLOT_EN_PH = {1: 2, 2: 3, 3: 5, 4: 6, 5: 7}
+
+# Metamagia (SRD): efectos soportados por el motor + costo en PH.
+# "empoderado" y "elevado" tienen efecto mecánico completo; el resto gasta los
+# puntos y el narrador describe el efecto.
+METAMAGIA: dict[str, dict] = {
+    "empoderado": {"nombre": "Conjuro Empoderado", "costo": 1,
+                   "desc": "Re-tirás hasta tu mod de CAR dados de daño y usás "
+                           "las nuevas tiradas."},
+    "elevado": {"nombre": "Conjuro Elevado", "costo": 3,
+                "desc": "El objetivo tiene desventaja en su primera salvación "
+                        "contra el conjuro."},
+    "acelerado": {"nombre": "Conjuro Acelerado", "costo": 2,
+                  "desc": "Lanzás un conjuro de acción como acción adicional."},
+    "sutil": {"nombre": "Conjuro Sutil", "costo": 1,
+              "desc": "Lanzás sin componentes verbales ni somáticos."},
+    "gemelo": {"nombre": "Conjuro Gemelo", "costo": "nivel",
+               "desc": "Un conjuro de un solo objetivo apunta a un segundo "
+                       "objetivo (costo = nivel del conjuro, mín 1)."},
+    "distante": {"nombre": "Conjuro Distante", "costo": 1,
+                 "desc": "Duplicás el alcance del conjuro."},
+    "prolongado": {"nombre": "Conjuro Prolongado", "costo": 1,
+                   "desc": "Duplicás la duración del conjuro."},
+    "cuidadoso": {"nombre": "Conjuro Cuidadoso", "costo": 1,
+                  "desc": "Aliados elegidos salvan automáticamente contra tu "
+                          "conjuro de área."},
+}
+
+
+# ---------------------------------------------------------------- brujo
+# Invocaciones Sobrenaturales (SRD). "requisito_conjuro" exige conocer ese
+# conjuro; "nivel_min" el nivel mínimo de brujo. "mecanico" marca las que el
+# motor aplica; el resto van al contexto del narrador.
+INVOCACIONES: dict[str, dict] = {
+    "explosion_agonizante": {
+        "nombre": "Explosión Agonizante", "nivel_min": 2, "mecanico": True,
+        "requisito_conjuro": "explosion_sobrenatural",
+        "desc": "Sumás tu modificador de Carisma al daño de tu Explosión "
+                "Sobrenatural."},
+    "explosion_repelente": {
+        "nombre": "Explosión Repelente", "nivel_min": 2,
+        "requisito_conjuro": "explosion_sobrenatural",
+        "desc": "Al impactar con Explosión Sobrenatural, empujás al objetivo 3m."},
+    "hechicero_del_pacto": {
+        "nombre": "Tomo del Pacto (Secretos Ancestrales)", "nivel_min": 2,
+        "desc": "Aprendés trucos rituales y podés lanzarlos como rituales."},
+    "vista_del_diablo": {
+        "nombre": "Vista del Diablo", "nivel_min": 2,
+        "desc": "Ves en la oscuridad, incluso mágica, hasta 36m."},
+    "influencia_seductora": {
+        "nombre": "Influencia Seductora", "nivel_min": 2, "mecanico": True,
+        "otorga_competencias": ["engano", "persuasion"],
+        "desc": "Ganás competencia en Engaño y Persuasión."},
+    "mascara_de_mil_rostros": {
+        "nombre": "Máscara de Mil Rostros", "nivel_min": 2,
+        "desc": "Podés lanzar Disfrazarse a voluntad, sin gastar espacio."},
+    "lanza_sobrenatural": {
+        "nombre": "Lanza Sobrenatural", "nivel_min": 2,
+        "requisito_conjuro": "explosion_sobrenatural",
+        "desc": "El alcance de tu Explosión Sobrenatural sube a 90m."},
+    "hoja_sedienta": {
+        "nombre": "Hoja Sedienta", "nivel_min": 5,
+        "desc": "Tu arma de pacto gana +tu mod de CAR de daño necrótico "
+                "(narrativo v1)."},
+}
+
+
+def invocaciones_conocidas_max(nivel: int) -> int:
+    """Cantidad de Invocaciones Sobrenaturales conocidas por nivel de brujo."""
+    tabla = {2: 2, 5: 3, 7: 4, 9: 5, 12: 6, 15: 7, 18: 8}
+    disponible = 0
+    for nv, n in sorted(tabla.items()):
+        if nivel >= nv:
+            disponible = n
+    return disponible
+
+
+def metamagias_conocidas_max(nivel: int) -> int:
+    """Cantidad de opciones de metamagia que conoce un hechicero por nivel."""
+    if nivel >= 17:
+        return 4
+    if nivel >= 10:
+        return 3
+    if nivel >= 3:
+        return 2
+    return 0
+
+
+def costo_metamagia(clave: str, nivel_conjuro: int) -> int:
+    """Costo en PH de una metamagia para un conjuro de nivel dado."""
+    c = METAMAGIA[clave]["costo"]
+    if c == "nivel":
+        return max(1, nivel_conjuro)
+    return int(c)
 
 
 # Descripciones para UI y para el contexto del narrador
@@ -640,28 +1056,98 @@ SUBCLASES_INFO = {
 }
 
 # ---------------------------------------------------------------- feats
-# El SRD 5.1 solo incluye UN feat (Grappler). Los demás (PHB, Tasha's,
-# Xanathar's) son contenido con copyright: cargalos vos como data acá,
-# siguiendo el formato. Efectos soportados por el motor v1:
-#   {"asi": {"ATR": 1}}                      → suma al atributo (tope 20)
-#   {"pasivo": "texto"}                      → narrativo (va al contexto del DM)
-# Los efectos mecánicos complejos requieren código; empezá por los simples.
-
+# Dotes (feats) del PHB + el Grappler del SRD. Efectos soportados por el motor:
+#   "asi": {"ATR": n}                 → suma fija a atributo(s) (tope 20)
+#   "asi_eleccion": ["FUE","DES"]     → +1 a UNO de esos a elección del jugador
+#   "hp_por_nivel": n                 → +n PG por nivel de personaje (Vigoroso)
+#   "bono_iniciativa": n              → +n a la iniciativa (Alerta)
+#   "competencia_salvacion_eleccion": ["FUE",...] → competencia en la salv. elegida
+#   "competencias": ["sigilo", ...]   → competencias de habilidad fijas
+#   "pasivo": "texto"                 → efecto narrativo (va al contexto del DM)
+# Las dotes se toman en los niveles de Mejora (4, 8, 12, 16, 19) en vez del +2.
 FEATS: dict[str, dict] = {
     "luchador_agarrador": {  # Grappler (SRD)
-        "nombre": "Luchador agarrador",
-        "requisito": {"FUE": 13},
+        "nombre": "Luchador Agarrador", "requisito": {"FUE": 13},
         "efectos": {"pasivo": "Ventaja en ataques contra criaturas que "
-                              "agarraste; podés intentar inmovilizarlas."},
-    },
-    # ejemplo de formato para que agregues los tuyos:
-    # "resistente": {
-    #     "nombre": "Resistente",
-    #     "requisito": {},
-    #     "efectos": {"asi": {"CON": 1},
-    #                 "pasivo": "Competencia en salvaciones de CON"},
-    # },
+                              "agarraste; podés intentar inmovilizarlas."}},
+    "resistente": {  # Resilient
+        "nombre": "Resistente", "requisito": {},
+        "efectos": {"asi_eleccion": ["FUE", "DES", "CON", "INT", "SAB", "CAR"],
+                    "competencia_salvacion_eleccion": ["FUE", "DES", "CON",
+                                                       "INT", "SAB", "CAR"],
+                    "pasivo": "Competencia en salvaciones del atributo elegido."}},
+    "vigoroso": {  # Tough
+        "nombre": "Vigoroso", "requisito": {},
+        "efectos": {"hp_por_nivel": 2,
+                    "pasivo": "Tus PG máximos suben en 2 por nivel."}},
+    "alerta": {  # Alert
+        "nombre": "Alerta", "requisito": {},
+        "efectos": {"bono_iniciativa": 5,
+                    "pasivo": "No podés ser sorprendido mientras estés "
+                              "consciente; los atacantes ocultos no ganan "
+                              "ventaja contra vos."}},
+    "atleta": {  # Athlete
+        "nombre": "Atleta", "requisito": {},
+        "efectos": {"asi_eleccion": ["FUE", "DES"],
+                    "pasivo": "Te levantás de estar derribado con solo 1.5m de "
+                              "movimiento; trepás sin coste extra."}},
+    "actor": {
+        "nombre": "Actor", "requisito": {},
+        "efectos": {"asi": {"CAR": 1},
+                    "pasivo": "Ventaja en Engaño y Actuación al hacerte pasar "
+                              "por otra persona; imitás voces."}},
+    "observador": {  # Observant
+        "nombre": "Observador", "requisito": {},
+        "efectos": {"asi_eleccion": ["INT", "SAB"],
+                    "pasivo": "+5 a tu Percepción y Perspicacia pasivas; leés "
+                              "los labios."}},
+    "robusto": {  # Durable
+        "nombre": "Robusto", "requisito": {},
+        "efectos": {"asi": {"CON": 1},
+                    "pasivo": "Al gastar Dados de Golpe recuperás como mínimo "
+                              "el doble de tu mod. de CON."}},
+    "experto_en_habilidades": {  # Skilled
+        "nombre": "Experto en Habilidades", "requisito": {},
+        "efectos": {"pasivo": "Ganás competencia en tres habilidades o "
+                              "herramientas a elección (cargalas con el DM)."}},
+    "gran_maestro_de_armas": {  # Great Weapon Master
+        "nombre": "Gran Maestro de Armas", "requisito": {},
+        "efectos": {"pasivo": "Al sacar crítico o abatir a un enemigo, ganás un "
+                              "ataque de arma cuerpo a cuerpo como acción "
+                              "adicional. Podés restar 5 al ataque para sumar "
+                              "10 al daño con armas pesadas (avisá al DM)."}},
+    "tirador_agudo": {  # Sharpshooter
+        "nombre": "Tirador Agudo", "requisito": {},
+        "efectos": {"pasivo": "Ignorás cobertura parcial y penalización por "
+                              "largo alcance. Podés restar 5 al ataque a "
+                              "distancia para sumar 10 al daño (avisá al DM)."}},
+    "centinela": {  # Sentinel
+        "nombre": "Centinela", "requisito": {},
+        "efectos": {"pasivo": "Tus ataques de oportunidad reducen a 0 el "
+                              "movimiento del objetivo; atacás a quien ataque "
+                              "a un aliado cerca tuyo."}},
+    "afortunado": {  # Lucky
+        "nombre": "Afortunado", "requisito": {},
+        "efectos": {"pasivo": "Tenés 3 puntos de suerte por descanso largo para "
+                              "re-tirar un d20 de ataque, salvación o habilidad "
+                              "(avisá al DM)."}},
 }
+
+
+def efectos_feats(feats: list) -> dict:
+    """Agrega los efectos mecánicos de una lista de feats guardados en el
+    personaje (cada uno {'clave': str, 'atributo': str|None}).
+    Devuelve {'hp_por_nivel': int, 'bono_iniciativa': int}."""
+    hp = 0
+    ini = 0
+    for f in feats or []:
+        clave = f.get("clave") if isinstance(f, dict) else f
+        if not clave:
+            continue
+        ef = FEATS.get(clave, {}).get("efectos", {})
+        hp += ef.get("hp_por_nivel", 0)
+        ini += ef.get("bono_iniciativa", 0)
+    return {"hp_por_nivel": hp, "bono_iniciativa": ini}
 
 
 # ---------------------------------------------------------------- contenido importado
@@ -744,12 +1230,37 @@ XP_POR_CR.update({
 # Clases con Ataque Extra a partir de nivel 5 (SRD)
 ATAQUE_EXTRA_NV5 = {"guerrero", "barbaro", "paladin", "ranger", "monje"}
 
-# Conjuros conocidos máximos por nivel de personaje (SRD, lanzadores "conocidos")
+
+def ataques_por_accion(clase: str, nivel: int) -> int:
+    """Cantidad de ataques con la acción de Ataque. El guerrero llega a 3 (nv11)
+    y 4 (nv20); el resto de clases con Ataque Extra hacen 2 desde nivel 5."""
+    if clase == "guerrero":
+        if nivel >= 20:
+            return 4
+        if nivel >= 11:
+            return 3
+        if nivel >= 5:
+            return 2
+        return 1
+    if clase in ATAQUE_EXTRA_NV5 and nivel >= 5:
+        return 2
+    return 1
+
+
+# Conjuros conocidos máximos por nivel de personaje (SRD/PHB, niveles 1-20)
 CONOCIDOS_MAX = {
-    "bardo":     {1: 4, 2: 5, 3: 6, 4: 7, 5: 8},
-    "hechicero": {1: 2, 2: 3, 3: 4, 4: 5, 5: 6},
-    "brujo":     {1: 2, 2: 3, 3: 4, 4: 5, 5: 6},
-    "ranger":    {1: 0, 2: 2, 3: 3, 4: 3, 5: 4},
+    "bardo":     {1: 4, 2: 5, 3: 6, 4: 7, 5: 8, 6: 9, 7: 10, 8: 11, 9: 12,
+                  10: 14, 11: 15, 12: 15, 13: 16, 14: 18, 15: 19, 16: 19,
+                  17: 20, 18: 22, 19: 22, 20: 22},
+    "hechicero": {1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8, 8: 9, 9: 10,
+                  10: 11, 11: 12, 12: 12, 13: 13, 14: 13, 15: 14, 16: 14,
+                  17: 15, 18: 15, 19: 15, 20: 15},
+    "brujo":     {1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8, 8: 9, 9: 10,
+                  10: 10, 11: 11, 12: 11, 13: 12, 14: 12, 15: 13, 16: 13,
+                  17: 14, 18: 14, 19: 15, 20: 15},
+    "ranger":    {1: 0, 2: 2, 3: 3, 4: 3, 5: 4, 6: 4, 7: 5, 8: 5, 9: 6,
+                  10: 6, 11: 7, 12: 7, 13: 8, 14: 8, 15: 9, 16: 9, 17: 10,
+                  18: 10, 19: 11, 20: 11},
 }
 
 
@@ -761,7 +1272,7 @@ def limite_conjuros(clase: str, nivel: int, mod_magico: int) -> tuple[str, int]:
     - Paladín (preparado, medio): mod CAR + nivel//2 (mín 1), desde nv2.
     """
     if clase in CONOCIDOS_MAX:
-        return "conocidos", CONOCIDOS_MAX[clase].get(min(nivel, 5), 0)
+        return "conocidos", CONOCIDOS_MAX[clase].get(min(max(nivel, 1), 20), 0)
     if clase in ("mago", "clerigo", "druida"):
         return "preparados", max(1, mod_magico + nivel)
     if clase == "paladin":
@@ -796,3 +1307,69 @@ NIVEL_SUBCLASE = {"clerigo": 1, "hechicero": 1, "brujo": 1,
                   "barbaro": 3, "bardo": 3, "guerrero": 3, "monje": 3,
                   "paladin": 3, "picaro": 3, "ranger": 3, "druida": 2,
                   "mago": 2}
+
+# ---------------------------------------------------------------- multiclase
+# Requisitos de atributo para multiclasear a/desde cada clase (PHB).
+MULTICLASE_REQUISITOS: dict[str, dict[str, int]] = {
+    "barbaro": {"FUE": 13},
+    "bardo": {"CAR": 13},
+    "clerigo": {"SAB": 13},
+    "druida": {"SAB": 13},
+    "guerrero": {"FUE_O_DES": 13},   # FUE 13 o DES 13
+    "monje": {"DES": 13, "SAB": 13},
+    "paladin": {"FUE": 13, "CAR": 13},
+    "ranger": {"DES": 13, "SAB": 13},
+    "picaro": {"DES": 13},
+    "hechicero": {"CAR": 13},
+    "mago": {"INT": 13},
+    "brujo": {"CAR": 13},
+}
+
+# Aporte al "nivel de lanzador" combinado para los espacios de multiclase (PHB):
+# lanzadores completos aportan su nivel entero; medios (paladín/ranger) la mitad
+# redondeada abajo. El brujo NO cuenta acá (Magia de Pacto es aparte).
+_APORTE_LANZADOR = {
+    "bardo": 1.0, "clerigo": 1.0, "druida": 1.0, "hechicero": 1.0, "mago": 1.0,
+    "paladin": 0.5, "ranger": 0.5,
+}
+
+
+def cumple_requisitos_multiclase(clase: str, atributos: dict) -> tuple[bool, str]:
+    """¿Cumple los atributos mínimos para (multi)clasear en 'clase'?"""
+    reqs = MULTICLASE_REQUISITOS.get(clase, {})
+    for atr, minimo in reqs.items():
+        if atr == "FUE_O_DES":
+            if atributos.get("FUE", 0) < minimo and atributos.get("DES", 0) < minimo:
+                return False, "FUE 13 o DES 13"
+        elif atributos.get(atr, 0) < minimo:
+            return False, f"{atr} {minimo}"
+    return True, ""
+
+
+def nivel_lanzador_multiclase(clases: dict[str, int]) -> int:
+    """Nivel de lanzador combinado (PHB) a partir de {clase: nivel}."""
+    total = 0.0
+    for cls, lvl in clases.items():
+        total += _APORTE_LANZADOR.get(cls, 0.0) * lvl
+    return int(total)
+
+
+def slots_multiclase(clases: dict[str, int]) -> dict:
+    """Espacios de conjuro combinados (PHB) para una mezcla de clases.
+    Usa la tabla de lanzador completo con el nivel de lanzador combinado, y
+    agrega los espacios de Magia de Pacto del brujo por separado (aprox v1:
+    se suman al mismo nivel; se recuperan con descanso largo)."""
+    cl = nivel_lanzador_multiclase(clases)
+    slots: dict[str, dict] = {}
+    if cl >= 1:
+        slots = {nv: {"usados": 0, "max": m}
+                 for nv, m in SLOTS_COMPLETO[min(max(cl, 1), 20)].items()}
+    nv_brujo = clases.get("brujo", 0)
+    if nv_brujo:
+        cant, nivel_pacto = SLOTS_BRUJO[min(max(nv_brujo, 1), 20)]
+        clave = str(nivel_pacto)
+        if clave in slots:
+            slots[clave]["max"] += cant
+        else:
+            slots[clave] = {"usados": 0, "max": cant}
+    return slots
