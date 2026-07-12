@@ -1243,6 +1243,10 @@ SUBCLASES_INFO = {
     "circulo_de_la_tierra": "Recuperación natural y conjuros de círculo "
                             "(narrativo v1)",
     "ladron": "Manos rápidas y trepar de segundo piso (narrativo v1)",
+    "swashbuckler": "Audacia Temeraria: sumás tu CAR a la iniciativa y podés "
+                    "hacer Ataque Furtivo en duelo 1 vs 1 sin necesitar ventaja "
+                    "ni un aliado adyacente (mecánico); Juego de Pies Ágil "
+                    "evita ataques de oportunidad de a quien atacás (narrativo)",
     "escuela_de_evocacion": "Esculpir conjuros: tus aliados esquivan tus "
                             "evocaciones (narrativo v1: avisale al DM)",
     "patron_infernal": "Bendición del oscuro: PG temporales al abatir "
@@ -1490,7 +1494,7 @@ SUBCLASES_SRD = {
     "guerrero": ["campeon"],
     "monje": ["camino_de_la_mano_abierta"],
     "paladin": ["juramento_de_devocion"],
-    "picaro": ["ladron"],
+    "picaro": ["ladron", "swashbuckler"],
     "ranger": ["cazador"],
     "hechicero": ["linaje_draconico"],
     "brujo": ["patron_infernal"],

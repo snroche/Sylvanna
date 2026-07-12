@@ -44,6 +44,11 @@ def hidratar_personaje(c: Character) -> Criatura:
     # dotes: bono de iniciativa (Alerta), etc.
     from engine.content import efectos_feats
     ef_feats = efectos_feats(c.feats or [])
+    bono_ini = ef_feats["bono_iniciativa"]
+    # Swashbuckler (pícaro): Audacia Temeraria suma el mod de CAR a la iniciativa
+    if c.clase == "picaro" and c.subclase == "swashbuckler":
+        from engine.rules import mod as _mod
+        bono_ini += _mod(c.atributos["CAR"])
     return Criatura(
         id=f"pj_{c.id}",
         nombre=c.nombre,
@@ -71,7 +76,7 @@ def hidratar_personaje(c: Character) -> Criatura:
         ) if c.slots or c.conocidos else None,
         dados_golpe_disp=c.dados_golpe_disp,
         dado_golpe=c.dado_golpe,
-        bono_iniciativa=ef_feats["bono_iniciativa"],
+        bono_iniciativa=bono_ini,
         muerte_exitos=c.muerte_exitos,
         muerte_fallos=c.muerte_fallos,
         vivo=c.vivo,

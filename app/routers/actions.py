@@ -455,6 +455,10 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
             Character.vivo == True, Character.pg_actual > 0))  # noqa: E712
         furtivo = res_al.scalars().first() is not None \
             or cr_pj.tiene_condicion("ayudado")
+        # Swashbuckler — Audacia Temeraria: puede hacer Ataque Furtivo en duelo
+        # 1 vs 1 sin necesitar ventaja ni un aliado adyacente.
+        if char.subclase == "swashbuckler":
+            furtivo = True
     r = resolver_ataque(cr_pj, cr_npc, arma,
                         dos_manos=body.dos_manos, furtivo=furtivo,
                         smite_dados=smite_dados,
