@@ -33,7 +33,11 @@ async def catalogo():
     oficiales = ["cuero", "cuero_tachonado", "camisa_de_mallas", "coraza",
                  "media_armadura", "ring_mail", "cota_de_mallas",
                  "armadura_de_placas"]
-    from engine.content import (NIVEL_SUBCLASE, RAZAS, SUBCLASES_SRD)
+    from engine.content import (ALINEAMIENTOS, ARMADURAS_COMP_CLASE,
+                                ARMAS_COMP_CLASE, CLASE_HABILIDADES,
+                                CLASE_HABILIDADES_N, ESTILOS_COMBATE,
+                                NIVEL_SUBCLASE, RAZAS, SALVACIONES_CLASE,
+                                SUBCLASES_SRD, TRASFONDOS)
     razas = {}
     for k, r in RAZAS.items():
         if k == "tiflin":   # alias de compatibilidad: no listar
@@ -48,6 +52,25 @@ async def catalogo():
                               "bonos_a_eleccion": sv.get("bonos_a_eleccion")}
                          for sk, sv in r["subrazas"].items()},
         }
+    # categoría de cada arma/armadura oficial, para que la UI filtre por competencia
+    armas_info = {k: {"categoria": ARMAS[k].categoria,
+                      "distancia": ARMAS[k].distancia,
+                      "ligera": ARMAS[k].ligera,
+                      "dos_manos_fijo": ARMAS[k].dos_manos_fijo}
+                  for k in sorted(set(ARMAS)) if k in ARMAS}
+    armaduras_info = {k: {"categoria": ARMADURAS[k].categoria} for k in oficiales}
+    competencias_clase = {
+        c: {"salvaciones": SALVACIONES_CLASE.get(c, []),
+            "armas": ARMAS_COMP_CLASE.get(c, []),
+            "armaduras": ARMADURAS_COMP_CLASE.get(c, [])}
+        for c in ARMAS_COMP_CLASE}
+    trasfondos = {k: {"nombre": v["nombre"], "competencias": v["competencias"],
+                      "rasgo": v["rasgo"], "rasgo_desc": v.get("rasgo_desc", ""),
+                      "oro": v.get("oro", 0)}
+                  for k, v in TRASFONDOS.items()}
+    habilidades_clase = {c: {"lista": CLASE_HABILIDADES.get(c, []),
+                             "cantidad": CLASE_HABILIDADES_N.get(c, 2)}
+                         for c in ARMAS_COMP_CLASE}
     return {
         "conjuros": {k: {"nivel": v["nivel"],
                          "nombre": v.get("nombre", k.replace("_", " "))}
@@ -55,6 +78,13 @@ async def catalogo():
         "monstruos": sorted(MONSTRUOS),
         "armas": sorted(set(ARMAS)),
         "armaduras": oficiales,
+        "armas_info": armas_info,
+        "armaduras_info": armaduras_info,
+        "competencias_clase": competencias_clase,
+        "habilidades_clase": habilidades_clase,
+        "trasfondos": trasfondos,
+        "alineamientos": ALINEAMIENTOS,
+        "estilos_combate": ESTILOS_COMBATE,
         "razas": razas,
         "subclases": SUBCLASES_SRD,
         "objetos_magicos": len(__import__("engine.content",

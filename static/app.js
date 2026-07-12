@@ -46,7 +46,8 @@ const HABILIDADES = ["atletismo","acrobacias","juego_de_manos","sigilo","arcanos
   "actuacion","persuasion"];
 
 const ARMAS = ["daga","espada_corta","espada_larga","hacha_de_mano","hacha_de_batalla",
-  "arco_corto","arco_largo","ballesta_de_mano","lanza","mazo","mandoble","baston","cimitarra"];
+  "arco_corto","arco_largo","ballesta_de_mano","lanza","mazo","mandoble","hacha_grande",
+  "baston","cimitarra","garrote"];
 
 const ARMADURAS = ["cuero","cuero_tachonado","camisa_de_mallas","coraza",
   "media_armadura","ring_mail","cota_de_mallas","armadura_de_placas"];
@@ -127,6 +128,42 @@ const HABILIDADES_CLASE_UI = {
 const CONSUMIBLES_USABLES = new Set(["pocion_de_curacion","pocion_de_curacion_mayor"]);
 const ATRS = ["FUE","DES","CON","INT","SAB","CAR"];
 const TIMEOUT_TURNO = 120;
+
+// Fallback local (el servidor es la fuente de verdad vía /api/content; esto
+// asegura que la UI funcione aunque el catálogo aún no haya cargado).
+const TRASFONDOS_LOCAL = {
+  acolito:{nombre:"Acólito",competencias:["perspicacia","religion"],oro:15,rasgo:"Refugio de los Fieles"},
+  charlatan:{nombre:"Charlatán",competencias:["engano","juego_de_manos"],oro:15,rasgo:"Identidad Falsa"},
+  criminal:{nombre:"Criminal",competencias:["engano","sigilo"],oro:15,rasgo:"Contacto Criminal"},
+  artista:{nombre:"Artista",competencias:["acrobacias","actuacion"],oro:15,rasgo:"Por Demanda Popular"},
+  heroe_del_pueblo:{nombre:"Héroe del Pueblo",competencias:["trato_con_animales","supervivencia"],oro:10,rasgo:"Hospitalidad Rústica"},
+  gremio_artesano:{nombre:"Artesano de Gremio",competencias:["perspicacia","persuasion"],oro:15,rasgo:"Membresía de Gremio"},
+  ermitano:{nombre:"Ermitaño",competencias:["medicina","religion"],oro:5,rasgo:"Descubrimiento"},
+  noble:{nombre:"Noble",competencias:["historia","persuasion"],oro:25,rasgo:"Posición de Privilegio"},
+  forastero:{nombre:"Forastero",competencias:["atletismo","supervivencia"],oro:10,rasgo:"Errante"},
+  sabio:{nombre:"Sabio",competencias:["arcanos","historia"],oro:10,rasgo:"Investigador"},
+  marinero:{nombre:"Marinero",competencias:["atletismo","percepcion"],oro:10,rasgo:"Pasaje de Barco"},
+  soldado:{nombre:"Soldado",competencias:["atletismo","intimidacion"],oro:10,rasgo:"Rango Militar"},
+  huerfano:{nombre:"Pilluelo",competencias:["juego_de_manos","sigilo"],oro:10,rasgo:"Secretos de la Ciudad"},
+};
+const HAB_CLASE_LOCAL = {
+  barbaro:{lista:["trato_con_animales","atletismo","intimidacion","naturaleza","percepcion","supervivencia"],cantidad:2},
+  bardo:{lista:HABILIDADES,cantidad:3},
+  clerigo:{lista:["historia","perspicacia","medicina","persuasion","religion"],cantidad:2},
+  druida:{lista:["arcanos","trato_con_animales","perspicacia","medicina","naturaleza","percepcion","religion","supervivencia"],cantidad:2},
+  guerrero:{lista:["acrobacias","trato_con_animales","atletismo","historia","perspicacia","intimidacion","percepcion","supervivencia"],cantidad:2},
+  monje:{lista:["acrobacias","atletismo","historia","perspicacia","religion","sigilo"],cantidad:2},
+  paladin:{lista:["atletismo","perspicacia","intimidacion","medicina","persuasion","religion"],cantidad:2},
+  ranger:{lista:["trato_con_animales","atletismo","perspicacia","investigacion","naturaleza","percepcion","sigilo","supervivencia"],cantidad:3},
+  picaro:{lista:["acrobacias","atletismo","engano","perspicacia","intimidacion","investigacion","percepcion","actuacion","persuasion","juego_de_manos","sigilo"],cantidad:4},
+  hechicero:{lista:["arcanos","engano","perspicacia","intimidacion","persuasion","religion"],cantidad:2},
+  mago:{lista:["arcanos","historia","perspicacia","investigacion","medicina","religion"],cantidad:2},
+  brujo:{lista:["arcanos","engano","historia","intimidacion","investigacion","naturaleza","religion"],cantidad:2},
+};
+const GENEROS = ["", "masculino", "femenino", "helicoptero apache"];
+const getTrasfondos = () => CATALOGO?.trasfondos || TRASFONDOS_LOCAL;
+const getHabClase = (clase) =>
+  CATALOGO?.habilidades_clase?.[clase] || HAB_CLASE_LOCAL[clase] || {lista:HABILIDADES,cantidad:2};
 
 // ---------------------------------------------------------------- fetch
 
@@ -216,7 +253,31 @@ $("btn-retomar").onclick = async () => {
 async function prepararCreacionPJ() {
   await cargarCatalogo();
   const sel = $("pj-clase");
-  if (sel.options.length) { actualizarPB(); return; }
+  const primeraVez = !sel.options.length;
+
+  // Trasfondo y género NO dependen de la clase: se poblan siempre que estén
+  // vacíos, incluso al re-entrar a la pantalla (así nunca quedan vacíos).
+  const st = $("pj-trasfondo");
+  if (!st.options.length) {
+    st.add(new Option("(sin trasfondo)", ""));
+    for (const [k, t] of Object.entries(getTrasfondos()))
+      st.add(new Option(t.nombre, k));
+    st.onchange = () => {
+      const t = getTrasfondos()[st.value];
+      $("pj-trasfondo-info").textContent = t
+        ? `Competencias: ${t.competencias.map(c => c.replaceAll("_", " ")).join(", ")}`
+          + ` · ${t.oro} mo · ${t.rasgo}`
+        : "";
+      montarHabilidades();   // el trasfondo fuerza sus habilidades
+    };
+  }
+  const sg = $("pj-genero");
+  if (!sg.options.length)
+    for (const g of GENEROS) sg.add(new Option(g || "(sin especificar)", g));
+
+  if (!primeraVez) { actualizarPB(); return; }
+
+  // --- lo que sigue solo hace falta la primera vez ---
   for (const c of Object.keys(CLASES)) sel.add(new Option(c, c));
   sel.onchange = () => {
     $("pj-clase-info").textContent = CLASES[sel.value];
@@ -231,6 +292,8 @@ async function prepararCreacionPJ() {
       for (const s of (CATALOGO?.subclases?.[sel.value] || []))
         ss.add(new Option(s.replaceAll("_"," "), s));
     }
+    filtrarEquipo();      // solo armas/armaduras que la clase domina
+    montarHabilidades();  // solo habilidades de la lista de la clase
   };
   const sal = $("pj-alineamiento");
   for (const a of ALINEAMIENTOS) sal.add(new Option(a.replaceAll("_"," "), a));
@@ -305,14 +368,78 @@ async function prepararCreacionPJ() {
   $("modo-libre").onclick = () => setModo("libre");
   setModo("puntos");
 
-  montarChips("pj-habilidades", HABILIDADES, 4);
+  montarHabilidades();
   cargarConjurosCreacion();
+  filtrarEquipo();
+}
 
-  const sa = $("pj-armadura");
-  for (const a of ARMADURAS) sa.add(new Option(a.replaceAll("_"," "), a));
-  const sw = $("pj-arma");
-  for (const a of ARMAS) sw.add(new Option(a.replaceAll("_"," "), a));
-  sw.value = "espada_larga";
+// Habilidades: chips de la lista de la clase (elegís la cantidad del PHB) más
+// las que fuerza el trasfondo (pre-marcadas y bloqueadas).
+function montarHabilidades() {
+  const hc = getHabClase($("pj-clase").value);
+  const forzadas = new Set(getTrasfondos()[$("pj-trasfondo").value]?.competencias || []);
+  const cont = $("pj-habilidades"); cont.innerHTML = "";
+  const cap = hc.cantidad;
+  const todas = [...new Set([...hc.lista, ...forzadas])];
+  for (const it of todas) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.dataset.valor = it;
+    b.textContent = it.replaceAll("_", " ");
+    if (forzadas.has(it)) {
+      b.classList.add("activo", "chip-forzada");
+      b.title = "Otorgada por tu trasfondo";
+      b.style.opacity = ".85"; b.style.cursor = "default";
+    } else {
+      b.onclick = () => {
+        const elegidas = cont.querySelectorAll(".activo:not(.chip-forzada)").length;
+        if (!b.classList.contains("activo") && elegidas >= cap) return;
+        b.classList.toggle("activo");
+      };
+    }
+    cont.appendChild(b);
+  }
+  $("hab-hint").textContent = `(elegí ${cap})`;
+  const nombresForz = [...forzadas].map(f => f.replaceAll("_", " "));
+  $("hab-forzadas").textContent = nombresForz.length
+    ? `Tu trasfondo ya te da: ${nombresForz.join(", ")}.` : "";
+}
+
+const habilidadesElegidas = () =>
+  [...$("pj-habilidades").querySelectorAll(".activo:not(.chip-forzada)")]
+    .map(b => b.dataset.valor);
+
+// Rearma los selects de arma/armadura con SOLO lo que la clase domina (SRD:
+// tu clase determina tus competencias; no podés equipar lo que no dominás).
+function filtrarEquipo() {
+  const clase = $("pj-clase").value;
+  const comp = CATALOGO?.competencias_clase?.[clase] || {armas: [], armaduras: []};
+  const armasInfo = CATALOGO?.armas_info || {};
+  const armadInfo = CATALOGO?.armaduras_info || {};
+
+  const sw = $("pj-arma"); const armaPrev = sw.value; sw.innerHTML = "";
+  for (const a of ARMAS) {
+    const cat = armasInfo[a]?.categoria;
+    if (cat && (comp.armas.includes(cat) || comp.armas.includes(a)))
+      sw.add(new Option(a.replaceAll("_", " "), a));
+  }
+  if (!sw.options.length) sw.add(new Option("(sin arma)", ""));
+  if ([...sw.options].some(o => o.value === armaPrev)) sw.value = armaPrev;
+
+  const sa = $("pj-armadura"); const armadPrev = sa.value; sa.innerHTML = "";
+  sa.add(new Option("Sin armadura", ""));
+  for (const a of ARMADURAS) {
+    const cat = armadInfo[a]?.categoria;
+    if (cat && comp.armaduras.includes(cat))
+      sa.add(new Option(a.replaceAll("_", " "), a));
+  }
+  if ([...sa.options].some(o => o.value === armadPrev)) sa.value = armadPrev;
+
+  const esc = $("pj-escudo");
+  const puedeEscudo = comp.armaduras.includes("escudo");
+  esc.disabled = !puedeEscudo;
+  if (!puedeEscudo) esc.checked = false;
+  const escLbl = esc.closest("label");
+  if (escLbl) escLbl.style.opacity = puedeEscudo ? "" : ".5";
 }
 
 let modoAtributos = "puntos";
@@ -424,13 +551,15 @@ $("btn-crear-pj").onclick = async () => {
         ? [$("pj-eleccion-1").value, $("pj-eleccion-2").value] : [],
       subclase: $("lbl-subclase-crea").hidden ? null : $("pj-subclase-crea").value,
       metodo: modoAtributos,
+      genero: $("pj-genero").value || null,
+      trasfondo: $("pj-trasfondo").value || null,
       alineamiento: $("pj-alineamiento").value,
       estilo_combate: $("pj-clase").value === "guerrero" ? $("pj-estilo").value : null,
       clase: $("pj-clase").value, atributos,
-      habilidades: chipsElegidos("pj-habilidades"),
+      habilidades: habilidadesElegidas(),
       armadura: $("pj-armadura").value || null,
       escudo: $("pj-escudo").checked,
-      arma_equipada: $("pj-arma").value,
+      arma_equipada: $("pj-arma").value || null,
       conocidos: conjuros, preparados: conjuros,
     });
     await entrarALaMesa();
@@ -962,6 +1091,19 @@ $("btn-skill").onclick = async () => {
   $("btn-skill").disabled = false;
 };
 
+$("btn-save").onclick = async () => {
+  $("btn-save").disabled = true;
+  try {
+    const d = await api("POST", `/campaigns/${S.campaignId}/saving-throw`, {
+      atributo: $("inp-salvacion").value,
+      descripcion: $("inp-desc-salvacion").value.trim()});
+    sellarResolucion(d.resolucion);
+    $("inp-desc-salvacion").value = "";
+    S.narrando = true; pintarEscribiendo(); acelerarPolling();
+  } catch(e){ avisoSistema(e.message); }
+  $("btn-save").disabled = false;
+};
+
 // ---------- ficha
 
 function pintarFicha(f) {
@@ -1243,6 +1385,9 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
 document.querySelector('[data-panel="juego"]')?.classList.add("visible");
 
 for (const h of HABILIDADES) $("inp-habilidad").add(new Option(h.replaceAll("_"," "), h));
+const SALV_LABEL = {FUE:"Fuerza", DES:"Destreza", CON:"Constitución",
+  INT:"Inteligencia", SAB:"Sabiduría", CAR:"Carisma"};
+for (const a of ATRS) $("inp-salvacion").add(new Option(SALV_LABEL[a], a));
 
 // ---------------------------------------------------------------- arranque
 

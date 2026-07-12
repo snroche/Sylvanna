@@ -53,7 +53,9 @@ async def construir_contexto(db: AsyncSession, camp: Campaign) -> str:
             (f", condiciones: {[x['tipo'] for x in c.condiciones]}"
              if c.condiciones else "")
         sub = f"/{c.subclase}" if c.subclase else ""
-        lineas.append(f"- {c.nombre} ({c.raza} {c.clase}{sub} nv{c.nivel}): {estado}")
+        gen = f" {c.genero}" if getattr(c, "genero", "") else ""
+        lineas.append(f"- {c.nombre} ({c.raza}{gen} {c.clase}{sub} "
+                      f"nv{c.nivel}): {estado}")
     partes.append("## GRUPO\n" + "\n".join(lineas))
 
     # --- NPCs en escena (ficha completa solo de los presentes)

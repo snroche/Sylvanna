@@ -45,15 +45,17 @@ def test_dados_castigo_extra_vs_no_muerto():
 
 
 def test_castigo_divino_suma_danio_radiante():
-    atk = pj()
-    obj = maniqui(ca=1)   # CA 1: siempre impacta
-    r = resolver_ataque(atk, obj, ARMAS["espada_larga"], smite_dados="10d8")
-    assert r["impacta"]
-    smite = r["danio"]["castigo_divino"]
-    assert smite is not None
-    assert smite["tipo_danio"] == "radiante"
-    # 10d8 => al menos 10 de daño radiante encima del arma
-    assert smite["valor"] >= 10
+    for _ in range(50):   # reintentar hasta que no sea pifia natural
+        r = resolver_ataque(pj(), maniqui(ca=1), ARMAS["espada_larga"],
+                            smite_dados="10d8")
+        if r["danio"]:
+            smite = r["danio"]["castigo_divino"]
+            assert smite is not None
+            assert smite["tipo_danio"] == "radiante"
+            # 10d8 => al menos 10 de daño radiante encima del arma
+            assert smite["valor"] >= 10
+            return
+    raise AssertionError("nunca impactó contra CA 1")
 
 
 def test_castigo_divino_no_aplica_a_distancia():

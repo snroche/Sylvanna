@@ -223,6 +223,46 @@ async def accion_habilidad(campaign_id: int, body: AccionHabilidad,
     return {"resolucion": r, "narrando": True}
 
 
+class TiradaSalvacion(BaseModel):
+    atributo: str            # FUE | DES | CON | INT | SAB | CAR
+    cd: int = 12
+    descripcion: str = ""
+
+
+@router.post("/saving-throw")
+async def tirada_de_salvacion(campaign_id: int, body: TiradaSalvacion,
+                              bg: BackgroundTasks,
+                              player: Player = Depends(jugador_actual),
+                              db: AsyncSession = Depends(get_db)):
+    """Tirada de salvación (d20 + mod de atributo + BC si tenés competencia en
+    esa salvación). La CD la fija el mundo/DM."""
+    char = await _mi_personaje(campaign_id, player, db)
+    camp = await db.get(Campaign, campaign_id)
+    atr = (body.atributo or "").upper()
+    if atr not in ("FUE", "DES", "CON", "INT", "SAB", "CAR"):
+        raise HTTPException(400, "Atributo inválido (FUE/DES/CON/INT/SAB/CAR)")
+    cr = hidratar_personaje(char)
+    r = tirada_salvacion(cr, atr, body.cd)
+    persistir_personaje(cr, char)
+    competente = atr in char.competencias.get("salvaciones", [])
+    _msg(db, campaign_id, "jugador", char.nombre,
+         f"[salvación de {atr}] {body.descripcion}")
+    exito = "✓ éxito" if r["exito"] else "✗ fallo"
+    _msg(db, campaign_id, "sistema", "Sistema",
+         f"🛡🎲 {char.nombre} — salvación de {atr}"
+         f"{' (competente)' if competente else ''}: d20={r.get('natural')} "
+         f"+{r.get('bono')} = {r.get('total')} vs CD {body.cd} → {exito}")
+    _roll(db, campaign_id, r, char.id)
+    encolar_narracion(
+        bg, camp,
+        f"{char.nombre} hace una tirada de salvación de {atr} "
+        f"({body.descripcion or 'sin detalle'}). "
+        f"Resultado del sistema: {json.dumps(r, ensure_ascii=False)}",
+        char.id)
+    await db.commit()
+    return {"resolucion": r, "narrando": True}
+
+
 # ================================================================ combate
 
 async def _iniciar_combate(db: AsyncSession, camp: Campaign,
@@ -1758,12 +1798,18 @@ async def equipar(campaign_id: int, body: Equipar,
     camp = await db.get(Campaign, campaign_id)
     if camp.estado == "combate":
         raise HTTPException(409, "No podés reequiparte en pleno combate")
+    from engine.content import (puede_usar_arma, puede_usar_armadura,
+                                puede_usar_escudo)
+    comp = char.competencias or {}
     nombres_inv = {x.get("nombre") for x in char.inventario}
     if body.arma is not None:
         if body.arma not in ARMAS:
             raise HTTPException(400, "Arma desconocida")
         if body.arma not in nombres_inv and body.arma != char.arma_equipada:
             raise HTTPException(400, f"No tenés {body.arma} en el inventario")
+        if not puede_usar_arma(comp, body.arma):
+            raise HTTPException(400, f"No sos competente con "
+                                     f"{body.arma.replace('_', ' ')}")
         char.arma_equipada = body.arma
     if body.armadura is not None:
         if body.armadura and body.armadura not in ARMADURAS:
@@ -1771,8 +1817,13 @@ async def equipar(campaign_id: int, body: Equipar,
         if body.armadura and body.armadura not in nombres_inv \
                 and body.armadura != char.armadura:
             raise HTTPException(400, f"No tenés {body.armadura}")
+        if not puede_usar_armadura(comp, body.armadura):
+            raise HTTPException(400, f"No sabés usar "
+                                     f"{body.armadura.replace('_', ' ')}")
         char.armadura = body.armadura or None
     if body.escudo is not None:
+        if body.escudo and not puede_usar_escudo(comp):
+            raise HTTPException(400, "No sabés usar escudo")
         char.escudo = body.escudo
     await db.commit()
     from engine.rules import calcular_ca

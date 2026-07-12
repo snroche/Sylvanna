@@ -844,6 +844,111 @@ ESTILOS_COMBATE = {
                  "mano secundaria",
 }
 
+# ---------------------------------------------------------------- competencias de clase (SRD)
+# Competencias que otorga cada clase: salvaciones, categorías de armas y de
+# armaduras (incluye "escudo"). Fuente única para creación, /api/content y la UI.
+SALVACIONES_CLASE = {
+    "barbaro": ["FUE", "CON"], "guerrero": ["FUE", "CON"],
+    "paladin": ["SAB", "CAR"], "ranger": ["FUE", "DES"],
+    "clerigo": ["SAB", "CAR"], "druida": ["INT", "SAB"],
+    "bardo": ["DES", "CAR"], "monje": ["FUE", "DES"],
+    "picaro": ["DES", "INT"], "hechicero": ["CON", "CAR"],
+    "mago": ["INT", "SAB"], "brujo": ["SAB", "CAR"],
+}
+
+ARMAS_COMP_CLASE = {
+    "barbaro": ["simple", "marcial"], "guerrero": ["simple", "marcial"],
+    "paladin": ["simple", "marcial"], "ranger": ["simple", "marcial"],
+    "clerigo": ["simple"], "druida": ["simple"],
+    "bardo": ["simple"], "monje": ["simple"],
+    "picaro": ["simple"], "hechicero": ["simple"],
+    "mago": ["simple"], "brujo": ["simple"],
+}
+
+ARMADURAS_COMP_CLASE = {
+    "barbaro": ["ligera", "media", "escudo"],
+    "guerrero": ["ligera", "media", "pesada", "escudo"],
+    "paladin": ["ligera", "media", "pesada", "escudo"],
+    "ranger": ["ligera", "media", "escudo"],
+    "clerigo": ["ligera", "media", "escudo"],
+    "druida": ["ligera", "media", "escudo"],
+    "bardo": ["ligera"], "monje": [], "picaro": ["ligera"],
+    "hechicero": [], "mago": [], "brujo": ["ligera"],
+}
+
+
+# Lista de habilidades entre las que elige cada clase, y cuántas (PHB).
+# Las competencias de habilidad del PJ = estas elegidas + las del trasfondo.
+CLASE_HABILIDADES = {
+    "barbaro": ["trato_con_animales", "atletismo", "intimidacion", "naturaleza",
+                "percepcion", "supervivencia"],
+    "bardo": ["atletismo", "acrobacias", "juego_de_manos", "sigilo", "arcanos",
+              "historia", "investigacion", "naturaleza", "religion",
+              "perspicacia", "medicina", "percepcion", "supervivencia",
+              "trato_con_animales", "engano", "intimidacion", "actuacion",
+              "persuasion"],   # bardo: cualquier habilidad
+    "clerigo": ["historia", "perspicacia", "medicina", "persuasion", "religion"],
+    "druida": ["arcanos", "trato_con_animales", "perspicacia", "medicina",
+               "naturaleza", "percepcion", "religion", "supervivencia"],
+    "guerrero": ["acrobacias", "trato_con_animales", "atletismo", "historia",
+                 "perspicacia", "intimidacion", "percepcion", "supervivencia"],
+    "monje": ["acrobacias", "atletismo", "historia", "perspicacia", "religion",
+              "sigilo"],
+    "paladin": ["atletismo", "perspicacia", "intimidacion", "medicina",
+                "persuasion", "religion"],
+    "ranger": ["trato_con_animales", "atletismo", "perspicacia", "investigacion",
+               "naturaleza", "percepcion", "sigilo", "supervivencia"],
+    "picaro": ["acrobacias", "atletismo", "engano", "perspicacia", "intimidacion",
+               "investigacion", "percepcion", "actuacion", "persuasion",
+               "juego_de_manos", "sigilo"],
+    "hechicero": ["arcanos", "engano", "perspicacia", "intimidacion",
+                  "persuasion", "religion"],
+    "mago": ["arcanos", "historia", "perspicacia", "investigacion", "medicina",
+             "religion"],
+    "brujo": ["arcanos", "engano", "historia", "intimidacion", "investigacion",
+              "naturaleza", "religion"],
+}
+
+# Cantidad de habilidades que elige cada clase (PHB): la mayoría 2; pícaro 4;
+# bardo y explorador 3.
+CLASE_HABILIDADES_N = {
+    "barbaro": 2, "bardo": 3, "clerigo": 2, "druida": 2, "guerrero": 2,
+    "monje": 2, "paladin": 2, "ranger": 3, "picaro": 4, "hechicero": 2,
+    "mago": 2, "brujo": 2,
+}
+
+
+def competencias_de_clase(clase: str) -> dict:
+    """Competencias base (sin trasfondo) que otorga una clase."""
+    return {
+        "salvaciones": list(SALVACIONES_CLASE.get(clase, [])),
+        "armas": list(ARMAS_COMP_CLASE.get(clase, [])),
+        "armaduras": list(ARMADURAS_COMP_CLASE.get(clase, [])),
+    }
+
+
+def puede_usar_arma(competencias: dict, arma_nombre: str) -> bool:
+    """¿La criatura es competente con esa arma? (por categoría o nombre)."""
+    a = ARMAS.get(arma_nombre)
+    if a is None:
+        return False
+    comp = competencias.get("armas", [])
+    return a.categoria in comp or arma_nombre in comp
+
+
+def puede_usar_armadura(competencias: dict, armadura_nombre: str | None) -> bool:
+    """¿Es competente con esa armadura? Sin armadura siempre es válido."""
+    if not armadura_nombre:
+        return True
+    a = ARMADURAS.get(armadura_nombre)
+    if a is None:
+        return False
+    return a.categoria in competencias.get("armaduras", [])
+
+
+def puede_usar_escudo(competencias: dict) -> bool:
+    return "escudo" in competencias.get("armaduras", [])
+
 # ---------------------------------------------------------------- recursos de clase (SRD, niveles 1-4)
 # tipo: "corto" se recupera con descanso corto; "largo" con descanso largo.
 

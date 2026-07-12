@@ -6,7 +6,7 @@
 <title>La Mesa — DnD con DM de IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/style.css?v=2">
 </head>
 <body>
 
@@ -26,7 +26,7 @@
           placeholder="Transcurre en Baldur's Gate. Tono oscuro, intriga entre gremios. La party empieza en el puerto…"></textarea>
       </label>
       <label>Tu nombre
-        <input id="inp-jugador-1" placeholder="Santi" maxlength="80">
+        <input id="inp-jugador-1" placeholder="Amongus" maxlength="80">
       </label>
       <button class="btn btn-ambar" id="btn-crear-camp">Fundar</button>
     </div>
@@ -65,8 +65,9 @@
     <div class="tarjeta">
       <div class="fila-2">
         <label>Nombre <input id="pj-nombre" placeholder="Thorin" maxlength="80"></label>
-        <label>Raza <select id="pj-raza"></select></label>
+        <label>Género <span class="nota-inline">(descripción)</span> <select id="pj-genero"></select></label>
       </div>
+      <label>Raza <select id="pj-raza"></select></label>
       <div class="fila-2">
         <label id="lbl-subraza" hidden>Subraza <select id="pj-subraza"></select></label>
         <label id="lbl-eleccion" hidden>+1 a dos atributos
@@ -81,7 +82,11 @@
       </label>
       <p class="nota" id="pj-clase-info"></p>
       <div class="fila-2">
+        <label>Trasfondo <select id="pj-trasfondo"></select></label>
         <label>Alineamiento <select id="pj-alineamiento"></select></label>
+      </div>
+      <p class="nota" id="pj-trasfondo-info"></p>
+      <div class="fila-2">
         <label id="lbl-estilo" hidden>Estilo de combate <select id="pj-estilo"></select></label>
         <label id="lbl-subclase-crea" hidden>Subclase <select id="pj-subclase-crea"></select></label>
       </div>
@@ -96,7 +101,8 @@
       <div class="grilla-atributos" id="pj-atributos"></div>
       <p class="nota">Los bonos raciales los suma el servidor: acá cargás los valores base.</p>
 
-      <h3>Habilidades <span class="nota-inline">(elegí hasta 4)</span></h3>
+      <h3>Habilidades <span class="nota-inline" id="hab-hint"></span></h3>
+      <p class="nota" id="hab-forzadas"></p>
       <div class="chips" id="pj-habilidades"></div>
 
       <div class="fila-2">
@@ -170,6 +176,15 @@
             </div>
             <p class="nota">La CD la fija el mundo (12 por defecto en v1). El servidor tira y suma tus bonos.</p>
           </details>
+          <details class="tirada-detalle">
+            <summary>🛡 Tirada de salvación</summary>
+            <div class="composer-fila">
+              <select id="inp-salvacion"></select>
+              <input id="inp-desc-salvacion" placeholder="Contra qué (opcional)">
+              <button class="btn" id="btn-save">Salvar</button>
+            </div>
+            <p class="nota">d20 + mod del atributo + tu competencia de salvación si la tenés.</p>
+          </details>
         </div>
 
         <div id="composer-combate" hidden>
@@ -205,6 +220,6 @@
   </div>
 </section>
 
-<script src="/app.js"></script>
+<script src="/app.js?v=2"></script>
 </body>
 </html>

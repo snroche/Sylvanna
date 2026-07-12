@@ -68,6 +68,7 @@ class Character(Base):
     nombre: Mapped[str] = mapped_column(String(80))
     raza: Mapped[str] = mapped_column(String(40))
     clase: Mapped[str] = mapped_column(String(40))
+    genero: Mapped[str] = mapped_column(String(20), default="")  # flavor: descripción
     nivel: Mapped[int] = mapped_column(Integer, default=1)
     xp: Mapped[int] = mapped_column(Integer, default=0)
 

@@ -21,6 +21,7 @@ class CrearPersonaje(BaseModel):
     raza: str                        # clave de engine.content.RAZAS
     subraza: str | None = None
     clase: str
+    genero: str | None = None        # flavor para la descripción (libre)
     metodo: str = "libre"            # "puntos" (point buy 27) | "libre"
     atributos: dict[str, int]        # BASE, sin bonos raciales (los aplica el server)
     bonos_eleccion: list[str] = []   # semielfo: 2 atributos para el +1
@@ -55,13 +56,35 @@ def _validar(body: CrearPersonaje):
                 raise HTTPException(400, f"{k}={v} fuera de rango (3-18)")
     else:
         raise HTTPException(400, "metodo debe ser 'puntos' o 'libre'")
-    for h in body.habilidades:
+    from engine.content import CLASE_HABILIDADES, CLASE_HABILIDADES_N
+    lista_clase = CLASE_HABILIDADES.get(body.clase, [])
+    n_clase = CLASE_HABILIDADES_N.get(body.clase, 2)
+    elegidas = list(dict.fromkeys(body.habilidades))
+    for h in elegidas:
         if h not in HABILIDADES:
             raise HTTPException(400, f"Habilidad inválida: {h}")
+        if lista_clase and h not in lista_clase:
+            raise HTTPException(400, f"{h.replace('_', ' ')} no está en la lista "
+                                     f"de habilidades del {body.clase}")
+    if len(elegidas) > n_clase:
+        raise HTTPException(400, f"El {body.clase} elige {n_clase} habilidades "
+                                 f"(mandaste {len(elegidas)})")
     if body.armadura and body.armadura not in ARMADURAS:
         raise HTTPException(400, f"Armadura inválida. Opciones: {list(ARMADURAS)}")
     if body.arma_equipada and body.arma_equipada not in ARMAS:
         raise HTTPException(400, f"Arma inválida. Opciones: {list(ARMAS)}")
+    # Competencia: no podés equipar armas/armaduras que tu clase no domina
+    from engine.content import (competencias_de_clase, puede_usar_arma,
+                                puede_usar_armadura, puede_usar_escudo)
+    comp = competencias_de_clase(body.clase)
+    if body.arma_equipada and not puede_usar_arma(comp, body.arma_equipada):
+        raise HTTPException(400, f"Tu clase ({body.clase}) no es competente con "
+                                 f"{body.arma_equipada.replace('_', ' ')}")
+    if body.armadura and not puede_usar_armadura(comp, body.armadura):
+        raise HTTPException(400, f"Tu clase ({body.clase}) no sabe usar "
+                                 f"{body.armadura.replace('_', ' ')}")
+    if body.escudo and not puede_usar_escudo(comp):
+        raise HTTPException(400, f"Tu clase ({body.clase}) no sabe usar escudo")
     from engine.content import ALINEAMIENTOS, ESTILOS_COMBATE, TRASFONDOS
     if body.alineamiento not in ALINEAMIENTOS:
         raise HTTPException(400, f"Alineamiento inválido: {ALINEAMIENTOS}")
@@ -127,39 +150,19 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
             (body.subclase or "").strip() == "linaje_draconico":
         pg_max += 1  # resiliencia dracónica
 
-    # salvaciones por clase (simplificación 5e estándar)
-    SALVACIONES = {
-        "barbaro": ["FUE", "CON"], "guerrero": ["FUE", "CON"],
-        "paladin": ["SAB", "CAR"], "ranger": ["FUE", "DES"],
-        "clerigo": ["SAB", "CAR"], "druida": ["INT", "SAB"],
-        "bardo": ["DES", "CAR"], "monje": ["FUE", "DES"],
-        "picaro": ["DES", "INT"], "hechicero": ["CON", "CAR"],
-        "mago": ["INT", "SAB"], "brujo": ["SAB", "CAR"],
-    }
-    ARMAS_COMP = {
-        "barbaro": ["simple", "marcial"], "guerrero": ["simple", "marcial"],
-        "paladin": ["simple", "marcial"], "ranger": ["simple", "marcial"],
-        "clerigo": ["simple"], "druida": ["simple"],
-        "bardo": ["simple"], "monje": ["simple"],
-        "picaro": ["simple"], "hechicero": ["simple"],
-        "mago": ["simple"], "brujo": ["simple"],
-    }
-    ARMADURAS_COMP = {
-        "barbaro": ["ligera", "media", "escudo"],
-        "guerrero": ["ligera", "media", "pesada", "escudo"],
-        "paladin": ["ligera", "media", "pesada", "escudo"],
-        "ranger": ["ligera", "media", "escudo"],
-        "clerigo": ["ligera", "media", "escudo"],
-        "druida": ["ligera", "media", "escudo"],
-        "bardo": ["ligera"], "monje": [], "picaro": ["ligera"],
-        "hechicero": [], "mago": [], "brujo": ["ligera"],
-    }
+    # competencias por clase (fuente única en engine.content)
+    from engine.content import competencias_de_clase
+    comp_clase = competencias_de_clase(body.clase)
 
     # Trasfondo: competencias, equipo, oro inicial y rasgo narrativo
-    from engine.content import TRASFONDOS
+    from engine.content import CLASE_HABILIDADES_N, TRASFONDOS
     tras = TRASFONDOS.get(body.trasfondo) if body.trasfondo else None
+    n_clase = CLASE_HABILIDADES_N.get(body.clase, 2)
+    # habilidades del PJ = las elegidas de la clase (tope por clase) + las del
+    # trasfondo (forzadas por el PHB, p. ej. soldado → atletismo + intimidación)
     habilidades = list(dict.fromkeys(
-        body.habilidades[:4] + (tras["competencias"] if tras else [])))
+        list(dict.fromkeys(body.habilidades))[:n_clase]
+        + (tras["competencias"] if tras else [])))
     inventario = _inventario_inicial(body)
     monedas = {"mo": 0, "mp": 0, "mc": 0}
     opciones = {}
@@ -181,15 +184,16 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
         nombre=body.nombre,
         raza=body.raza + (f" ({body.subraza})" if body.subraza else ""),
         clase=body.clase,
+        genero=(body.genero or "").strip()[:20],
         atributos=atributos_finales,
         velocidad_m=velocidad,
         pg_actual=max(1, pg_max), pg_max=max(1, pg_max),
         dado_golpe=dado, dados_golpe_disp=1,
         competencias={
             "habilidades": habilidades,
-            "salvaciones": SALVACIONES[body.clase],
-            "armas": ARMAS_COMP[body.clase],
-            "armaduras": ARMADURAS_COMP[body.clase],
+            "salvaciones": comp_clase["salvaciones"],
+            "armas": comp_clase["armas"],
+            "armaduras": comp_clase["armaduras"],
         },
         armadura=body.armadura, escudo=body.escudo,
         arma_equipada=body.arma_equipada,
@@ -327,6 +331,7 @@ async def ficha(character_id: int, player: Player = Depends(jugador_actual),
     cr = hidratar_personaje(c)
     return {
         "id": c.id, "nombre": c.nombre, "raza": c.raza, "clase": c.clase,
+        "genero": getattr(c, "genero", "") or "",
         "nivel": c.nivel, "xp": c.xp, "nivel_por_xp": nivel_por_xp(c.xp),
         "pg_actual": c.pg_actual, "pg_max": c.pg_max,
         "ca": calcular_ca(cr), "velocidad_m": c.velocidad_m,

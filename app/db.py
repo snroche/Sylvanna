@@ -44,6 +44,7 @@ MIGRACIONES = [
     "ALTER TABLE characters ADD COLUMN subclase VARCHAR(60)",
     "ALTER TABLE campaigns ADD COLUMN typing JSON",
     "ALTER TABLE characters ADD COLUMN opciones_clase JSON",
+    "ALTER TABLE characters ADD COLUMN genero VARCHAR(20) DEFAULT ''",
 ]
 
 
