@@ -293,154 +293,149 @@ CONSUMIBLES: dict[str, dict] = {
 
 CONJUROS: dict[str, dict] = {
     # Trucos
-    "rayo_de_escarcha": {
+    "ray_of_frost": {
         "nivel": 0, "resolucion": "ataque", "danio": "1d8", "tipo_danio": "frio",
         "concentracion": False, "efecto_extra": "velocidad_objetivo -3m 1 turno",
     },
-    "descarga_sagrada": {
+    "sacred_flame": {
         "nivel": 0, "resolucion": "salvacion", "salvacion": "DES",
         "danio": "1d8", "tipo_danio": "radiante", "en_salvacion_exitosa": "nada",
         "concentracion": False,
     },
-    "llama_sagrada": {  # alias común
-        "nivel": 0, "resolucion": "salvacion", "salvacion": "DES",
-        "danio": "1d8", "tipo_danio": "radiante", "en_salvacion_exitosa": "nada",
-        "concentracion": False,
-    },
-    "toque_helado": {
+    "chill_touch": {
         "nivel": 0, "resolucion": "ataque", "danio": "1d8", "tipo_danio": "necrotico",
         "concentracion": False, "efecto_extra": "no puede recuperar PG 1 turno",
     },
-    "luz": {"nivel": 0, "resolucion": "auto", "concentracion": False},
-    "explosion_sobrenatural": {  # eldritch blast (SRD)
+    "light": {"nivel": 0, "resolucion": "auto", "concentracion": False},
+    "eldritch_blast": {  # eldritch blast (SRD)
         "nivel": 0, "resolucion": "ataque", "danio": "1d10",
         "tipo_danio": "fuerza", "concentracion": False,
     },
-    "prestidigitacion": {"nivel": 0, "resolucion": "auto", "concentracion": False},
+    "prestidigitation": {"nivel": 0, "resolucion": "auto", "concentracion": False},
 
     # Nivel 1
-    "proyectil_magico": {
+    "magic_missile": {
         "nivel": 1, "resolucion": "auto", "danio": "1d4+1", "proyectiles": 3,
         "tipo_danio": "fuerza", "concentracion": False,
         "escalado": "+1 proyectil por nivel de slot extra",
         "escalado_proyectiles": 1,
     },
-    "curar_heridas": {
+    "cure_wounds": {
         "nivel": 1, "resolucion": "curacion", "curacion": "1d8",
         "suma_mod_magico": True, "concentracion": False,
         "escalado": "+1d8 por nivel de slot extra",
         "escalado_curacion": "1d8",
     },
-    "palabra_de_curacion": {
+    "healing_word": {
         "nivel": 1, "resolucion": "curacion", "curacion": "1d4",
         "suma_mod_magico": True, "concentracion": False, "accion": "adicional",
         "escalado_curacion": "1d4",
     },
-    "manos_ardientes": {
+    "burning_hands": {
         "nivel": 1, "resolucion": "salvacion", "salvacion": "DES",
         "danio": "3d6", "tipo_danio": "fuego", "en_salvacion_exitosa": "mitad",
         "area": "cono 4.5m", "concentracion": False,
         "escalado": "+1d6 por nivel de slot extra",
         "escalado_danio": "1d6",
     },
-    "escudo": {
+    "shield": {
         "nivel": 1, "resolucion": "auto", "concentracion": False,
         "accion": "reaccion", "efecto": "+5 CA hasta inicio de su próximo turno",
     },
-    "armadura_de_mago": {
+    "mage_armor": {
         "nivel": 1, "resolucion": "auto", "concentracion": False,
         "efecto": "CA base = 13 + DES por 8 horas (sin armadura)",
     },
-    "bendecir": {
+    "bless": {
         "nivel": 1, "resolucion": "auto", "concentracion": True,
         "efecto": "hasta 3 aliados suman 1d4 a ataques y salvaciones",
     },
-    "perdicion": {
+    "bane": {
         "nivel": 1, "resolucion": "salvacion", "salvacion": "CAR",
         "concentracion": True,
         "efecto": "hasta 3 enemigos restan 1d4 a ataques y salvaciones",
     },
-    "dormir": {
+    "sleep": {
         "nivel": 1, "resolucion": "auto", "concentracion": False,
         "efecto": "5d8 PG de criaturas caen dormidas, de menor a mayor PG actual",
         "escalado": "+2d8 por nivel de slot extra",
     },
-    "onda_atronadora": {
+    "thunderwave": {
         "nivel": 1, "resolucion": "salvacion", "salvacion": "CON",
         "danio": "2d8", "tipo_danio": "trueno", "en_salvacion_exitosa": "mitad",
         "area": "cubo 4.5m", "concentracion": False,
         "efecto_extra": "empuja 3m si falla la salvación",
         "escalado_danio": "1d8",
     },
-    "hechizar_persona": {
+    "charm_person": {
         "nivel": 1, "resolucion": "salvacion", "salvacion": "SAB",
         "concentracion": False, "efecto": "hechizado 1 hora (humanoide)",
     },
-    "fe_militante": {  # heroism
+    "heroism": {  # heroism
         "nivel": 1, "resolucion": "auto", "concentracion": True,
         "efecto": "objetivo inmune a asustado, gana PG temporales = mod mágico por turno",
     },
-    "marca_del_cazador": {
+    "hunter_s_mark": {
         "nivel": 1, "resolucion": "auto", "concentracion": True,
         "efecto": "+1d6 de daño contra el objetivo marcado",
     },
-    "rociada_de_color": {
+    "color_spray": {
         "nivel": 1, "resolucion": "auto", "concentracion": False,
         "efecto": "6d10 PG de criaturas quedan cegadas 1 ronda, de menor a mayor",
     },
 
     # Nivel 2
-    "rayo_abrasador": {
+    "scorching_ray": {
         "nivel": 2, "resolucion": "ataque", "danio": "2d6", "tipo_danio": "fuego",
         "proyectiles": 3, "concentracion": False,
         "escalado": "+1 rayo por nivel de slot extra",
     },
-    "inmovilizar_persona": {
+    "hold_person": {
         "nivel": 2, "resolucion": "salvacion", "salvacion": "SAB",
         "concentracion": True, "efecto": "paralizado; repite salvación cada turno",
     },
-    "invisibilidad": {
+    "invisibility": {
         "nivel": 2, "resolucion": "auto", "concentracion": True,
         "efecto": "invisible hasta atacar o lanzar conjuro",
     },
-    "paso_brumoso": {
+    "misty_step": {
         "nivel": 2, "resolucion": "auto", "concentracion": False,
         "accion": "adicional", "efecto": "teleport 9m a punto visible",
     },
-    "ayuda_divina": {  # aid
+    "aid": {  # aid
         "nivel": 2, "resolucion": "auto", "concentracion": False,
         "efecto": "+5 PG max y actuales a 3 criaturas por 8 horas",
     },
 
     # -------- conjuros rituales (se lanzan sin gastar espacio, +10 min) -------
-    "detectar_magia": {
+    "detect_magic": {
         "nivel": 1, "resolucion": "auto", "concentracion": True, "ritual": True,
         "componentes": "VS",
         "efecto": "Percibís la presencia de magia a 9m durante 10 minutos.",
     },
-    "comprender_idiomas": {
+    "comprehend_languages": {
         "nivel": 1, "resolucion": "auto", "concentracion": False, "ritual": True,
         "componentes": "VSM",
         "efecto": "Entendés cualquier idioma hablado que oigas por 1 hora.",
     },
-    "hablar_con_animales": {
+    "speak_with_animals": {
         "nivel": 1, "resolucion": "auto", "concentracion": False, "ritual": True,
         "componentes": "VS",
         "efecto": "Podés comunicarte con bestias durante 10 minutos.",
     },
-    "alarma": {
+    "alarm": {
         "nivel": 1, "resolucion": "auto", "concentracion": False, "ritual": True,
         "componentes": "VSM",
-        "efecto": "Creás una alarma en un área por 8 horas.",
+        "efecto": "Creás una alarm en un área por 8 horas.",
     },
-    "identificar": {
+    "identify": {
         "nivel": 1, "resolucion": "auto", "concentracion": False, "ritual": True,
         "componentes": "VSM",
         "componente_costoso": {"nombre": "perla", "costo": 100,
                                "consumido": False},
         "efecto": "Aprendés las propiedades de un objeto mágico.",
     },
-    "augurio": {
+    "augury": {
         "nivel": 2, "resolucion": "auto", "concentracion": False, "ritual": True,
         "componentes": "VSM",
         "componente_costoso": {"nombre": "varillas_de_augurio", "costo": 25,
@@ -471,42 +466,41 @@ _NORM_CLASE = {
 # Clases de los conjuros curados (claves en español de arriba).
 _CLASES_CURADAS = {
     # trucos
-    "rayo_de_escarcha": ["hechicero", "mago"],
-    "descarga_sagrada": ["clerigo"],
-    "llama_sagrada": ["clerigo"],
-    "toque_helado": ["hechicero", "mago", "brujo"],
-    "luz": ["bardo", "clerigo", "hechicero", "mago"],
-    "explosion_sobrenatural": ["brujo"],
-    "prestidigitacion": ["bardo", "hechicero", "mago", "brujo"],
+    "ray_of_frost": ["hechicero", "mago"],
+    "sacred_flame": ["clerigo"],
+    "chill_touch": ["hechicero", "mago", "brujo"],
+    "light": ["bardo", "clerigo", "hechicero", "mago"],
+    "eldritch_blast": ["brujo"],
+    "prestidigitation": ["bardo", "hechicero", "mago", "brujo"],
     # nivel 1
-    "proyectil_magico": ["hechicero", "mago"],
-    "curar_heridas": ["bardo", "clerigo", "druida", "paladin", "ranger"],
-    "palabra_de_curacion": ["bardo", "clerigo", "druida"],
-    "manos_ardientes": ["hechicero", "mago"],
-    "escudo": ["hechicero", "mago"],
-    "armadura_de_mago": ["hechicero", "mago"],
-    "bendecir": ["clerigo", "paladin"],
-    "perdicion": ["bardo", "clerigo"],
-    "dormir": ["bardo", "hechicero", "mago"],
-    "onda_atronadora": ["bardo", "druida", "hechicero", "mago"],
-    "hechizar_persona": ["bardo", "druida", "hechicero", "mago", "brujo"],
-    "fe_militante": ["bardo", "paladin"],
-    "marca_del_cazador": ["ranger"],
-    "rociada_de_color": ["hechicero", "mago"],
+    "magic_missile": ["hechicero", "mago"],
+    "cure_wounds": ["bardo", "clerigo", "druida", "paladin", "ranger"],
+    "healing_word": ["bardo", "clerigo", "druida"],
+    "burning_hands": ["hechicero", "mago"],
+    "shield": ["hechicero", "mago"],
+    "mage_armor": ["hechicero", "mago"],
+    "bless": ["clerigo", "paladin"],
+    "bane": ["bardo", "clerigo"],
+    "sleep": ["bardo", "hechicero", "mago"],
+    "thunderwave": ["bardo", "druida", "hechicero", "mago"],
+    "charm_person": ["bardo", "druida", "hechicero", "mago", "brujo"],
+    "heroism": ["bardo", "paladin"],
+    "hunter_s_mark": ["ranger"],
+    "color_spray": ["hechicero", "mago"],
     # nivel 2
-    "rayo_abrasador": ["hechicero", "mago"],
-    "inmovilizar_persona": ["bardo", "clerigo", "druida", "hechicero", "mago", "brujo"],
-    "invisibilidad": ["bardo", "hechicero", "mago", "brujo"],
-    "paso_brumoso": ["hechicero", "mago", "brujo"],
-    "ayuda_divina": ["clerigo", "paladin"],
+    "scorching_ray": ["hechicero", "mago"],
+    "hold_person": ["bardo", "clerigo", "druida", "hechicero", "mago", "brujo"],
+    "invisibility": ["bardo", "hechicero", "mago", "brujo"],
+    "misty_step": ["hechicero", "mago", "brujo"],
+    "aid": ["clerigo", "paladin"],
     # rituales
-    "detectar_magia": ["bardo", "clerigo", "druida", "paladin", "ranger",
+    "detect_magic": ["bardo", "clerigo", "druida", "paladin", "ranger",
                        "hechicero", "mago"],
-    "comprender_idiomas": ["bardo", "hechicero", "mago", "brujo"],
-    "hablar_con_animales": ["bardo", "druida", "ranger"],
-    "alarma": ["mago", "ranger"],
-    "identificar": ["bardo", "mago"],
-    "augurio": ["clerigo"],
+    "comprehend_languages": ["bardo", "hechicero", "mago", "brujo"],
+    "speak_with_animals": ["bardo", "druida", "ranger"],
+    "alarm": ["mago", "ranger"],
+    "identify": ["bardo", "mago"],
+    "augury": ["clerigo"],
 }
 for _k, _cl in _CLASES_CURADAS.items():
     if _k in CONJUROS:
@@ -1147,12 +1141,12 @@ METAMAGIA: dict[str, dict] = {
 INVOCACIONES: dict[str, dict] = {
     "explosion_agonizante": {
         "nombre": "Explosión Agonizante", "nivel_min": 2, "mecanico": True,
-        "requisito_conjuro": "explosion_sobrenatural",
+        "requisito_conjuro": "eldritch_blast",
         "desc": "Sumás tu modificador de Carisma al daño de tu Explosión "
                 "Sobrenatural."},
     "explosion_repelente": {
         "nombre": "Explosión Repelente", "nivel_min": 2,
-        "requisito_conjuro": "explosion_sobrenatural",
+        "requisito_conjuro": "eldritch_blast",
         "desc": "Al impactar con Explosión Sobrenatural, empujás al objetivo 3m."},
     "hechicero_del_pacto": {
         "nombre": "Tomo del Pacto (Secretos Ancestrales)", "nivel_min": 2,
@@ -1169,7 +1163,7 @@ INVOCACIONES: dict[str, dict] = {
         "desc": "Podés lanzar Disfrazarse a voluntad, sin gastar espacio."},
     "lanza_sobrenatural": {
         "nombre": "Lanza Sobrenatural", "nivel_min": 2,
-        "requisito_conjuro": "explosion_sobrenatural",
+        "requisito_conjuro": "eldritch_blast",
         "desc": "El alcance de tu Explosión Sobrenatural sube a 90m."},
     "hoja_sedienta": {
         "nombre": "Hoja Sedienta", "nivel_min": 5,

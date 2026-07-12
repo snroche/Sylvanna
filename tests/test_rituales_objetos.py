@@ -6,7 +6,7 @@ CLERIGO = {
     "clase": "clerigo", "metodo": "libre", "subclase": "dominio_de_la_vida",
     "atributos": {"FUE": 10, "DES": 10, "CON": 12, "INT": 10, "SAB": 15, "CAR": 10},
     "habilidades": ["religion", "medicina"],
-    "preparados": ["detectar_magia"],
+    "preparados": ["detect_magic"],
     "arma_equipada": "mazo",
     "inventario": [{"nombre": "perla", "cantidad": 1},
                    {"nombre": "anillo_de_proteccion", "cantidad": 1},
@@ -32,7 +32,7 @@ async def test_ritual_no_gasta_slot(client):
     ficha0 = (await client.get("/api/campaigns/%d/state" % cid, headers=h)).json()
     t0 = ficha0["tiempo_juego_min"]
     r = await client.post(f"/api/campaigns/{cid}/spells/ritual",
-                          json={"conjuro": "detectar_magia"}, headers=h)
+                          json={"conjuro": "detect_magic"}, headers=h)
     assert r.status_code == 200, r.text
     # avanzó 10 minutos de juego
     t1 = (await client.get(f"/api/campaigns/{cid}/state", headers=h)).json()[
@@ -44,32 +44,32 @@ async def test_ritual_no_gasta_slot(client):
 async def test_ritual_de_conjuro_no_ritual_falla(client):
     cid, h = await _crear(client)
     r = await client.post(f"/api/campaigns/{cid}/spells/ritual",
-                          json={"conjuro": "curar_heridas"}, headers=h)
+                          json={"conjuro": "cure_wounds"}, headers=h)
     assert r.status_code == 400
 
 
-# identificar es de mago (no de clérigo) y pide un componente costoso (perla)
+# identify es de mago (no de clérigo) y pide un componente costoso (perla)
 MAGO_RITUAL = {
     "nombre": "Elrimar", "raza": "humano", "subraza": "estandar", "clase": "mago",
     "metodo": "libre",
     "atributos": {"FUE": 8, "DES": 12, "CON": 12, "INT": 15, "SAB": 10, "CAR": 10},
     "habilidades": ["arcanos", "historia"], "arma_equipada": "daga",
-    "preparados": ["detectar_magia", "identificar"],
+    "preparados": ["detect_magic", "identify"],
     "inventario": [{"nombre": "perla", "cantidad": 1}],
 }
 
 
 @pytest.mark.anyio
 async def test_componente_material_requerido(client):
-    # con la perla en el inventario, identificar (ritual) se puede lanzar
+    # con la perla en el inventario, identify (ritual) se puede lanzar
     cid, h = await _crear(client, MAGO_RITUAL)
     r = await client.post(f"/api/campaigns/{cid}/spells/ritual",
-                          json={"conjuro": "identificar"}, headers=h)
+                          json={"conjuro": "identify"}, headers=h)
     assert r.status_code == 200, r.text
     # sin la perla, falla
     cid2, h2 = await _crear(client, {**MAGO_RITUAL, "inventario": []})
     r = await client.post(f"/api/campaigns/{cid2}/spells/ritual",
-                          json={"conjuro": "identificar"}, headers=h2)
+                          json={"conjuro": "identify"}, headers=h2)
     assert r.status_code == 400
     assert "componente" in r.text.lower()
 

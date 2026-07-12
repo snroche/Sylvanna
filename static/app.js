@@ -52,11 +52,6 @@ const ARMAS = ["daga","espada_corta","espada_larga","hacha_de_mano","hacha_de_ba
 const ARMADURAS = ["cuero","cuero_tachonado","camisa_de_mallas","coraza",
   "media_armadura","ring_mail","cota_de_mallas","armadura_de_placas"];
 
-const CONJUROS_V1 = ["rayo_de_escarcha","llama_sagrada","toque_helado","luz",
-  "proyectil_magico","curar_heridas","palabra_de_curacion","manos_ardientes",
-  "escudo","armadura_de_mago","bendecir","perdicion","dormir","onda_atronadora",
-  "hechizar_persona","marca_del_cazador","rociada_de_color","rayo_abrasador",
-  "inmovilizar_persona","invisibilidad","paso_brumoso"];
 
 let CONJUROS_SERVER = null;  // {clave: {nivel, nombre}} desde /api/content
 let CATALOGO = null;         // /api/content completo (razas, subclases...)

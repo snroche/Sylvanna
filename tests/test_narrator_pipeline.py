@@ -128,7 +128,7 @@ MAGO = {
     "clase": "mago", "metodo": "libre",
     "atributos": {"FUE": 8, "DES": 14, "CON": 12, "INT": 16, "SAB": 10, "CAR": 10},
     "habilidades": ["arcanos"], "arma_equipada": "daga",
-    "preparados": ["proyectil_magico", "manos_ardientes", "escudo", "dormir"],
+    "preparados": ["magic_missile", "burning_hands", "shield", "sleep"],
 }
 
 
@@ -162,7 +162,7 @@ async def test_cast_proyectil_magico_gasta_slot(client):
     npc_id = int([e for e in est["combate"]["orden"]
                   if e["tipo"] == "npc"][0]["id"].split("_")[1])
     r = await c.post(f"/api/campaigns/{cid}/combat/cast", json={
-        "conjuro": "proyectil_magico", "objetivo_npc_id": npc_id}, headers=h)
+        "conjuro": "magic_missile", "objetivo_npc_id": npc_id}, headers=h)
     assert r.status_code == 200, r.text
     d = r.json()
     assert d["gasto_slot"]["ok"] and d["gasto_slot"]["restantes"] == 1
@@ -179,7 +179,7 @@ async def test_cast_conjuro_no_preparado(client):
     npc_id = int([e for e in est["combate"]["orden"]
                   if e["tipo"] == "npc"][0]["id"].split("_")[1])
     r = await c.post(f"/api/campaigns/{cid}/combat/cast", json={
-        "conjuro": "rayo_abrasador", "objetivo_npc_id": npc_id}, headers=h)
+        "conjuro": "scorching_ray", "objetivo_npc_id": npc_id}, headers=h)
     assert r.status_code == 400
     assert "hechizo_no_disponible" in r.text
 
@@ -197,7 +197,7 @@ async def test_cast_slots_se_agotan(client):
             break
         npc_id = int(npcs[0]["id"].split("_")[1])
         r = await c.post(f"/api/campaigns/{cid}/combat/cast", json={
-            "conjuro": "escudo"}, headers=h)
+            "conjuro": "shield"}, headers=h)
         if r.status_code == 200:
             usados += 1
         elif r.status_code == 400 and "Sin espacios" in r.text:
@@ -211,7 +211,7 @@ async def test_cast_slots_se_agotan(client):
     est = (await c.get(f"/api/campaigns/{cid}", headers=h)).json()
     if est["estado"] == "combate":
         r = await c.post(f"/api/campaigns/{cid}/combat/cast", json={
-            "conjuro": "escudo"}, headers=h)
+            "conjuro": "shield"}, headers=h)
         assert r.status_code == 400
 
 
@@ -448,7 +448,7 @@ MAGO5 = {
     "nombre": "Zim", "raza": "gnomo", "subraza": "gnomo_de_las_rocas",
     "clase": "mago", "metodo": "libre",
     "atributos": {"FUE": 8, "DES": 14, "CON": 14, "INT": 16, "SAB": 10, "CAR": 10},
-    "arma_equipada": "daga", "preparados": ["rayo_de_escarcha", "proyectil_magico"],
+    "arma_equipada": "daga", "preparados": ["ray_of_frost", "magic_missile"],
 }
 
 
@@ -462,33 +462,33 @@ async def test_gestion_de_conjuros(client):
     char_id = (await c.post("/api/characters", json=MAGO5,
                             headers=h)).json()["character_id"]
 
-    # nivel 1: máx lanzable 1 → rayo_abrasador (nv2) rebota
+    # nivel 1: máx lanzable 1 → scorching_ray (nv2) rebota
     r = await c.post(f"/api/campaigns/{cid}/spells/manage",
-                     json={"lista": ["rayo_abrasador"]}, headers=h)
+                     json={"lista": ["scorching_ray"]}, headers=h)
     assert r.status_code == 400 and "nivel 2" in r.text
 
     # límite de preparados: INT 16 +2 gnomo = 18 → mod +4, + nivel 1 = 5.
     # Seis conjuros con nivel deben rebotar.
     r = await c.post(f"/api/campaigns/{cid}/spells/manage",
-                     json={"lista": ["proyectil_magico", "escudo",
-                                     "manos_ardientes", "dormir",
-                                     "hechizar_persona", "onda_atronadora"]},
+                     json={"lista": ["magic_missile", "shield",
+                                     "burning_hands", "sleep",
+                                     "charm_person", "thunderwave"]},
                      headers=h)
     assert r.status_code == 400 and "Máximo 5" in r.text
 
     # válido: 3 con nivel + 1 truco
     r = await c.post(f"/api/campaigns/{cid}/spells/manage",
-                     json={"lista": ["rayo_de_escarcha", "proyectil_magico",
-                                     "escudo", "dormir"]}, headers=h)
+                     json={"lista": ["ray_of_frost", "magic_missile",
+                                     "shield", "sleep"]}, headers=h)
     assert r.status_code == 200
     ficha = (await c.get(f"/api/characters/{char_id}/sheet", headers=h)).json()
-    assert "dormir" in ficha["preparados"]
+    assert "sleep" in ficha["preparados"]
 
     # a nivel 5: máx lanzable 3, límite 8
     ficha = await _subir_a(c, h, cid, char_id, 5, clase="mago")
     r = await c.post(f"/api/campaigns/{cid}/spells/manage",
-                     json={"lista": ["rayo_abrasador", "invisibilidad",
-                                     "proyectil_magico"]}, headers=h)
+                     json={"lista": ["scorching_ray", "invisibility",
+                                     "magic_missile"]}, headers=h)
     assert r.status_code == 200 and r.json()["nivel_max"] == 3
 
 

@@ -186,7 +186,7 @@ def test_danio_no_negativo():
 
 
 def test_danio_con_concentracion_pide_check():
-    c = pj(spell_state=SpellState(concentracion_activa={"hechizo": "bendecir",
+    c = pj(spell_state=SpellState(concentracion_activa={"hechizo": "bless",
                                                         "desde_ronda": 1}))
     res = aplicar_danio(c, 3)
     assert "requiere_check_concentracion" in res["eventos"]
@@ -194,7 +194,7 @@ def test_danio_con_concentracion_pide_check():
 
 
 def test_caer_a_cero_rompe_concentracion_sin_tirada():
-    c = pj(spell_state=SpellState(concentracion_activa={"hechizo": "bendecir",
+    c = pj(spell_state=SpellState(concentracion_activa={"hechizo": "bless",
                                                         "desde_ronda": 1}))
     res = aplicar_danio(c, 99)
     assert c.spell_state.concentracion_activa is None
@@ -202,14 +202,14 @@ def test_caer_a_cero_rompe_concentracion_sin_tirada():
 
 
 def test_check_concentracion_cd_minimo_10():
-    c = pj(spell_state=SpellState(concentracion_activa={"hechizo": "bendecir",
+    c = pj(spell_state=SpellState(concentracion_activa={"hechizo": "bless",
                                                         "desde_ronda": 1}))
     r = check_concentracion(c, danio=4)
     assert r["cd"] == 10
 
 
 def test_check_concentracion_cd_mitad_danio():
-    c = pj(spell_state=SpellState(concentracion_activa={"hechizo": "bendecir",
+    c = pj(spell_state=SpellState(concentracion_activa={"hechizo": "bless",
                                                         "desde_ronda": 1}))
     r = check_concentracion(c, danio=30)
     assert r["cd"] == 15
@@ -318,7 +318,7 @@ def mago() -> Criatura:
         atributos={"FUE": 8, "DES": 14, "CON": 12, "INT": 16, "SAB": 10, "CAR": 10},
         spell_state=SpellState(
             slots=slots_iniciales("mago", 1),
-            preparados=["proyectil_magico", "escudo"],
+            preparados=["magic_missile", "shield"],
         ),
     )
 
@@ -353,10 +353,10 @@ def test_no_lanzador_no_gasta():
 
 def test_puede_lanzar_validaciones():
     m = mago()
-    assert puede_lanzar(m, "proyectil_magico")["ok"]
+    assert puede_lanzar(m, "magic_missile")["ok"]
     assert puede_lanzar(m, "bola_de_fuego")["motivo"] == "hechizo_no_disponible"
     m.condiciones.append({"tipo": "silenciado", "origen": "test"})
-    assert puede_lanzar(m, "escudo")["motivo"] == "silenciado"
+    assert puede_lanzar(m, "shield")["motivo"] == "silenciado"
 
 
 # ---------------------------------------------------------------- descansos
@@ -382,7 +382,7 @@ def test_descanso_largo_restaura_todo():
     m.pg_actual = 2
     m.dados_golpe_disp = 0
     gastar_slot(m, 1)
-    m.spell_state.concentracion_activa = {"hechizo": "bendecir", "desde_ronda": 1}
+    m.spell_state.concentracion_activa = {"hechizo": "bless", "desde_ronda": 1}
     descanso_largo(m)
     assert m.pg_actual == m.pg_max
     assert m.dados_golpe_disp == 2  # nivel 4 // 2

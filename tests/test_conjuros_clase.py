@@ -9,15 +9,15 @@ def test_normaliza_clases_ingles_y_espanol():
     # conjuro importado con clases en inglés
     assert clases_de_conjuro({"clases": ["druid", "wizard"]}) == ["druida", "mago"]
     # curado con clases en español
-    assert "mago" in clases_de_conjuro(CONJUROS["proyectil_magico"])
+    assert "mago" in clases_de_conjuro(CONJUROS["magic_missile"])
 
 
 def test_puede_aprender_por_clase():
-    assert puede_aprender_conjuro("mago", "proyectil_magico")
-    assert not puede_aprender_conjuro("mago", "curar_heridas")   # no es de mago
-    assert puede_aprender_conjuro("clerigo", "curar_heridas")
+    assert puede_aprender_conjuro("mago", "magic_missile")
+    assert not puede_aprender_conjuro("mago", "cure_wounds")   # no es de mago
+    assert puede_aprender_conjuro("clerigo", "cure_wounds")
     # druida no aprende proyectil mágico (mago/hechicero)
-    assert not puede_aprender_conjuro("druida", "proyectil_magico")
+    assert not puede_aprender_conjuro("druida", "magic_missile")
 
 
 def test_oro_inicial_por_clase():
@@ -44,7 +44,7 @@ async def _crear(client, body):
 
 @pytest.mark.anyio
 async def test_mago_no_aprende_conjuro_de_otra_clase(client):
-    _, _, r = await _crear(client, {**MAGO, "preparados": ["curar_heridas"]})
+    _, _, r = await _crear(client, {**MAGO, "preparados": ["cure_wounds"]})
     assert r.status_code == 400
     assert "no puede aprender" in r.text.lower()
 
@@ -56,7 +56,7 @@ async def test_druida_no_aprende_conjuro_de_mago(client):
               "atributos": {"FUE": 10, "DES": 12, "CON": 13, "INT": 10,
                             "SAB": 15, "CAR": 8},
               "habilidades": ["naturaleza", "percepcion"],
-              "arma_equipada": "baston", "conocidos": ["proyectil_magico"]}
+              "arma_equipada": "baston", "conocidos": ["magic_missile"]}
     _, _, r = await _crear(client, druida)
     assert r.status_code == 400
 
@@ -70,7 +70,7 @@ async def test_alto_elfo_puede_truco_de_mago(client):
                      "atributos": {"FUE": 15, "DES": 13, "CON": 14, "INT": 10,
                                    "SAB": 10, "CAR": 8},
                      "habilidades": ["atletismo"], "arma_equipada": "espada_larga",
-                     "conocidos": ["rayo_de_escarcha"]}   # truco de mago
+                     "conocidos": ["ray_of_frost"]}   # truco de mago
     _, _, r = await _crear(client, guerrero_elfo)
     assert r.status_code == 200, r.text
 
@@ -78,5 +78,5 @@ async def test_alto_elfo_puede_truco_de_mago(client):
 @pytest.mark.anyio
 async def test_content_conjuros_traen_clases(client):
     d = (await client.get("/api/content")).json()
-    assert "mago" in d["conjuros"]["proyectil_magico"]["clases"]
-    assert "clerigo" in d["conjuros"]["curar_heridas"]["clases"]
+    assert "mago" in d["conjuros"]["magic_missile"]["clases"]
+    assert "clerigo" in d["conjuros"]["cure_wounds"]["clases"]

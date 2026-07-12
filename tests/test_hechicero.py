@@ -5,7 +5,7 @@ from engine.rules import tirar_danio_conjuro
 
 
 def test_upcasting_suma_dados():
-    # manos_ardientes 3d6 base, +1d6 por nivel extra; con 2 niveles extra => 5d6
+    # burning_hands 3d6 base, +1d6 por nivel extra; con 2 niveles extra => 5d6
     d = tirar_danio_conjuro("3d6", "1d6", niveles_extra=2)
     assert len(d["dados"]) == 5
     assert d["niveles_extra"] == 2
@@ -15,7 +15,7 @@ def test_upcasting_suma_dados():
 
 
 def test_upcasting_curacion():
-    # curar_heridas 1d8 base, +1d8 por nivel extra; 3 niveles extra => 4 dados
+    # cure_wounds 1d8 base, +1d8 por nivel extra; 3 niveles extra => 4 dados
     d = tirar_danio_conjuro("1d8", "1d8", niveles_extra=3)
     assert len(d["dados"]) == 4
 

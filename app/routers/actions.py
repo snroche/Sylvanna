@@ -697,7 +697,7 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
                                          "tipo_danio": conjuro.get("tipo_danio"),
                                          "efectos": ev["eventos"]})
             elif not salv["exito"]:
-                cond = ("paralizado" if "inmovilizar" in body.conjuro
+                cond = ("paralizado" if body.conjuro == "hold_person"
                         else "hechizado")
                 cr_t.condiciones.append({"tipo": cond, "origen": body.conjuro})
                 resoluciones.append({"tipo": "condicion_aplicada",
@@ -716,7 +716,7 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
         if tipo == "ataque":
             # Explosión Agonizante (brujo): +mod de CAR al daño de la explosión
             bono_danio = 0
-            if char.clase == "brujo" and body.conjuro == "explosion_sobrenatural" \
+            if char.clase == "brujo" and body.conjuro == "eldritch_blast" \
                     and "explosion_agonizante" in (
                         char.opciones_clase or {}).get("invocaciones", []):
                 bono_danio = max(0, mod(cr_pj.atributos[atributo]))
@@ -739,7 +739,7 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
         persistir_npc(cr_t, t)
         objetivos_npc.append(t)
 
-    else:  # auto sin proyectiles (escudo, bendecir...)
+    else:  # auto sin proyectiles (escudo, bless...)
         resoluciones.append({"tipo": "efecto_auto",
                              "efecto": conjuro.get("efecto", body.conjuro)})
 

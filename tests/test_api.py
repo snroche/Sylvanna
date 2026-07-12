@@ -26,7 +26,7 @@ MAGO = {
     "atributos": {"FUE": 8, "DES": 14, "CON": 12, "INT": 15, "SAB": 10, "CAR": 10},
     "habilidades": ["arcanos", "investigacion"],
     "arma_equipada": "daga",
-    "preparados": ["proyectil_magico", "escudo"],
+    "preparados": ["magic_missile", "shield"],
 }
 
 
