@@ -104,6 +104,26 @@ def _validar(body: CrearPersonaje):
     elif body.estilo_combate:
         raise HTTPException(400, "Solo el guerrero tiene estilo de combate (v1)")
 
+    # Conjuros: solo trucos y nivel 1 en creación, y solo los que la clase (o
+    # la raza, p. ej. alto elfo con un truco de mago) puede aprender.
+    from engine.content import (CONJUROS, clases_de_conjuro,
+                                puede_aprender_conjuro)
+    raza_truco_mago = body.subraza in ("alto_elfo", "descendiente_alto_elfo")
+    for c in dict.fromkeys((body.conocidos or []) + (body.preparados or [])):
+        info = CONJUROS.get(c)
+        if info is None:
+            raise HTTPException(400, f"Conjuro desconocido: {c}")
+        if info["nivel"] > 1:
+            raise HTTPException(400, f"En creación solo trucos y conjuros de "
+                                     f"nivel 1 ({c.replace('_', ' ')})")
+        ok = puede_aprender_conjuro(body.clase, c)
+        if not ok and raza_truco_mago and info["nivel"] == 0 \
+                and "mago" in clases_de_conjuro(info):
+            ok = True   # truco de mago del alto elfo
+        if not ok:
+            raise HTTPException(400, f"Tu clase/raza no puede aprender "
+                                     f"{c.replace('_', ' ')}")
+
 
 def _inventario_inicial(body: "CrearPersonaje") -> list[dict]:
     """Equipo base: lo elegido + kit de aventurero estándar."""
@@ -164,7 +184,9 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
         list(dict.fromkeys(body.habilidades))[:n_clase]
         + (tras["competencias"] if tras else [])))
     inventario = _inventario_inicial(body)
-    monedas = {"mo": 0, "mp": 0, "mc": 0}
+    # riqueza inicial: la de la clase (PHB) + la del trasfondo
+    from engine.content import oro_inicial_clase
+    monedas = {"mo": oro_inicial_clase(body.clase), "mp": 0, "mc": 0}
     opciones = {}
     if tras:
         for item in tras.get("equipo", []):
@@ -174,7 +196,7 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
                 ex["cantidad"] = ex.get("cantidad", 1) + item.get("cantidad", 1)
             else:
                 inventario.append(dict(item))
-        monedas["mo"] = tras.get("oro", 0)
+        monedas["mo"] += tras.get("oro", 0)
         opciones = {"trasfondo": body.trasfondo,
                     "rasgo_trasfondo": tras["rasgo"],
                     "rasgo_trasfondo_desc": tras["rasgo_desc"]}

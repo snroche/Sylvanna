@@ -71,9 +71,11 @@ async def catalogo():
     habilidades_clase = {c: {"lista": CLASE_HABILIDADES.get(c, []),
                              "cantidad": CLASE_HABILIDADES_N.get(c, 2)}
                          for c in ARMAS_COMP_CLASE}
+    from engine.content import clases_de_conjuro
     return {
         "conjuros": {k: {"nivel": v["nivel"],
-                         "nombre": v.get("nombre", k.replace("_", " "))}
+                         "nombre": v.get("nombre", k.replace("_", " ")),
+                         "clases": clases_de_conjuro(v)}
                      for k, v in CONJUROS.items()},
         "monstruos": sorted(MONSTRUOS),
         "armas": sorted(set(ARMAS)),

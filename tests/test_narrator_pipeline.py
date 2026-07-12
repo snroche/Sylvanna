@@ -128,8 +128,7 @@ MAGO = {
     "clase": "mago", "metodo": "libre",
     "atributos": {"FUE": 8, "DES": 14, "CON": 12, "INT": 16, "SAB": 10, "CAR": 10},
     "habilidades": ["arcanos"], "arma_equipada": "daga",
-    "preparados": ["proyectil_magico", "manos_ardientes", "curar_heridas",
-                   "bendecir"],
+    "preparados": ["proyectil_magico", "manos_ardientes", "escudo", "dormir"],
 }
 
 
@@ -198,8 +197,7 @@ async def test_cast_slots_se_agotan(client):
             break
         npc_id = int(npcs[0]["id"].split("_")[1])
         r = await c.post(f"/api/campaigns/{cid}/combat/cast", json={
-            "conjuro": "curar_heridas",
-            "objetivo_character_id": None}, headers=h)
+            "conjuro": "escudo"}, headers=h)
         if r.status_code == 200:
             usados += 1
         elif r.status_code == 400 and "Sin espacios" in r.text:
@@ -213,7 +211,7 @@ async def test_cast_slots_se_agotan(client):
     est = (await c.get(f"/api/campaigns/{cid}", headers=h)).json()
     if est["estado"] == "combate":
         r = await c.post(f"/api/campaigns/{cid}/combat/cast", json={
-            "conjuro": "curar_heridas"}, headers=h)
+            "conjuro": "escudo"}, headers=h)
         assert r.status_code == 400
 
 

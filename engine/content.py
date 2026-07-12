@@ -453,6 +453,101 @@ CONJUROS: dict[str, dict] = {
 # Clases que pueden lanzar rituales (con el conjuro conocido/preparado)
 CLASES_RITUALISTAS = {"bardo", "clerigo", "druida", "mago"}
 
+# --------- listas de conjuros por clase (quién puede aprender qué, SRD) -------
+# Los conjuros importados de Open5e ya traen "clases" en inglés; los curados
+# arriba no, así que se las asignamos acá. Esto restringe qué puede elegir cada
+# clase (p. ej. el druida no aprende Sirviente Invisible).
+_NORM_CLASE = {
+    "barbarian": "barbaro", "fighter": "guerrero", "paladin": "paladin",
+    "ranger": "ranger", "cleric": "clerigo", "druid": "druida", "bard": "bardo",
+    "monk": "monje", "rogue": "picaro", "sorcerer": "hechicero",
+    "wizard": "mago", "warlock": "brujo",
+    # identidad para claves ya en español
+    "barbaro": "barbaro", "guerrero": "guerrero", "clerigo": "clerigo",
+    "druida": "druida", "bardo": "bardo", "monje": "monje", "picaro": "picaro",
+    "hechicero": "hechicero", "mago": "mago", "brujo": "brujo",
+}
+
+# Clases de los conjuros curados (claves en español de arriba).
+_CLASES_CURADAS = {
+    # trucos
+    "rayo_de_escarcha": ["hechicero", "mago"],
+    "descarga_sagrada": ["clerigo"],
+    "llama_sagrada": ["clerigo"],
+    "toque_helado": ["hechicero", "mago", "brujo"],
+    "luz": ["bardo", "clerigo", "hechicero", "mago"],
+    "explosion_sobrenatural": ["brujo"],
+    "prestidigitacion": ["bardo", "hechicero", "mago", "brujo"],
+    # nivel 1
+    "proyectil_magico": ["hechicero", "mago"],
+    "curar_heridas": ["bardo", "clerigo", "druida", "paladin", "ranger"],
+    "palabra_de_curacion": ["bardo", "clerigo", "druida"],
+    "manos_ardientes": ["hechicero", "mago"],
+    "escudo": ["hechicero", "mago"],
+    "armadura_de_mago": ["hechicero", "mago"],
+    "bendecir": ["clerigo", "paladin"],
+    "perdicion": ["bardo", "clerigo"],
+    "dormir": ["bardo", "hechicero", "mago"],
+    "onda_atronadora": ["bardo", "druida", "hechicero", "mago"],
+    "hechizar_persona": ["bardo", "druida", "hechicero", "mago", "brujo"],
+    "fe_militante": ["bardo", "paladin"],
+    "marca_del_cazador": ["ranger"],
+    "rociada_de_color": ["hechicero", "mago"],
+    # nivel 2
+    "rayo_abrasador": ["hechicero", "mago"],
+    "inmovilizar_persona": ["bardo", "clerigo", "druida", "hechicero", "mago", "brujo"],
+    "invisibilidad": ["bardo", "hechicero", "mago", "brujo"],
+    "paso_brumoso": ["hechicero", "mago", "brujo"],
+    "ayuda_divina": ["clerigo", "paladin"],
+    # rituales
+    "detectar_magia": ["bardo", "clerigo", "druida", "paladin", "ranger",
+                       "hechicero", "mago"],
+    "comprender_idiomas": ["bardo", "hechicero", "mago", "brujo"],
+    "hablar_con_animales": ["bardo", "druida", "ranger"],
+    "alarma": ["mago", "ranger"],
+    "identificar": ["bardo", "mago"],
+    "augurio": ["clerigo"],
+}
+for _k, _cl in _CLASES_CURADAS.items():
+    if _k in CONJUROS:
+        CONJUROS[_k]["clases"] = _cl
+
+
+def clases_de_conjuro(conjuro: dict) -> list[str]:
+    """Clases (claves en español) que pueden aprender un conjuro dado su dict."""
+    out: list[str] = []
+    for c in conjuro.get("clases", []) or []:
+        n = _NORM_CLASE.get(str(c).lower().strip())
+        if n and n not in out:
+            out.append(n)
+    return out
+
+
+def puede_aprender_conjuro(clase: str, conjuro: str) -> bool:
+    """¿La clase puede aprender ese conjuro? (True si no tenemos su lista de
+    clases, para no bloquear contenido importado sin metadata)."""
+    c = CONJUROS.get(conjuro)
+    if c is None:
+        return False
+    clases = clases_de_conjuro(c)
+    return clase in clases if clases else True
+
+
+# --------- riqueza inicial por clase (PHB "Starting Wealth by Class") ----------
+# (cantidad de d4, multiplicador). El monje usa 5d4 sin multiplicar.
+PLATA_INICIAL_CLASE = {
+    "barbaro": (2, 10), "bardo": (5, 10), "clerigo": (5, 10), "druida": (2, 10),
+    "guerrero": (5, 10), "monje": (5, 1), "paladin": (5, 10), "ranger": (5, 10),
+    "picaro": (4, 10), "hechicero": (3, 10), "mago": (4, 10), "brujo": (4, 10),
+}
+
+
+def oro_inicial_clase(clase: str) -> int:
+    """Tira la riqueza inicial de la clase (PHB) y devuelve el oro resultante."""
+    from .dice import roll
+    n, mult = PLATA_INICIAL_CLASE.get(clase, (0, 0))
+    return roll(f"{n}d4")["total"] * mult if n else 0
+
 
 # ---------------------------------------------------------------- razas
 

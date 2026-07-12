@@ -165,6 +165,35 @@ const getTrasfondos = () => CATALOGO?.trasfondos || TRASFONDOS_LOCAL;
 const getHabClase = (clase) =>
   CATALOGO?.habilidades_clase?.[clase] || HAB_CLASE_LOCAL[clase] || {lista:HABILIDADES,cantidad:2};
 
+// Categorías de armas/armaduras y competencias por clase (fallback local para
+// que el filtro de proeficiencia funcione aunque el catálogo aún no cargue).
+const ARMAS_CAT_LOCAL = {daga:"simple",espada_corta:"marcial",espada_larga:"marcial",
+  hacha_de_mano:"simple",hacha_de_batalla:"marcial",arco_corto:"simple",
+  arco_largo:"marcial",ballesta_de_mano:"marcial",lanza:"simple",mazo:"simple",
+  mandoble:"marcial",hacha_grande:"marcial",baston:"simple",cimitarra:"marcial",
+  garrote:"simple"};
+const ARMADURAS_CAT_LOCAL = {cuero:"ligera",cuero_tachonado:"ligera",
+  camisa_de_mallas:"media",coraza:"media",media_armadura:"media",ring_mail:"pesada",
+  cota_de_mallas:"pesada",armadura_de_placas:"pesada"};
+const COMP_CLASE_LOCAL = {
+  barbaro:{armas:["simple","marcial"],armaduras:["ligera","media","escudo"]},
+  guerrero:{armas:["simple","marcial"],armaduras:["ligera","media","pesada","escudo"]},
+  paladin:{armas:["simple","marcial"],armaduras:["ligera","media","pesada","escudo"]},
+  ranger:{armas:["simple","marcial"],armaduras:["ligera","media","escudo"]},
+  clerigo:{armas:["simple"],armaduras:["ligera","media","escudo"]},
+  druida:{armas:["simple"],armaduras:["ligera","media","escudo"]},
+  bardo:{armas:["simple"],armaduras:["ligera"]},
+  monje:{armas:["simple"],armaduras:[]},
+  picaro:{armas:["simple"],armaduras:["ligera"]},
+  hechicero:{armas:["simple"],armaduras:[]},
+  mago:{armas:["simple"],armaduras:[]},
+  brujo:{armas:["simple"],armaduras:["ligera"]},
+};
+const getArmaCat  = (a) => CATALOGO?.armas_info?.[a]?.categoria || ARMAS_CAT_LOCAL[a];
+const getArmadCat = (a) => CATALOGO?.armaduras_info?.[a]?.categoria || ARMADURAS_CAT_LOCAL[a];
+const getCompClase = (c) =>
+  CATALOGO?.competencias_clase?.[c] || COMP_CLASE_LOCAL[c] || {armas:[],armaduras:[]};
+
 // ---------------------------------------------------------------- fetch
 
 async function api(metodo, ruta, body) {
@@ -281,7 +310,6 @@ async function prepararCreacionPJ() {
   for (const c of Object.keys(CLASES)) sel.add(new Option(c, c));
   sel.onchange = () => {
     $("pj-clase-info").textContent = CLASES[sel.value];
-    $("pj-magia").hidden = !CON_MAGIA_NV1.includes(sel.value);
     $("lbl-estilo").hidden = sel.value !== "guerrero";
     $("pj-estilo-info").textContent = sel.value === "guerrero"
       ? ESTILOS[$("pj-estilo").value] : "";
@@ -292,8 +320,9 @@ async function prepararCreacionPJ() {
       for (const s of (CATALOGO?.subclases?.[sel.value] || []))
         ss.add(new Option(s.replaceAll("_"," "), s));
     }
-    filtrarEquipo();      // solo armas/armaduras que la clase domina
-    montarHabilidades();  // solo habilidades de la lista de la clase
+    filtrarEquipo();          // solo armas/armaduras que la clase domina
+    montarHabilidades();      // solo habilidades de la lista de la clase
+    cargarConjurosCreacion(); // solo conjuros que la clase/raza puede aprender
   };
   const sal = $("pj-alineamiento");
   for (const a of ALINEAMIENTOS) sal.add(new Option(a.replaceAll("_"," "), a));
@@ -331,6 +360,7 @@ async function prepararCreacionPJ() {
     infoSubraza();
     actualizarEleccion();
     actualizarPB();
+    cargarConjurosCreacion();   // alto elfo puede un truco de mago
   };
   const actualizarEleccion = () => {
     const r = RAZAS[$("pj-raza").value];
@@ -360,7 +390,8 @@ async function prepararCreacionPJ() {
   }
   ga.addEventListener("input", actualizarPB);
   $("pj-subraza").addEventListener("change", () => {
-    infoSubraza(); actualizarEleccion(); actualizarPB(); });
+    infoSubraza(); actualizarEleccion(); actualizarPB();
+    cargarConjurosCreacion(); });
   ["pj-eleccion-1","pj-eleccion-2"].forEach(id=>$(id).addEventListener("change", actualizarPB));
 
   // toggle método
@@ -411,14 +442,11 @@ const habilidadesElegidas = () =>
 // Rearma los selects de arma/armadura con SOLO lo que la clase domina (SRD:
 // tu clase determina tus competencias; no podés equipar lo que no dominás).
 function filtrarEquipo() {
-  const clase = $("pj-clase").value;
-  const comp = CATALOGO?.competencias_clase?.[clase] || {armas: [], armaduras: []};
-  const armasInfo = CATALOGO?.armas_info || {};
-  const armadInfo = CATALOGO?.armaduras_info || {};
+  const comp = getCompClase($("pj-clase").value);
 
   const sw = $("pj-arma"); const armaPrev = sw.value; sw.innerHTML = "";
   for (const a of ARMAS) {
-    const cat = armasInfo[a]?.categoria;
+    const cat = getArmaCat(a);
     if (cat && (comp.armas.includes(cat) || comp.armas.includes(a)))
       sw.add(new Option(a.replaceAll("_", " "), a));
   }
@@ -428,7 +456,7 @@ function filtrarEquipo() {
   const sa = $("pj-armadura"); const armadPrev = sa.value; sa.innerHTML = "";
   sa.add(new Option("Sin armadura", ""));
   for (const a of ARMADURAS) {
-    const cat = armadInfo[a]?.categoria;
+    const cat = getArmadCat(a);
     if (cat && comp.armaduras.includes(cat))
       sa.add(new Option(a.replaceAll("_", " "), a));
   }
@@ -491,32 +519,89 @@ function actualizarPB() {
   }
 }
 
+const MAX_CONJUROS_CREACION = 4;
+
+// Trucos y conjuros de nivel 1 que la clase (o la raza) puede aprender.
+function conjurosDisponibles() {
+  const clase = $("pj-clase").value;
+  const subraza = $("lbl-subraza").hidden ? null : $("pj-subraza").value;
+  const altoElfo = subraza === "alto_elfo" || subraza === "descendiente_alto_elfo";
+  const src = CONJUROS_SERVER || {};
+  const trucos = [], nivel1 = [];
+  for (const [k, v] of Object.entries(src)) {
+    if (v.nivel > 1) continue;
+    const clases = v.clases || [];
+    let ok = clases.includes(clase);
+    if (!ok && altoElfo && v.nivel === 0 && clases.includes("mago")) ok = true;
+    if (!ok) continue;
+    (v.nivel === 0 ? trucos : nivel1).push(k);
+  }
+  const porNombre = (a, b) =>
+    (src[a]?.nombre || a).localeCompare(src[b]?.nombre || b);
+  trucos.sort(porNombre); nivel1.sort(porNombre);
+  return { trucos, nivel1 };
+}
+
 async function cargarConjurosCreacion() {
-  let lista = CONJUROS_V1;
-  try {
-    if (!CONJUROS_SERVER) {
+  if (!CONJUROS_SERVER) {
+    try {
       const r = await fetch("/api/content");
       CONJUROS_SERVER = (await r.json()).conjuros;
+    } catch {}
+  }
+  const cont = $("pj-conjuros");
+  cont.innerHTML = "";
+  const { trucos, nivel1 } = conjurosDisponibles();
+  // el bloque de magia solo aparece si la clase/raza tiene algo para aprender
+  $("pj-magia").hidden = !(trucos.length || nivel1.length);
+  if (trucos.length + nivel1.length === 0) return;
+
+  const totalSel = () => cont.querySelectorAll(".chip.activo").length;
+  const filtroTxt = () =>
+    ($("filtro-conjuros")?.value || "").toLowerCase();
+
+  const grupo = (titulo, claves) => {
+    if (!claves.length) return;
+    const h = document.createElement("div");
+    h.textContent = titulo;
+    h.style.cssText = "font-weight:600;margin:.5rem 0 .2rem;opacity:.75";
+    cont.appendChild(h);
+    const fila = document.createElement("div");
+    fila.className = "chips";
+    for (const k of claves) {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip chip-arcano"; b.dataset.valor = k;
+      b.textContent = CONJUROS_SERVER[k]?.nombre || k.replaceAll("_", " ");
+      b.onclick = () => {
+        if (!b.classList.contains("activo") && totalSel() >= MAX_CONJUROS_CREACION)
+          return;
+        b.classList.toggle("activo");
+      };
+      fila.appendChild(b);
     }
-    // en creación (nivel 1): trucos y nivel 1
-    lista = Object.entries(CONJUROS_SERVER)
-      .filter(([,v]) => v.nivel <= 1)
-      .sort((a,b) => a[1].nivel - b[1].nivel || a[0].localeCompare(b[0]))
-      .map(([k]) => k);
-  } catch {}
-  montarChips("pj-conjuros", lista, 4, "chip-arcano");
-  // filtro de texto si hay muchos
-  if (lista.length > 30 && !$("filtro-conjuros")) {
-    const inp = document.createElement("input");
-    inp.id = "filtro-conjuros"; inp.placeholder = "Filtrar conjuros…";
-    inp.style.marginBottom = ".4rem";
-    $("pj-conjuros").before(inp);
-    inp.oninput = () => {
-      const q = inp.value.toLowerCase();
-      $("pj-conjuros").querySelectorAll(".chip").forEach(c =>
-        c.style.display = c.dataset.valor.includes(q) ||
-                          c.classList.contains("activo") ? "" : "none");
-    };
+    cont.appendChild(fila);
+  };
+  grupo(`Trucos (${trucos.length})`, trucos);
+  grupo(`Nivel 1 (${nivel1.length})`, nivel1);
+
+  // filtro de texto reutilizable si hay muchos conjuros
+  let inp = $("filtro-conjuros");
+  if (trucos.length + nivel1.length > 16) {
+    if (!inp) {
+      inp = document.createElement("input");
+      inp.id = "filtro-conjuros"; inp.placeholder = "Filtrar conjuros…";
+      inp.style.marginBottom = ".4rem";
+      cont.before(inp);
+      inp.oninput = () => {
+        const q = filtroTxt();
+        cont.querySelectorAll(".chip").forEach(c =>
+          c.style.display = c.dataset.valor.includes(q) ||
+                            c.classList.contains("activo") ? "" : "none");
+      };
+    }
+    inp.hidden = false;
+  } else if (inp) {
+    inp.hidden = true; inp.value = "";
   }
 }
 

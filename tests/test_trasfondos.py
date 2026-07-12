@@ -37,8 +37,8 @@ async def test_creacion_con_trasfondo(client):
     ficha = (await client.get(f"/api/characters/{cid}/sheet", headers=h)).json()
     # el sabio otorga competencia en arcanos e historia
     assert "historia" in ficha["competencias"]["habilidades"]
-    # oro inicial del trasfondo (sabio: 10 mo)
-    assert ficha["monedas"]["mo"] == 10
+    # oro inicial: riqueza de clase (mago 4d4×10, mín 40) + trasfondo (sabio 10)
+    assert ficha["monedas"]["mo"] >= 50
     # el rasgo del trasfondo queda registrado
     assert ficha["opciones_clase"]["trasfondo"] == "sabio"
     assert ficha["opciones_clase"]["rasgo_trasfondo"] == "Investigador"

@@ -6,7 +6,7 @@ CLERIGO = {
     "clase": "clerigo", "metodo": "libre", "subclase": "dominio_de_la_vida",
     "atributos": {"FUE": 10, "DES": 10, "CON": 12, "INT": 10, "SAB": 15, "CAR": 10},
     "habilidades": ["religion", "medicina"],
-    "preparados": ["detectar_magia", "identificar"],
+    "preparados": ["detectar_magia"],
     "arma_equipada": "mazo",
     "inventario": [{"nombre": "perla", "cantidad": 1},
                    {"nombre": "anillo_de_proteccion", "cantidad": 1},
@@ -48,16 +48,26 @@ async def test_ritual_de_conjuro_no_ritual_falla(client):
     assert r.status_code == 400
 
 
+# identificar es de mago (no de clérigo) y pide un componente costoso (perla)
+MAGO_RITUAL = {
+    "nombre": "Elrimar", "raza": "humano", "subraza": "estandar", "clase": "mago",
+    "metodo": "libre",
+    "atributos": {"FUE": 8, "DES": 12, "CON": 12, "INT": 15, "SAB": 10, "CAR": 10},
+    "habilidades": ["arcanos", "historia"], "arma_equipada": "daga",
+    "preparados": ["detectar_magia", "identificar"],
+    "inventario": [{"nombre": "perla", "cantidad": 1}],
+}
+
+
 @pytest.mark.anyio
 async def test_componente_material_requerido(client):
-    cid, h = await _crear(client)
     # con la perla en el inventario, identificar (ritual) se puede lanzar
+    cid, h = await _crear(client, MAGO_RITUAL)
     r = await client.post(f"/api/campaigns/{cid}/spells/ritual",
                           json={"conjuro": "identificar"}, headers=h)
     assert r.status_code == 200, r.text
     # sin la perla, falla
-    body = {**CLERIGO, "inventario": []}
-    cid2, h2 = await _crear(client, body)
+    cid2, h2 = await _crear(client, {**MAGO_RITUAL, "inventario": []})
     r = await client.post(f"/api/campaigns/{cid2}/spells/ritual",
                           json={"conjuro": "identificar"}, headers=h2)
     assert r.status_code == 400
