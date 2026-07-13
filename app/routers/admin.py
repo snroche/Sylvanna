@@ -60,8 +60,12 @@ async def dump_completo(campaign_id: int, _=Depends(admin_ok),
                   "condiciones": n.condiciones} for n in npcs],
         "quests": [{"id": q.id, "titulo": q.titulo, "estado": q.estado}
                    for q in quests],
-        "consecuencias": [{"id": p.id, "descripcion": p.descripcion}
-                          for p in cons],
+        "consecuencias": [
+            {"id": p.id,
+             "descripcion": f"{p.evento} → {p.efecto}"
+                            + (f" (se activa: {p.activacion})" if p.activacion else "")
+                            + (" ✓resuelta" if p.resuelta else "")}
+            for p in cons],
     }
 
 

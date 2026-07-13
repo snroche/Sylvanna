@@ -47,7 +47,7 @@ Campos permitidos (todos opcionales):
 - "consecuencia_pendiente": {"evento": str, "efecto": str, "activacion": str}
 - "resolver_consecuencia": {"consecuencia_id": int}
 - "inicia_combate": {"monstruos": ["goblin", ...]}  (opciones: goblin, lobo, bandido, esqueleto, zombi, orco). EMITILO APENAS el combate sea obvio o inevitable, en la misma respuesta en que aparece la amenaza: no narres la pelea vos, dejá que el sistema tire iniciativa. No hace falta que los PJs "declaren" que atacan primero.
-- "npcs_salen_de_escena": [int, ...]
+- "npcs_salen_de_escena": [int, ...]  (IDs de los NPCs que dejan de estar presentes: se van, se retiran, se esconden, mueren o el grupo los deja atrás. Mantené la escena limpia: si un NPC ya no está físicamente con el grupo, sacalo. No dejes acumular NPCs "en escena" que ya no participan)
 - "otorgar_xp": int (solo hitos narrativos; el XP de combate lo calcula el sistema)
 - "loot": [{"nombre": str, "cantidad": int}] (objetos que el grupo encuentra/recibe; máx 5)
 - "quitar_item": [{"nombre": str, "cantidad": int}] (objetos que el PJ actor deja, entrega, pierde o consume en la ficción)
@@ -58,7 +58,7 @@ Campos permitidos (todos opcionales):
 - "otorgar_inspiracion": str (nombre del PJ que gana Inspiración Heroica: ventaja en su próxima tirada; premiá buen rol o ideas creativas, con mesura)
 - "otorgar_monedas": int | {"mo": int, "mp": int, "mc": int}  (monedas que el grupo encuentra/recibe. Un entero = ese oro; o especificá oro/plata/cobre (mo/mp/mc) para botines chicos o mixtos. Usá con mesura)
 - "avanzar_tiempo_min": int
-- "nueva_ubicacion": str
+- "nueva_ubicacion": str  (el grupo se mueve a un lugar nuevo. Al cambiar de ubicación, los NPCs de la escena anterior se retiran solos automáticamente: no arrastres a gente del lugar viejo)
 No declares efectos que no correspondan a lo que acaba de pasar."""
 
 

@@ -23,7 +23,7 @@
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; }
+html, body { margin: 0; height: 100%; max-width: 100%; overflow-x: hidden; }
 body {
   background:
     radial-gradient(ellipse 90% 60% at 50% -10%, #232635 0%, transparent 60%),
@@ -245,6 +245,39 @@ label input, label select { margin-top: .25rem; color: var(--pergamino); }
   aside[data-panel].visible { display: block; overflow-y: auto; }
   .fila-2 { grid-template-columns: 1fr; }
   .grilla-atributos { grid-template-columns: repeat(3, 1fr); }
+
+  /* cabecera: que envuelva y no se desborde de la pantalla */
+  .cabecera { flex-wrap: wrap; gap: .4rem .5rem; padding: .5rem .7rem; }
+  .titulo-campania { font-size: 1.15rem; }
+  .ubicacion { margin-left: 0; }
+  .cabecera-der { flex-wrap: wrap; gap: .35rem; }
+  .pastilla { font-size: .76rem; padding: .12rem .55rem; }
+
+  /* barra de info: una sola fila con scroll horizontal */
+  .barra-info { flex-wrap: nowrap; overflow-x: auto; padding: .4rem .6rem;
+    -webkit-overflow-scrolling: touch; }
+  .btn-info { white-space: nowrap; flex: 0 0 auto; }
+
+  /* composer: filas que envuelven; el textarea ocupa toda la fila */
+  .composer { padding: .6rem .8rem .8rem; }
+  .composer-fila { flex-wrap: wrap; }
+  .composer-fila textarea { flex: 1 1 100%; }
+  .log { padding: 1rem .9rem; }
+  .msg { max-width: 100%; }
+}
+
+/* ---------- teléfonos angostos ---------- */
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .titulo-juego { font-size: 3rem; }
+  .inicio-marco, .crear-marco { padding: 1.6rem 1rem 3rem; }
+  .panel-conjuros { padding: .5rem; }
+  .panel-conjuros .caja, .modal-info .caja { padding: 1rem .9rem; max-height: 92dvh; }
+  .info-grid { grid-template-columns: repeat(3, 1fr); }
+  /* botones más tocables */
+  .btn { padding: .7rem 1rem; }
+  .btn-mini { padding: .5rem .6rem; }
+  .composer-fila select, .composer-fila input { min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

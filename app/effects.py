@@ -42,6 +42,21 @@ async def aplicar_efectos(db: AsyncSession, camp: Campaign,
     if not efectos:
         return log
 
+    # Cambio de lugar: los NPCs de la escena anterior se quedan atrás. Se limpia
+    # ANTES de introducir los NPCs nuevos (nuevos_npcs), así los del lugar nuevo
+    # sí quedan en escena. Evita que la escena se llene de gente que ya no está.
+    _ub = efectos.get("nueva_ubicacion")
+    if isinstance(_ub, str) and _ub.strip() \
+            and _ub.strip()[:200] != camp.ubicacion_actual:
+        res = await db.execute(select(NPC).where(
+            NPC.campaign_id == camp.id, NPC.en_escena == True))  # noqa: E712
+        salieron = res.scalars().all()
+        for n in salieron:
+            n.en_escena = False
+        if salieron:
+            log["aplicados"].append(("escena_reiniciada_por_ubicacion",
+                                     len(salieron)))
+
     for npc_data in efectos.get("nuevos_npcs") or []:
         if not isinstance(npc_data, dict) or not npc_data.get("nombre"):
             log["rechazados"].append(("nuevos_npcs", npc_data))

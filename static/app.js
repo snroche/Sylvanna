@@ -706,7 +706,12 @@ async function apiAdmin(metodo, ruta, body) {
   });
   if (!r.ok) {
     if (r.status === 401) localStorage.removeItem("adminToken");
-    throw new Error((await r.json()).detail || r.status);
+    // el cuerpo puede no ser JSON (p. ej. un 500 con texto plano): no revientes
+    const cuerpo = await r.text().catch(() => "");
+    let detalle = `error ${r.status}`;
+    try { detalle = JSON.parse(cuerpo).detail || detalle; }
+    catch { if (cuerpo) detalle = cuerpo.slice(0, 200); }
+    throw new Error(detalle);
   }
   return r.json();
 }
