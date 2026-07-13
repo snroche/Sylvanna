@@ -1433,6 +1433,7 @@ async function abrirPanelConjuros(f) {
 // ---------- mundo
 
 function pintarMundo(st) {
+  S.mundo = st;                       // lo usan los modales de info
   const quests = st.quests.filter(q=>q.estado==="activa");
   const hechas = st.quests.filter(q=>q.estado!=="activa");
   const abiertos = S.seccionesAbiertas || (S.seccionesAbiertas = {party:true, misiones:true});
@@ -1458,31 +1459,157 @@ function pintarMundo(st) {
     ? `<p class="nota">${hechas.length} completada(s)</p>` : "")
     || '<p class="nota">Sin misiones activas.</p>';
 
-  const npcs = st.npcs_conocidos.map(n =>
-    `<p class="npc-linea"><b>${esc(n.nombre)}</b> · ${esc(n.descripcion||"")}
-     <span class="party-meta">${esc(n.actitud)}${n.en_escena?" · presente":""}</span></p>`
-  ).join("") || '<p class="nota">Nadie todavía.</p>';
-
-  const presagios = st.consecuencias_pendientes > 0
-    ? `<p class="nota">Hay ${st.consecuencias_pendientes} consecuencia(s) pendiente(s) sobre el grupo…</p>`
-    : '<p class="nota">El horizonte está despejado. Por ahora.</p>';
-
-  const cronica = st.resumen
-    ? `<div class="cronica-caja">${esc(st.resumen)}</div>`
-    : '<p class="nota">La historia recién empieza.</p>';
-
+  // Personajes conocidos, Presagios y Crónica ahora viven en modales
+  // (botones en la barra de info); acá quedan solo party y misiones.
   $("ui-mundo").innerHTML =
     sec("party", "La party", (S.campania?.personajes||[]).length, party) +
-    sec("misiones", "Misiones", quests.length, misiones) +
-    sec("npcs", "Personajes conocidos", st.npcs_conocidos.length, npcs) +
-    sec("presagios", "Presagios", st.consecuencias_pendientes || "", presagios) +
-    sec("cronica", "Crónica", st.resumen ? "…" : "", cronica);
+    sec("misiones", "Misiones", quests.length, misiones);
 
   // recordar qué secciones dejó abiertas el jugador
   $("ui-mundo").querySelectorAll("details").forEach(d =>
     d.addEventListener("toggle", () =>
       S.seccionesAbiertas[d.dataset.sec] = d.open));
 }
+
+// ---------------------------------------------------------------- modales de info
+
+function abrirModal(titulo, htmlCuerpo) {
+  cerrarModal();
+  const ov = document.createElement("div");
+  ov.className = "panel-conjuros modal-info";
+  ov.id = "modal-info";
+  ov.innerHTML = `<div class="caja">
+    <button class="modal-cerrar" aria-label="Cerrar">✕</button>
+    <h2>${esc(titulo)}</h2>
+    <div class="modal-cuerpo">${htmlCuerpo}</div>
+  </div>`;
+  ov.querySelector(".modal-cerrar").onclick = cerrarModal;
+  ov.addEventListener("click", (e) => { if (e.target === ov) cerrarModal(); });
+  document.body.appendChild(ov);
+}
+
+function cerrarModal() {
+  const ov = $("modal-info");
+  if (ov) ov.remove();
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") cerrarModal();
+});
+
+const _pretty = (s) => esc((s ?? "—").toString().replaceAll("_", " "));
+
+function _tags(lista, vacio) {
+  if (!lista || !lista.length) return `<p class="info-vacio">${vacio}</p>`;
+  return `<div class="info-tags">${lista.map(x =>
+    `<span class="info-tag">${_pretty(x)}</span>`).join("")}</div>`;
+}
+
+function fichaCompletaHTML(f) {
+  if (!f) return '<p class="info-vacio">Todavía no cargaste tu personaje.</p>';
+  const opc = f.opciones_clase || {};
+  const comp = f.competencias || {};
+  const mon = f.monedas || {};
+  const linea = (k, v) => `<div class="info-linea"><span>${k}</span><span>${v}</span></div>`;
+  const stats = ATRS.map(a => `<div class="info-celda">
+    <span class="n">${a}</span>
+    <span class="v">${f.atributos[a].valor}</span>
+    <span class="m">${signo(f.atributos[a].mod)}</span></div>`).join("");
+  const inv = (f.inventario || []).length
+    ? `<div class="info-tags">${f.inventario.map(it =>
+        `<span class="info-tag">${_pretty(it.nombre)}${it.cantidad>1?` ×${it.cantidad}`:""}</span>`
+      ).join("")}</div>`
+    : '<p class="info-vacio">Sin objetos.</p>';
+  const trasfondo = opc.trasfondo
+    ? `${_pretty(opc.trasfondo)}${opc.rasgo_trasfondo ? ` — <i>${esc(opc.rasgo_trasfondo)}</i>` : ""}`
+    : "—";
+
+  return `
+    <p class="info-sub">${_pretty(f.raza)} · ${_pretty(f.clase)}${
+      f.subclase ? ` (${_pretty(f.subclase)})` : ""} · nivel ${f.nivel} · ${
+      _pretty(f.alineamiento)}${f.genero ? ` · ${_pretty(f.genero)}` : ""}</p>
+
+    <div class="info-grid">${stats}</div>
+
+    <div class="info-grid" style="grid-template-columns:repeat(auto-fit,minmax(5.5rem,1fr))">
+      <div class="info-celda"><span class="n">PG</span><span class="v">${f.pg_actual}/${f.pg_max}</span></div>
+      <div class="info-celda"><span class="n">CA</span><span class="v">${f.ca}</span></div>
+      <div class="info-celda"><span class="n">Inic.</span><span class="v">${signo(f.iniciativa_mod)}</span></div>
+      <div class="info-celda"><span class="n">Comp.</span><span class="v">${signo(f.bc)}</span></div>
+      <div class="info-celda"><span class="n">Vel.</span><span class="v">${f.velocidad_m}m</span></div>
+      <div class="info-celda"><span class="n">D. golpe</span><span class="v">${f.dados_golpe_disp}${f.dado_golpe}</span></div>
+    </div>
+
+    <h3>Identidad</h3>
+    ${linea("Nombre", esc(f.nombre))}
+    ${linea("Raza / subraza", _pretty(f.raza))}
+    ${linea("Clase / subclase", `${_pretty(f.clase)}${f.subclase ? ` (${_pretty(f.subclase)})` : ""}`)}
+    ${opc.multiclase ? linea("Multiclase", _pretty(opc.multiclase)) : ""}
+    ${linea("Trasfondo", trasfondo)}
+    ${linea("Alineamiento", _pretty(f.alineamiento))}
+    ${f.estilo_combate ? linea("Estilo de combate", _pretty(f.estilo_combate)) : ""}
+    ${linea("XP", `${f.xp}${f.nivel_por_xp>f.nivel ? ` · puede subir a nv ${f.nivel_por_xp}` : ""}`)}
+
+    <h3>Salvaciones</h3>
+    ${_tags(comp.salvaciones, "Ninguna competencia de salvación.")}
+
+    <h3>Habilidades competentes</h3>
+    ${_tags(comp.habilidades, "Ninguna.")}
+    ${(opc.expertise||[]).length ? `<h3>Pericia (expertise)</h3>${_tags(opc.expertise,"")}` : ""}
+
+    <h3>Competencias de equipo</h3>
+    ${linea("Armas", comp.armas ? comp.armas.map(x=>_pretty(x)).join(", ") : "—")}
+    ${linea("Armaduras", comp.armaduras && comp.armaduras.length ? comp.armaduras.map(x=>_pretty(x)).join(", ") : "—")}
+
+    ${(opc.invocaciones||[]).length ? `<h3>Invocaciones</h3>${_tags(opc.invocaciones,"")}` : ""}
+    ${(opc.metamagia||[]).length ? `<h3>Metamagia</h3>${_tags(opc.metamagia,"")}` : ""}
+    ${(f.feats||[]).length ? `<h3>Dotes</h3>${_tags(f.feats,"")}` : ""}
+
+    <h3>Equipo</h3>
+    ${linea("Arma", _pretty(f.arma_equipada))}
+    ${linea("Armadura", `${_pretty(f.armadura)}${f.escudo ? " + escudo" : ""}`)}
+    ${linea("Monedas", `<span class="monedas"><span title="Oro">${mon.mo??0} <b class="mo">mo</b></span> · <span title="Plata">${mon.mp??0} <b class="mp">mp</b></span> · <span title="Cobre">${mon.mc??0} <b class="mc">mc</b></span></span>`)}
+
+    <h3>Inventario</h3>
+    ${inv}
+
+    ${(f.conocidos||[]).length || (f.preparados||[]).length
+      ? `<h3>Conjuros</h3>${_tags((f.preparados&&f.preparados.length)?f.preparados:f.conocidos,"")}`
+      : ""}
+  `;
+}
+
+$("btn-ver-personaje").onclick = () =>
+  abrirModal(S.ficha ? S.ficha.nombre : "Personaje", fichaCompletaHTML(S.ficha));
+
+$("btn-ver-conocidos").onclick = () => {
+  const st = S.mundo || {};
+  const npcs = (st.npcs_conocidos || []);
+  const html = npcs.length
+    ? npcs.map(n => `<div class="info-linea">
+        <span><b>${esc(n.nombre)}</b>${n.rol ? ` · ${esc(n.rol)}` : ""}</span>
+        <span class="party-meta">${_pretty(n.actitud)}${n.en_escena ? " · presente" : ""}</span>
+      </div>`).join("")
+    : '<p class="info-vacio">Todavía no conocés a nadie.</p>';
+  abrirModal("Personajes conocidos", html);
+};
+
+$("btn-ver-presagios").onclick = () => {
+  const st = S.mundo || {};
+  const n = st.consecuencias_pendientes || 0;
+  const html = n > 0
+    ? `<p>Pesan <b>${n}</b> consecuencia(s) pendiente(s) sobre el grupo. Algo se está gestando…</p>`
+    : '<p class="info-vacio">El horizonte está despejado. Por ahora.</p>';
+  abrirModal("Presagios", html);
+};
+
+$("btn-ver-cronica").onclick = () => {
+  const st = S.mundo || {};
+  const html = st.resumen
+    ? `<div class="cronica-caja">${esc(st.resumen)}</div>`
+    : '<p class="info-vacio">La historia recién empieza.</p>';
+  abrirModal("Crónica", html);
+};
 
 // ---------- tabs móvil
 

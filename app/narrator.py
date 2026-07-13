@@ -65,11 +65,11 @@ Campos permitidos (todos opcionales):
 - "loot": [{"nombre": str, "cantidad": int}]  (objetos que el grupo encuentra/recibe; máx 5)
 - "quitar_item": [{"nombre": str, "cantidad": int}]  (objetos que el PJ actor deja, entrega, pierde o consume en la ficción)
 - "pedir_tirada": {"habilidad": str, "a_quien": str, "cd": int}  (pedile una tirada al PJ nombrado o a "todos". Elegí la CD según la dificultad real: 5 muy fácil, 10 fácil, 15 media, 20 difícil, 25 muy difícil, 30 casi imposible. NUNCA narres el resultado en este mensaje: esperá a que tiren. Si es a "todos", el sistema junta las tiradas de TODOS y recién cuando estén todas te pide narrar el desenlace: no sigas la escena hasta entonces)
-- "quitar_monedas": int  (el PJ actor PAGA ese oro: compras, sobornos, peajes. Si no le alcanza, el sistema lo rechaza y debés renegociar)
+- "quitar_monedas": int  (el PJ actor PAGA ese precio en oro (PO): compras, sobornos, peajes. El sistema cubre el pago con toda la bolsa —oro, plata y cobre— y da el cambio. Si no le alcanza, lo rechaza y debés renegociar. Precios chicos existen: una jarra de cerveza cuesta menos de 1 PO)
 - "aplicar_condicion": {"objetivo": str, "tipo": str, "rondas": int}  (tipos válidos: envenenado, asustado, cegado, derribado, restringido, aturdido, paralizado, agarrado; máx 3 rondas; usalo con moderación y justificación en la ficción)
 - "quitar_condicion": {"objetivo": str, "tipo": str}
 - "otorgar_inspiracion": str  (nombre del PJ que gana Inspiración Heroica: ventaja en su próxima tirada; premiá buen rol o ideas creativas, con mesura)
-- "otorgar_monedas": int  (monedas de oro encontradas/pagadas; usá con mesura)
+- "otorgar_monedas": int | {"mo": int, "mp": int, "mc": int}  (monedas que el grupo encuentra/recibe. Un entero = ese oro; o especificá oro/plata/cobre (mo/mp/mc) para botines chicos o mixtos. Usá con mesura)
 - "avanzar_tiempo_min": int
 - "nueva_ubicacion": str
 No declares efectos que no correspondan a lo que acaba de pasar."""

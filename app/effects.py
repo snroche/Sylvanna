@@ -18,6 +18,22 @@ XP_NARRATIVO_TOPE_POR_NIVEL = 50   # tope: 50 × nivel_promedio por evento
 ACTITUDES = {"amistoso", "neutral", "desconfiado", "hostil"}
 
 
+def _en_cobre(m: dict | None) -> int:
+    """Valor total de una bolsa {mo,mp,mc} en cobre (1 mo = 10 mp = 100 mc)."""
+    m = m or {}
+    return int(m.get("mo", 0)) * 100 + int(m.get("mp", 0)) * 10 + int(m.get("mc", 0))
+
+
+def _desde_cobre(cp: int) -> dict:
+    """Reparte un total de cobre en oro/plata/cobre (cambio óptimo)."""
+    cp = max(0, int(cp))
+    return {"mo": cp // 100, "mp": (cp % 100) // 10, "mc": cp % 10}
+
+
+def _bolsa_a_texto(m: dict) -> str:
+    return f"{m.get('mo', 0)} mo, {m.get('mp', 0)} mp, {m.get('mc', 0)} mc"
+
+
 async def aplicar_efectos(db: AsyncSession, camp: Campaign,
                           efectos: dict,
                           actor: Character | None = None) -> dict:
@@ -286,38 +302,47 @@ async def aplicar_efectos(db: AsyncSession, camp: Campaign,
                 log["aplicados"].append(("inspiracion", pj.nombre))
                 break
 
+    # Pagar: el precio viene en oro (PO) pero se cubre con TODA la bolsa
+    # (oro + plata + cobre) y se devuelve el cambio en denominaciones óptimas.
     gasto = efectos.get("quitar_monedas")
     if isinstance(gasto, (int, float)) and gasto > 0 and actor is not None:
         gasto = min(int(gasto), 10000)
-        m = dict(actor.monedas or {})
-        oro_actual = m.get("mo", 0)
-        if oro_actual >= gasto:
-            m["mo"] = oro_actual - gasto
-            actor.monedas = m   # reasignar: trampa de mutación JSON
+        costo_cp = gasto * 100
+        fondos_cp = _en_cobre(actor.monedas)
+        if fondos_cp >= costo_cp:
+            nueva = _desde_cobre(fondos_cp - costo_cp)
+            actor.monedas = nueva   # reasignar: trampa de mutación JSON
             log["aplicados"].append(("quitar_monedas", gasto))
             db.add(Message(campaign_id=camp.id, autor="sistema",
                            autor_nombre="Sistema",
                            contenido=f"💰 {actor.nombre} paga {gasto} PO "
-                                     f"(le quedan {m['mo']})."))
+                                     f"(le quedan {_bolsa_a_texto(nueva)})."))
         else:
             log["rechazados"].append(("quitar_monedas",
-                                      f"{gasto} > oro {oro_actual}"))
+                                      f"{gasto} PO > fondos "
+                                      f"({fondos_cp / 100:g} PO)"))
 
+    # Otorgar: acepta un entero (oro) o una bolsa {mo,mp,mc}. Se reparte entre
+    # los personajes vivos, con tope por nivel promedio.
     oro = efectos.get("otorgar_monedas")
-    if isinstance(oro, int) and oro > 0:
+    premio_cp = 0
+    if isinstance(oro, dict):
+        premio_cp = _en_cobre({k: (v if isinstance(v, (int, float)) else 0)
+                               for k, v in oro.items()})
+    elif isinstance(oro, int) and oro > 0:
+        premio_cp = oro * 100
+    if premio_cp > 0:
         res = await db.execute(select(Character).where(
             Character.campaign_id == camp.id, Character.vivo == True))  # noqa: E712
         chars = res.scalars().all()
         if chars:
             nivel_prom = sum(c.nivel for c in chars) / len(chars)
-            tope = int(50 * nivel_prom)
-            otorgado = min(oro, tope)
-            porcada = max(1, otorgado // len(chars))
+            tope_cp = int(50 * nivel_prom) * 100
+            otorgado_cp = min(premio_cp, tope_cp)
+            porcada_cp = max(1, otorgado_cp // len(chars))
             for c in chars:
-                m = dict(c.monedas)
-                m["mo"] = m.get("mo", 0) + porcada
-                c.monedas = m
-            log["aplicados"].append(("monedas_oro", porcada))
+                c.monedas = _desde_cobre(_en_cobre(c.monedas) + porcada_cp)
+            log["aplicados"].append(("monedas", _desde_cobre(porcada_cp)))
 
     ic = efectos.get("inicia_combate")
     if isinstance(ic, dict):
