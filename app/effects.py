@@ -174,14 +174,48 @@ async def aplicar_efectos(db: AsyncSession, camp: Campaign,
 
     tirada = efectos.get("pedir_tirada")
     if isinstance(tirada, dict) and tirada.get("habilidad"):
-        quien = str(tirada.get("a_quien", "") or
-                    (actor.nombre if actor else "el grupo"))[:60]
-        hab = str(tirada["habilidad"])[:30]
-        db.add(Message(
-            campaign_id=camp.id, autor="sistema", autor_nombre="Sistema",
-            contenido=f"🎲 El DM pide una tirada de **{hab}** a {quien}. "
-                      f"(Usá el botón Tirada en la mesa.)"))
-        log["aplicados"].append(("pedir_tirada", f"{hab} → {quien}"))
+        from engine.rules import HABILIDADES
+        hab = str(tirada["habilidad"]).lower().strip()[:30]
+        if hab not in HABILIDADES:
+            log["rechazados"].append(("pedir_tirada", hab))
+        else:
+            try:
+                cd = int(tirada.get("cd", 12))
+            except (TypeError, ValueError):
+                cd = 12
+            cd = max(5, min(30, cd))
+            a_quien = str(tirada.get("a_quien", "")).lower().strip()
+            grupo_kw = ("", "todos", "el grupo", "grupo", "party", "la party",
+                        "todo el grupo", "todos los jugadores", "todos los pj")
+            res_c = await db.execute(select(Character).where(
+                Character.campaign_id == camp.id, Character.vivo == True))  # noqa: E712
+            vivos = res_c.scalars().all()
+            es_grupo = a_quien in grupo_kw
+            if es_grupo:
+                objetivos = list(vivos)
+            else:
+                objetivos = [c for c in vivos if c.nombre.lower() == a_quien]
+                if not objetivos and actor is not None:
+                    objetivos = [actor]
+            if objetivos:
+                pend = list(camp.tiradas_pendientes or [])
+                pend.append({
+                    "habilidad": hab, "cd": cd,
+                    "motivo": str(tirada.get("motivo", ""))[:120],
+                    "pendientes": [c.id for c in objetivos],
+                    "tiradas": [],
+                })
+                camp.tiradas_pendientes = pend
+                quien = ("todo el grupo" if es_grupo
+                         else ", ".join(c.nombre for c in objetivos))
+                db.add(Message(
+                    campaign_id=camp.id, autor="sistema", autor_nombre="Sistema",
+                    contenido=f"🎲 El DM pide una tirada de **{hab}** (CD {cd}) a "
+                              f"{quien}. Cada uno tira con su botón; el DM narra "
+                              f"cuando estén todas."))
+                log["aplicados"].append(("pedir_tirada", f"{hab} CD{cd} → {quien}"))
+            else:
+                log["rechazados"].append(("pedir_tirada", a_quien))
 
     aplicar_cond = efectos.get("aplicar_condicion")
     if isinstance(aplicar_cond, dict) and aplicar_cond.get("tipo"):

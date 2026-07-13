@@ -889,6 +889,7 @@ async function refrescarTodo(inicial) {
 
   pintarCabecera(camp);
   pintarCombate(camp);
+  pintarTiradaPedida(camp);
   pintarEscribiendo();
   // deshacer/regenerar de OTRO jugador: el server tiene menos mensajes que yo
   if (S.campania?.ultimo_mensaje_id !== undefined
@@ -927,6 +928,27 @@ function pintarCabecera(c) {
   const est = $("ui-estado");
   est.textContent = c.estado;
   est.classList.toggle("en-combate", c.estado === "combate");
+}
+
+// Banner: el DM te pide una tirada (con su CD). Botón para responderla.
+function pintarTiradaPedida(camp) {
+  const el = $("ui-tirada-pedida");
+  if (!el) return;
+  const pend = (camp.tiradas_pendientes || []).find(p => p.me_toca);
+  if (!pend) { el.hidden = true; el.innerHTML = ""; return; }
+  const nombre = pend.habilidad.replaceAll("_", " ");
+  el.hidden = false;
+  el.innerHTML = `<span>🎲 El DM te pide una tirada de <b>${esc(nombre)}</b> `
+    + `(CD ${pend.cd})</span>`
+    + `<button class="btn btn-ambar" id="btn-tirada-pedida">Tirar ${esc(nombre)}</button>`;
+  $("btn-tirada-pedida").onclick = async () => {
+    $("btn-tirada-pedida").disabled = true;
+    try {
+      const d = await enviarSkill(pend.habilidad, pend.cd, "");
+      if (d.narrando === false)
+        avisoSistema(`Tirada registrada; faltan ${d.faltan} por tirar.`);
+    } catch(e){ avisoSistema(e.message); $("btn-tirada-pedida").disabled = false; }
+  };
 }
 
 // ---------- log
@@ -1158,15 +1180,22 @@ async function enviarAccion(entreJugadores) {
   } catch(e){ avisoSistema(e.message); }
 }
 
+async function enviarSkill(habilidad, cd, desc) {
+  const d = await api("POST", `/campaigns/${S.campaignId}/skill-check`, {
+    habilidad, cd, descripcion: desc || ""});
+  sellarResolucion(d.resolucion);
+  if (d.narrando) { S.narrando = true; pintarEscribiendo(); }
+  acelerarPolling();
+  await refrescarTodo(false);   // refresca el estado de tiradas pendientes
+  return d;
+}
+
 $("btn-skill").onclick = async () => {
   $("btn-skill").disabled = true;
   try {
-    const d = await api("POST", `/campaigns/${S.campaignId}/skill-check`, {
-      habilidad: $("inp-habilidad").value,
-      descripcion: $("inp-desc-habilidad").value.trim()});
-    sellarResolucion(d.resolucion);
+    await enviarSkill($("inp-habilidad").value, +$("inp-cd-dificultad").value,
+                      $("inp-desc-habilidad").value.trim());
     $("inp-desc-habilidad").value = "";
-    S.narrando = true; pintarEscribiendo(); acelerarPolling();
   } catch(e){ avisoSistema(e.message); }
   $("btn-skill").disabled = false;
 };
@@ -1465,6 +1494,10 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
 document.querySelector('[data-panel="juego"]')?.classList.add("visible");
 
 for (const h of HABILIDADES) $("inp-habilidad").add(new Option(h.replaceAll("_"," "), h));
+const DIFICULTADES = [["Muy fácil (5)",5],["Fácil (10)",10],["Media (15)",15],
+  ["Difícil (20)",20],["Muy difícil (25)",25],["Casi imposible (30)",30]];
+for (const [lbl,v] of DIFICULTADES) $("inp-cd-dificultad").add(new Option(lbl, v));
+$("inp-cd-dificultad").value = "15";
 const SALV_LABEL = {FUE:"Fuerza", DES:"Destreza", CON:"Constitución",
   INT:"Inteligencia", SAB:"Sabiduría", CAR:"Carisma"};
 for (const a of ATRS) $("inp-salvacion").add(new Option(SALV_LABEL[a], a));

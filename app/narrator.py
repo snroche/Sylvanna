@@ -58,7 +58,7 @@ Campos permitidos (todos opcionales):
 - "otorgar_xp": int  (solo hitos narrativos; el XP de combate lo calcula el sistema)
 - "loot": [{"nombre": str, "cantidad": int}]  (objetos que el grupo encuentra/recibe; máx 5)
 - "quitar_item": [{"nombre": str, "cantidad": int}]  (objetos que el PJ actor deja, entrega, pierde o consume en la ficción)
-- "pedir_tirada": {"habilidad": str, "a_quien": str}  (pedile una tirada al PJ nombrado, o "todos"; NO resuelvas el resultado todavía)
+- "pedir_tirada": {"habilidad": str, "a_quien": str, "cd": int}  (pedile una tirada al PJ nombrado o a "todos". Elegí la CD según la dificultad real: 5 muy fácil, 10 fácil, 15 media, 20 difícil, 25 muy difícil, 30 casi imposible. NUNCA narres el resultado en este mensaje: esperá a que tiren. Si es a "todos", el sistema junta las tiradas de TODOS y recién cuando estén todas te pide narrar el desenlace: no sigas la escena hasta entonces)
 - "quitar_monedas": int  (el PJ actor PAGA ese oro: compras, sobornos, peajes. Si no le alcanza, el sistema lo rechaza y debés renegociar)
 - "aplicar_condicion": {"objetivo": str, "tipo": str, "rondas": int}  (tipos válidos: envenenado, asustado, cegado, derribado, restringido, aturdido, paralizado, agarrado; máx 3 rondas; usalo con moderación y justificación en la ficción)
 - "quitar_condicion": {"objetivo": str, "tipo": str}

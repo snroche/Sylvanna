@@ -203,7 +203,16 @@ async def accion_habilidad(campaign_id: int, body: AccionHabilidad,
     char = await _mi_personaje(campaign_id, player, db)
     camp = await db.get(Campaign, campaign_id)
     cr = hidratar_personaje(char)
-    r = tirada_habilidad(cr, body.habilidad, body.cd)
+
+    # ¿Este PJ está respondiendo un pedido de tirada del DM? Si es así, usa la
+    # CD que fijó el DM (no la 12 por defecto).
+    pend = list(camp.tiradas_pendientes or [])
+    match = next((p for p in pend
+                  if char.id in p.get("pendientes", [])
+                  and p.get("habilidad") == body.habilidad), None)
+    cd = match["cd"] if match else body.cd
+
+    r = tirada_habilidad(cr, body.habilidad, cd)
     persistir_personaje(cr, char)
     _msg(db, campaign_id, "jugador", char.nombre,
          f"[{body.habilidad}] {body.descripcion}")
@@ -211,12 +220,47 @@ async def accion_habilidad(campaign_id: int, body: AccionHabilidad,
     detalle_insp = f" +{r['inspiracion']}🎵" if r.get("inspiracion") else ""
     _msg(db, campaign_id, "sistema", "Sistema",
          f"🎲 {char.nombre} — {body.habilidad}: d20={r['natural']} "
-         f"+{r['bono']}{detalle_insp} = {r['total']} → {exito}")
+         f"+{r['bono']}{detalle_insp} = {r['total']} vs CD {cd} → {exito}")
     _roll(db, campaign_id, r, char.id)
+
+    if match:
+        # registrar la tirada; recién narramos cuando TODOS los pedidos tiraron
+        restantes = [x for x in match["pendientes"] if x != char.id]
+        tiradas = match["tiradas"] + [{"nombre": char.nombre,
+                                       "total": r["total"], "exito": r["exito"]}]
+        nuevos_pend = []
+        for p in pend:
+            if p is match:
+                if restantes:
+                    nuevos_pend.append({**p, "pendientes": restantes,
+                                        "tiradas": tiradas})
+            else:
+                nuevos_pend.append(p)
+        camp.tiradas_pendientes = nuevos_pend
+        if restantes:
+            _msg(db, campaign_id, "sistema", "Sistema",
+                 f"⏳ Faltan {len(restantes)} por tirar {body.habilidad} "
+                 f"antes de que el DM narre.")
+            await db.commit()
+            return {"resolucion": r, "narrando": False,
+                    "faltan": len(restantes)}
+        # última tirada del pedido: el DM narra el desenlace con todas juntas
+        resumen = "; ".join(f"{t['nombre']}: {t['total']} "
+                            f"({'éxito' if t['exito'] else 'fallo'})"
+                            for t in tiradas)
+        encolar_narracion(
+            bg, camp,
+            f"Ya están TODAS las tiradas de {body.habilidad} (CD {cd}): "
+            f"{resumen}. Narrá el desenlace para el grupo según quién superó la "
+            f"CD y quién no; no pidas otra tirada para esto.", char.id)
+        await db.commit()
+        return {"resolucion": r, "narrando": True, "tiradas": tiradas}
+
+    # tirada suelta (sin pedido del DM): se narra al toque
     encolar_narracion(
         bg, camp,
         f"{char.nombre} intenta {body.habilidad} "
-        f"({body.descripcion or 'sin detalle'}). "
+        f"({body.descripcion or 'sin detalle'}) contra CD {cd}. "
         f"Resultado del sistema: {json.dumps(r, ensure_ascii=False)}",
         char.id)
     await db.commit()

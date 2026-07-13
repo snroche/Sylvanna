@@ -39,6 +39,9 @@ class Campaign(Base):
     invite_code: Mapped[str] = mapped_column(String(20), unique=True,
                                              default=_codigo_invitacion)
     combate: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # Combat.to_dict()
+    # pedidos de tirada del DM aún sin resolver:
+    # [{"habilidad": str, "cd": int, "pendientes": [char_id...], "tiradas": [...]}]
+    tiradas_pendientes: Mapped[list] = mapped_column(JSON, default=list)
     narrando: Mapped[bool] = mapped_column(Boolean, default=False)
     ultimo_descanso_largo_min: Mapped[int] = mapped_column(Integer, default=-10_000)
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_ahora)

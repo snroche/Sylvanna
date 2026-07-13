@@ -99,11 +99,19 @@ async def ver_campania(campaign_id: int, player: Player = Depends(jugador_actual
             return "herido"
         return "malherido"
 
+    mi_char = next((c for c in chars if c.player_id == player.id and c.vivo), None)
+    tiradas_pendientes = [
+        {"habilidad": p["habilidad"], "cd": p.get("cd", 12),
+         "me_toca": bool(mi_char and mi_char.id in p.get("pendientes", [])),
+         "faltan": len(p.get("pendientes", []))}
+        for p in (camp.tiradas_pendientes or [])]
+
     return {
         "id": camp.id, "nombre": camp.nombre, "estado": camp.estado,
         "ubicacion": camp.ubicacion_actual,
         "tiempo_juego_min": camp.tiempo_juego_min,
         "narrando": camp.narrando,
+        "tiradas_pendientes": tiradas_pendientes,
         "ultimo_mensaje_id": (await db.execute(
             select(func.max(Message.id)).where(
                 Message.campaign_id == camp.id))).scalar() or 0,

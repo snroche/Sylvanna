@@ -327,3 +327,8 @@ label input, label select { margin-top: .25rem; color: var(--pergamino); }
   border-bottom:1px dashed #2a2e3c; font-size:.85rem; flex-wrap:wrap; }
 .admin-fila b { min-width:8rem; }
 .panel-conjuros .caja h3 { margin:.9rem 0 .3rem; color: var(--ambar); }
+
+.tirada-pedida { display:flex; gap:.6rem; align-items:center; flex-wrap:wrap;
+  background:rgba(217,164,65,.12); border:1px solid var(--ambar);
+  border-radius:6px; padding:.5rem .7rem; margin:.3rem 0 .6rem; }
+.tirada-pedida span { flex:1; min-width:12rem; }

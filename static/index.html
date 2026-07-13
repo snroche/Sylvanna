@@ -6,7 +6,7 @@
 <title>La Mesa — DnD con DM de IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=4">
+<link rel="stylesheet" href="/style.css?v=5">
 </head>
 <body>
 
@@ -158,6 +158,7 @@
 
       <div class="composer">
         <p class="escribiendo-jugador" id="ui-escribiendo"></p>
+        <div id="ui-tirada-pedida" class="tirada-pedida" hidden></div>
         <div id="composer-exploracion">
           <div class="composer-fila">
             <textarea id="inp-accion" rows="2"
@@ -171,10 +172,11 @@
             <summary>🎲 Tirada de habilidad</summary>
             <div class="composer-fila">
               <select id="inp-habilidad"></select>
+              <select id="inp-cd-dificultad" title="Dificultad (CD)"></select>
               <input id="inp-desc-habilidad" placeholder="Qué intentás (opcional)">
               <button class="btn" id="btn-skill">Tirar</button>
             </div>
-            <p class="nota">La CD la fija el mundo (12 por defecto en v1). El servidor tira y suma tus bonos.</p>
+            <p class="nota">Elegí la dificultad (CD). Cuando el DM te pide una tirada, ya viene con su CD.</p>
           </details>
           <details class="tirada-detalle">
             <summary>🛡 Tirada de salvación</summary>
@@ -220,6 +222,6 @@
   </div>
 </section>
 
-<script src="/app.js?v=4"></script>
+<script src="/app.js?v=5"></script>
 </body>
 </html>
