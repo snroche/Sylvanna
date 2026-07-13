@@ -332,3 +332,7 @@ label input, label select { margin-top: .25rem; color: var(--pergamino); }
   background:rgba(217,164,65,.12); border:1px solid var(--ambar);
   border-radius:6px; padding:.5rem .7rem; margin:.3rem 0 .6rem; }
 .tirada-pedida span { flex:1; min-width:12rem; }
+.monedas { display:inline-flex; gap:.35rem; align-items:center; }
+.monedas .mo { color:#d9a441; }
+.monedas .mp { color:#b9c2cc; }
+.monedas .mc { color:#c08457; }

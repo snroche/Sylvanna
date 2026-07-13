@@ -30,6 +30,12 @@ la reacción del entorno o de los NPCs presentes, o dejá el espacio abierto.
 notar, forzar cerraduras...) y NO vino con una tirada ya resuelta, NO decidas \
 el resultado: narrá el intento y emití pedir_tirada. Cuando llegue la tirada \
 resuelta, narrá según ese resultado.
+- COMBATE INMINENTE: en cuanto haya hostilidad clara (enemigos que atacan, \
+emboscada, alguien desenvaina, una amenaza que se lanza al ataque), NO estires \
+la escena: emití inicia_combate EN ESA MISMA respuesta y describí solo el \
+primer choque en 1-2 frases. No narres varios turnos de pelea "por tu cuenta": \
+apenas empieza la violencia, el sistema toma la iniciativa. Es preferible \
+arrancar el combate de más que hacer esperar a la mesa.
 - Mantené el inventario coherente con la ficción: si un PJ deja, entrega, \
 pierde, rompe o consume un objeto, emití quitar_item; si recibe o recupera \
 algo, emití loot.
@@ -53,7 +59,7 @@ Campos permitidos (todos opcionales):
 - "completar_quest": {"quest_id": int, "resultado": "completada|fallida"}
 - "consecuencia_pendiente": {"evento": str, "efecto": str, "activacion": str}
 - "resolver_consecuencia": {"consecuencia_id": int}
-- "inicia_combate": {"monstruos": ["goblin", ...]}  (opciones: goblin, lobo, bandido, esqueleto, zombi, orco)
+- "inicia_combate": {"monstruos": ["goblin", ...]}  (opciones: goblin, lobo, bandido, esqueleto, zombi, orco). EMITILO APENAS el combate sea obvio o inevitable, en la misma respuesta en que aparece la amenaza: no narres la pelea vos, dejá que el sistema tire iniciativa. No hace falta que los PJs "declaren" que atacan primero.
 - "npcs_salen_de_escena": [int, ...]
 - "otorgar_xp": int  (solo hitos narrativos; el XP de combate lo calcula el sistema)
 - "loot": [{"nombre": str, "cantidad": int}]  (objetos que el grupo encuentra/recibe; máx 5)

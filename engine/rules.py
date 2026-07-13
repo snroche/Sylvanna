@@ -200,7 +200,8 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
                     ventaja: int = 0, dos_manos: bool = False,
                     furtivo: bool = False, smite_dados: str | None = None,
                     mano_secundaria: bool = False,
-                    imprudente: bool = False) -> dict:
+                    imprudente: bool = False,
+                    furtivo_usado: bool = False) -> dict:
     """Ataque completo: impacto + daño. Muta pg del objetivo si impacta.
 
     Rasgos que se aplican solos (condiciones/campos del atacante):
@@ -315,9 +316,15 @@ def resolver_ataque(atacante: Criatura, objetivo: Criatura, arma: Arma,
             pc = roll("2d8" if critico else "1d8")
             extras.append({"motivo": "presa_del_cazador", "valor": pc["total"],
                            "dados": pc["dados"]})
-        # Ataque furtivo del pícaro (dobla dados en crítico)
-        if furtivo and atacante.nivel_furtivo > 0 \
-                and (arma.finura or arma.distancia):
+        # Ataque furtivo del pícaro (dobla dados en crítico). RAW: arma de finura
+        # o distancia y, o bien VENTAJA en el ataque (por cualquier fuente:
+        # objetivo derribado/apresado/aturdido, atacante escondido, etc.), o bien
+        # un aliado adyacente al objetivo — furtivo=True lo pasa la capa de juego.
+        # Nunca se aplica con desventaja.
+        neta_sigilo = _ventaja_neta(bonos, penal)
+        if atacante.nivel_furtivo > 0 and not furtivo_usado \
+                and (arma.finura or arma.distancia) \
+                and neta_sigilo >= 0 and (neta_sigilo > 0 or furtivo):
             n = atacante.nivel_furtivo * (2 if critico else 1)
             f = roll(f"{n}d6")
             extras.append({"motivo": "furtivo", "valor": f["total"],

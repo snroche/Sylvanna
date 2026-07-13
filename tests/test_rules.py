@@ -500,6 +500,54 @@ def test_furia_suma_2_melee_no_distancia():
                 break
 
 
+def test_furtivo_por_ventaja_sin_aliado():
+    """RAW: el pícaro con VENTAJA en el ataque hace Ataque Furtivo aunque no
+    pase furtivo=True (sin aliado adyacente). Objetivo derribado → ventaja melé."""
+    for _ in range(400):
+        a = pj(nivel=3); a.nivel_furtivo = 2
+        o = goblin(); o.ca_fija = 1; o.pg_actual = 999; o.pg_max = 999
+        o.condiciones = [{"tipo": "derribado", "origen": "test"}]
+        r = _ra(a, o, _ARMAS["daga"], furtivo=False)  # sin aliado
+        if not r["impacta"]:
+            continue
+        f = next((e for e in r["danio"]["extras"]
+                  if e["motivo"] == "furtivo"), None)
+        assert f is not None   # la ventaja habilita el furtivo
+        return
+    raise AssertionError("nunca impactó")
+
+
+def test_furtivo_no_con_desventaja():
+    """Con desventaja no hay Ataque Furtivo, aunque haya aliado (furtivo=True)."""
+    for _ in range(400):
+        a = pj(nivel=3); a.nivel_furtivo = 2
+        a.condiciones = [{"tipo": "envenenado", "origen": "test"}]  # desventaja
+        o = goblin(); o.ca_fija = 1; o.pg_actual = 999; o.pg_max = 999
+        r = _ra(a, o, _ARMAS["daga"], furtivo=True)
+        if not r["impacta"]:
+            continue
+        f = next((e for e in r["danio"]["extras"]
+                  if e["motivo"] == "furtivo"), None)
+        assert f is None
+        return
+    raise AssertionError("nunca impactó")
+
+
+def test_furtivo_usado_lo_suprime():
+    """Una vez usado el Ataque Furtivo en el turno, no se repite."""
+    for _ in range(400):
+        a = pj(nivel=3); a.nivel_furtivo = 2
+        o = goblin(); o.ca_fija = 1; o.pg_actual = 999; o.pg_max = 999
+        r = _ra(a, o, _ARMAS["daga"], furtivo=True, furtivo_usado=True)
+        if not r["impacta"]:
+            continue
+        f = next((e for e in r["danio"]["extras"]
+                  if e["motivo"] == "furtivo"), None)
+        assert f is None
+        return
+    raise AssertionError("nunca impactó")
+
+
 def test_furtivo_agrega_dados_y_dobla_en_critico():
     vio_normal = vio_critico = False
     for _ in range(2000):

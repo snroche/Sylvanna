@@ -74,6 +74,54 @@ def _roll(db, campaign_id, resolucion, character_id=None):
                 resolucion=resolucion))
 
 
+def _bitacora(camp: Campaign, linea: str):
+    """Anota un hecho de la ronda de combate en curso (reasignar la lista para
+    que SQLAlchemy detecte el cambio en la columna JSON)."""
+    b = list(camp.bitacora_combate or [])
+    b.append(linea)
+    camp.bitacora_combate = b
+
+
+async def _cerrar_combate(db: AsyncSession, camp: Campaign):
+    """Limpieza al terminar el combate: caen la furia, el arma sagrada y la
+    concentración de conjuros de TODOS los personajes de la campaña."""
+    res = await db.execute(select(Character).where(
+        Character.campaign_id == camp.id))
+    for c in res.scalars().all():
+        if any(x.get("tipo") in ("furia", "arma_sagrada") for x in c.condiciones):
+            c.condiciones = [x for x in c.condiciones
+                             if x.get("tipo") not in ("furia", "arma_sagrada")]
+        if c.concentracion:
+            c.concentracion = None
+
+
+def _narrar_fin_de_ronda(bg: BackgroundTasks, camp: Campaign,
+                         ronda_antes: int, fin: str | None) -> bool:
+    """El DM narra UNA sola vez por ronda (o al terminar el combate), no tras
+    cada ataque. Vuelca la bitácora acumulada y la limpia. Devuelve si narró."""
+    activo = camp.combate is not None
+    ronda_ahora = camp.combate["ronda"] if activo else ronda_antes
+    cierra_ronda = (not activo) or (ronda_ahora > ronda_antes) or bool(fin)
+    if not cierra_ronda:
+        return False
+    lineas = list(camp.bitacora_combate or [])
+    if not lineas:
+        return False
+    if fin:
+        cierre = f"El combate termina ({fin})."
+    else:
+        cierre = f"Termina la ronda {ronda_antes} del combate."
+    encolar_narracion(
+        bg, camp,
+        f"[COMBATE] {cierre} Narrá en prosa, de forma cinematográfica, TODO lo "
+        f"que ocurrió esta ronda. No vuelvas a tirar dados ni cambies los "
+        f"resultados; respetá exactamente lo que dice la bitácora:\n"
+        + "\n".join(lineas),
+        None)
+    camp.bitacora_combate = []
+    return True
+
+
 def _quitar_esquivando(char: Character):
     char.condiciones = [c for c in char.condiciones
                         if c.get("tipo") != "esquivando"]
@@ -89,7 +137,8 @@ def _inicio_de_turno(char: Character):
                         if c.get("tipo") not in ("esquivando", "ya_ataco",
                                                  "ataques_hechos", "derribado",
                                                  "imprudente", "off_usada",
-                                                 "reaccion_usada")]
+                                                 "reaccion_usada",
+                                                 "furtivo_usado")]
 
 
 # ---------------- narración en background (fix de latencia) ----------------
@@ -332,11 +381,15 @@ async def _iniciar_combate(db: AsyncSession, camp: Campaign,
     combate.turno_ts = time.time()
     camp.combate = combate.to_dict()
     camp.estado = "combate"
+    camp.bitacora_combate = []   # arranca la bitácora de la ronda 1
     _msg(db, camp.id, "sistema", "Sistema",
          f"⚔️ Combate iniciado. Orden: {[e['id'] for e in combate.orden]}")
     _roll(db, camp.id, {"tipo": "inicio_combate",
                         "iniciativas": combate.tiradas_iniciativa})
     eventos = await _resolver_turnos_npc(db, camp)
+    # los turnos enemigos de apertura ya se cuentan en la narración de inicio;
+    # que no se repitan al cerrar la ronda 1.
+    camp.bitacora_combate = []
     return {"orden": combate.orden, "iniciativas": combate.tiradas_iniciativa,
             "turnos_npc": eventos}
 
@@ -383,14 +436,7 @@ async def _post_accion_combate(db: AsyncSession, camp: Campaign,
         combate.activo = False
         camp.estado = "exploracion"
         camp.combate = None
-        res_furia = await db.execute(select(Character).where(
-            Character.campaign_id == camp.id))
-        for c in res_furia.scalars().all():
-            if any(x.get("tipo") in ("furia", "arma_sagrada")
-                   for x in c.condiciones):
-                c.condiciones = [x for x in c.condiciones
-                                 if x.get("tipo") not in ("furia",
-                                                          "arma_sagrada")]
+        await _cerrar_combate(db, camp)
         res = await db.execute(select(NPC).where(
             NPC.campaign_id == camp.id, NPC.tipo == "monstruo",
             NPC.vivo == False, NPC.en_escena == True))  # noqa: E712
@@ -412,6 +458,7 @@ async def _post_accion_combate(db: AsyncSession, camp: Campaign,
                          f"(botón en la ficha).")
             _msg(db, camp.id, "sistema", "Sistema",
                  f"⚔️ Victoria. +{porcada} XP para cada personaje vivo.")
+            _bitacora(camp, f"🏆 El grupo gana el combate (+{porcada} XP c/u).")
     else:
         combate.avanzar_turno()
         combate.turno_ts = time.time()
@@ -443,6 +490,7 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
     if camp.estado != "combate" or not camp.combate:
         raise HTTPException(409, "No hay combate activo")
     combate = Combat.from_dict(camp.combate)
+    ronda_antes = combate.ronda
     if not combate.es_turno_de(f"pj_{char.id}"):
         raise HTTPException(409, "No es tu turno")
     if not char.arma_equipada:
@@ -491,8 +539,12 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
         from engine.rules import dados_castigo_divino
         smite_dados = dados_castigo_divino(body.castigo_slot, cr_npc)
 
-    # ataque furtivo: pícaro con un aliado consciente en combate (flanqueo v1)
+    # Ataque furtivo del pícaro. El motor ya lo concede si el pícaro tiene
+    # VENTAJA en el ataque (objetivo derribado/apresado/aturdido, etc.). Acá
+    # pasamos furtivo=True para el caso "aliado adyacente" (flanqueo v1): hay
+    # otro personaje consciente en combate, o el pícaro fue ayudado.
     furtivo = False
+    furtivo_usado = any(c.get("tipo") == "furtivo_usado" for c in char.condiciones)
     if char.clase == "picaro":
         res_al = await db.execute(select(Character).where(
             Character.campaign_id == campaign_id, Character.id != char.id,
@@ -507,7 +559,14 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
                         dos_manos=body.dos_manos, furtivo=furtivo,
                         smite_dados=smite_dados,
                         mano_secundaria=body.mano_secundaria,
-                        imprudente=imprudente)
+                        imprudente=imprudente, furtivo_usado=furtivo_usado)
+    # El Ataque Furtivo es una vez por turno: si se aplicó, marcá el turno.
+    if r.get("impacta") and any(
+            e.get("motivo") == "furtivo"
+            for e in (r.get("danio") or {}).get("extras", [])):
+        cr_pj.condiciones = [c for c in cr_pj.condiciones
+                             if c.get("tipo") != "furtivo_usado"] + [
+            {"tipo": "furtivo_usado", "origen": "furtivo"}]
     if smite_dados and r["impacta"]:
         gastar_slot(cr_pj, body.castigo_slot)
         r["castigo_slot"] = body.castigo_slot
@@ -547,6 +606,19 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
     _msg(db, campaign_id, "jugador", char.nombre, f"[ataque] contra {npc.nombre}")
     _roll(db, campaign_id, r, char.id)
 
+    # bitácora de la ronda: el DM la narra entera al cerrar la ronda
+    if r["impacta"]:
+        _dmg = (r.get("danio") or {}).get("total_final", 0)
+        _extras = (r.get("danio") or {}).get("extras", [])
+        _furt = " (¡ataque furtivo!)" if any(
+            e.get("motivo") == "furtivo" for e in _extras) else ""
+        _crit = " ¡crítico!" if r.get("critico") else ""
+        _cae = f" {npc.nombre} cae." if (npc.pg_actual or 0) == 0 else ""
+        _bitacora(camp, f"⚔️ {char.nombre} ataca a {npc.nombre}: impacta por "
+                        f"{_dmg} de daño{_crit}{_furt}.{_cae}")
+    else:
+        _bitacora(camp, f"⚔️ {char.nombre} ataca a {npc.nombre}: falla.")
+
     from engine.content import ataques_por_accion
     tiene_oleada = any(c.get("tipo") == "oleada" for c in char.condiciones)
     off_hand = body.mano_secundaria
@@ -580,17 +652,13 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
         char.condiciones = [c for c in char.condiciones
                             if c.get("tipo") != "ataques_hechos"]
         eventos, fin = await _post_accion_combate(db, camp, combate, char, npc)
-    encolar_narracion(
-        bg, camp,
-        f"Ataque de {char.nombre} contra {npc.nombre}: "
-        f"{json.dumps(r, ensure_ascii=False)}. "
-        f"Turnos de enemigos: {json.dumps(eventos, ensure_ascii=False)}. "
-        f"{('Fin del combate: ' + fin) if fin else 'El combate continúa.'}",
-        char.id)
+    # el DM narra una sola vez por ronda (o al terminar el combate), no tras
+    # cada ataque: si la ronda no cerró, solo se acumula la bitácora.
+    narrando = _narrar_fin_de_ronda(bg, camp, ronda_antes, fin)
     await db.commit()
     camp = await db.get(Campaign, campaign_id)
     return {"resolucion": r, "turnos_npc": eventos, "fin_combate": fin,
-            "narrando": True, "combate": camp.combate}
+            "narrando": narrando, "combate": camp.combate}
 
 
 class Lanzar(BaseModel):
@@ -611,6 +679,7 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
     if camp.estado != "combate" or not camp.combate:
         raise HTTPException(409, "No hay combate activo")
     combate = Combat.from_dict(camp.combate)
+    ronda_antes = combate.ronda
     if not combate.es_turno_de(f"pj_{char.id}"):
         raise HTTPException(409, "No es tu turno")
 
@@ -804,25 +873,21 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
          (f" contra {objetivo_nombre}" if objetivo_nombre else ""))
     for r in resoluciones:
         _roll(db, campaign_id, r, char.id)
+    _bitacora(camp, f"✦ {char.nombre} lanza {body.conjuro.replace('_', ' ')}"
+                    + (f" sobre {objetivo_nombre}" if objetivo_nombre else "") + ".")
 
     # sacar del orden a los objetivos que hayan caído (área puede matar a varios)
     for t in objetivos_npc:
         if (t.pg_actual or 0) == 0:
             combate.remover(f"npc_{t.id}")
     eventos, fin = await _post_accion_combate(db, camp, combate, char, None)
-    encolar_narracion(
-        bg, camp,
-        f"{char.nombre} lanza {body.conjuro}"
-        f"{' contra ' + objetivo_nombre if objetivo_nombre else ''}. "
-        f"Resultados: {json.dumps(resoluciones, ensure_ascii=False)}. "
-        f"Turnos de enemigos: {json.dumps(eventos, ensure_ascii=False)}. "
-        f"{('Fin del combate: ' + fin) if fin else ''}",
-        char.id)
+    # el DM narra una sola vez por ronda (o al terminar el combate)
+    narrando = _narrar_fin_de_ronda(bg, camp, ronda_antes, fin)
     await db.commit()
     camp = await db.get(Campaign, campaign_id)
     return {"resoluciones": resoluciones, "gasto_slot": gasto,
             "turnos_npc": eventos, "fin_combate": fin,
-            "narrando": True, "combate": camp.combate}
+            "narrando": narrando, "combate": camp.combate}
 
 
 async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
@@ -868,6 +933,7 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
                 if not combate.pjs_restantes():
                     camp.estado = "exploracion"
                     camp.combate = None
+                    await _cerrar_combate(db, camp)
                     eventos.append({"fin_combate": "derrota_total"})
                     return eventos
             else:
@@ -882,6 +948,7 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
         if not objetivos:
             camp.estado = "exploracion"
             camp.combate = None
+            await _cerrar_combate(db, camp)
             eventos.append({"fin_combate": "derrota_total"})
             return eventos
 
@@ -945,6 +1012,21 @@ async def _resolver_turnos_npc(db: AsyncSession, camp: Campaign) -> list[dict]:
         eventos.append({"actor": npc.nombre, "ataque": r,
                         "objetivo": objetivo.nombre})
         _roll(db, camp.id, r)
+        # log visible del ataque enemigo (para que los jugadores lo vean al
+        # instante) + bitácora para que el DM lo narre al cerrar la ronda.
+        nombre_ataque = r.get("arma") or "ataque"
+        if r.get("impacta"):
+            dmg = (r.get("danio") or {}).get("total_final", 0)
+            crit = " ¡crítico!" if r.get("critico") else ""
+            linea = (f"🗡️ {npc.nombre} ataca a {objetivo.nombre} "
+                     f"({nombre_ataque}): impacta por {dmg} de daño{crit}.")
+            if objetivo.pg_actual == 0:
+                linea += f" {objetivo.nombre} cae."
+        else:
+            linea = (f"🗡️ {npc.nombre} ataca a {objetivo.nombre} "
+                     f"({nombre_ataque}): falla.")
+        _msg(db, camp.id, "sistema", "Sistema", linea)
+        _bitacora(camp, linea)
         combate.avanzar_turno()
 
     combate.turno_ts = time.time()

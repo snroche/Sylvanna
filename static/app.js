@@ -1255,7 +1255,7 @@ function pintarFicha(f) {
     <div class="linea-dato"><span>Dados de golpe</span><span>${f.dados_golpe_disp}${f.dado_golpe}</span></div>
     <div class="linea-dato"><span>Arma</span><span>${esc(f.arma_equipada ?? "—")}</span></div>
     <div class="linea-dato"><span>Armadura</span><span>${esc(f.armadura ?? "—")}${f.escudo?" + escudo":""}</span></div>
-    <div class="linea-dato"><span>Monedas</span><span>${f.monedas?.mo ?? 0} mo</span></div>
+    <div class="linea-dato"><span>Monedas</span><span class="monedas"><span title="Oro">${f.monedas?.mo ?? 0} <b class="mo">mo</b></span> · <span title="Plata">${f.monedas?.mp ?? 0} <b class="mp">mp</b></span> · <span title="Cobre">${f.monedas?.mc ?? 0} <b class="mc">mc</b></span></span></div>
     ${slotsHTML ? "<h3 style='margin:.8rem 0 .2rem'>Espacios de conjuro</h3>"+slotsHTML : ""}
     ${f.concentracion ? `<div class="linea-dato"><span>Concentración</span><span>${esc(f.concentracion.hechizo)}</span></div>` : ""}
     ${(f.habilidades_activas||[]).length ?

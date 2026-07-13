@@ -46,6 +46,7 @@ MIGRACIONES = [
     "ALTER TABLE characters ADD COLUMN opciones_clase JSON",
     "ALTER TABLE characters ADD COLUMN genero VARCHAR(20) DEFAULT ''",
     "ALTER TABLE campaigns ADD COLUMN tiradas_pendientes JSON",
+    "ALTER TABLE campaigns ADD COLUMN bitacora_combate JSON",
 ]
 
 

@@ -42,6 +42,9 @@ class Campaign(Base):
     # pedidos de tirada del DM aún sin resolver:
     # [{"habilidad": str, "cd": int, "pendientes": [char_id...], "tiradas": [...]}]
     tiradas_pendientes: Mapped[list] = mapped_column(JSON, default=list)
+    # bitácora de la ronda de combate en curso: líneas de texto que el DM narra
+    # de una sola vez al cerrar la ronda (evita narrar tras cada ataque).
+    bitacora_combate: Mapped[list] = mapped_column(JSON, default=list)
     narrando: Mapped[bool] = mapped_column(Boolean, default=False)
     ultimo_descanso_largo_min: Mapped[int] = mapped_column(Integer, default=-10_000)
     creada: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_ahora)
