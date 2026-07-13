@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     openrouter_model: str = "meta-llama/llama-3.3-70b-instruct:free"
     openrouter_model_summarizer: str = ""
     admin_token: str = ""    # env ADMIN_TOKEN; vacío = panel deshabilitado
-    resumir_cada: int = 40   # mensajes sin resumir antes de actualizar la crónica
+    resumir_cada: int = 60   # mensajes sin resumir antes de actualizar la crónica
     database_url: str = "sqlite+aiosqlite:///./local.db"  # default para dev local
 
     model_config = {"env_file": ".env", "extra": "ignore"}

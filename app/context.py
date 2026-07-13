@@ -9,17 +9,21 @@ nunca de la memoria del modelo.
 """
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .config import get_settings
 from .models import (NPC, Campaign, Character, Message, PendingConsequence,
                      Quest)
 
-MENSAJES_RECIENTES = 12
-# umbral configurable por env RESUMIR_CADA (default 40). Nota: NO regenera
+# Ventana de mensajes verbatim que ve el DM. Es un PISO: la ventana real crece
+# para incluir SIEMPRE todos los mensajes aún no resumidos, así nunca hay un
+# "hueco" de memoria entre lo que está en el resumen y lo que se muestra crudo.
+MENSAJES_RECIENTES = 30
+MAX_MENSAJES_VENTANA = 90   # techo de seguridad (presupuesto de tokens)
+# umbral configurable por env RESUMIR_CADA (default 60). Nota: NO regenera
 # la crónica entera cada vez: integra el lote nuevo al resumen existente.
-MAX_PALABRAS_RESUMEN = 600
+MAX_PALABRAS_RESUMEN = 800
 
 
 def _umbral() -> int:
@@ -93,11 +97,17 @@ async def construir_contexto(db: AsyncSession, camp: Campaign) -> str:
                       + "\n".join(f"- [{c.id}] {c.evento} → {c.efecto} "
                                   f"(se activa: {c.activacion})" for c in cons))
 
-    # --- mensajes recientes
+    # --- mensajes recientes: mostramos TODOS los no resumidos (para que no
+    # quede un hueco entre el resumen y la ventana) con un piso y un techo.
+    sin_resumir = (await db.execute(
+        select(func.count()).select_from(Message).where(
+            Message.campaign_id == camp.id,
+            Message.resumido == False))).scalar() or 0  # noqa: E712
+    ventana = min(MAX_MENSAJES_VENTANA, max(MENSAJES_RECIENTES, sin_resumir))
     res = await db.execute(select(Message)
                            .where(Message.campaign_id == camp.id)
                            .order_by(Message.id.desc())
-                           .limit(MENSAJES_RECIENTES))
+                           .limit(ventana))
     recientes = list(reversed(res.scalars().all()))
     if recientes:
         def _linea(m):
@@ -132,6 +142,9 @@ async def actualizar_resumen_si_corresponde(db: AsyncSession,
         f"Reescribí el resumen COMPLETO integrando los nuevos eventos, en español, "
         f"máximo {MAX_PALABRAS_RESUMEN} palabras. Priorizá: misiones y quién las dio, "
         f"promesas hechas, enemigos creados, decisiones importantes, lugares. "
+        f"CONSERVÁ TEXTUALES los nombres propios ya establecidos (tabernas, "
+        f"posadas, personajes, facciones, lugares) y NO los cambies ni inventes "
+        f"variantes: la continuidad de esos nombres es crítica. "
         f"Descartá: descripciones ambientales y combates sin consecuencia. "
         f"Respondé SOLO con el resumen, sin preámbulo.")
 

@@ -1089,7 +1089,8 @@ function pintarCombate(c) {
 }
 
 $("btn-atacar").onclick = () => accionCombate("attack",
-  { objetivo_npc_id: +$("inp-objetivo").value });
+  { objetivo_npc_id: +$("inp-objetivo").value,
+    descripcion: $("inp-desc-combate").value.trim() });
 $("btn-dodge").onclick = () => accionCombate("dodge", {});
 $("btn-shove").onclick = () => accionCombate("shove",
   { objetivo_npc_id: +$("inp-objetivo").value });
@@ -1108,7 +1109,8 @@ $("btn-help").onclick = () => {
 };
 $("btn-cast").onclick = () => accionCombate("cast", {
   conjuro: $("inp-conjuro").value,
-  objetivo_npc_id: +$("inp-objetivo").value || null });
+  objetivo_npc_id: +$("inp-objetivo").value || null,
+  descripcion: $("inp-desc-combate").value.trim() });
 
 async function accionCombate(tipo, body) {
   const btns = ["btn-atacar","btn-cast","btn-dodge","btn-help","btn-shove","btn-flee"].map($);
@@ -1121,6 +1123,7 @@ async function accionCombate(tipo, body) {
       if (ev.concentracion) sellarResolucion({...ev.concentracion, tipo:"habilidad", habilidad:"concentración"});
       if (ev.salvacion_muerte) avisoSistema(`salvación de muerte de ${ev.actor}: d20 ${ev.salvacion_muerte.natural}`);
     }
+    const desc = $("inp-desc-combate"); if (desc) desc.value = "";
     acelerarPolling();
     await refrescarTodo(false);
   } catch(e) {

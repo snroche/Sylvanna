@@ -6,7 +6,7 @@
 <title>La Mesa — DnD con DM de IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=7">
+<link rel="stylesheet" href="/style.css?v=8">
 </head>
 <body>
 
@@ -198,6 +198,10 @@
 
         <div id="composer-combate" hidden>
           <div class="composer-fila">
+            <input id="inp-desc-combate" maxlength="240"
+              placeholder="Describí tu acción (opcional): «finto y le tiro al cuello»…">
+          </div>
+          <div class="composer-fila">
             <select id="inp-objetivo"></select>
             <button class="btn btn-brasa" id="btn-atacar">⚔ Atacar</button>
           </div>
@@ -229,6 +233,6 @@
   </div>
 </section>
 
-<script src="/app.js?v=7"></script>
+<script src="/app.js?v=8"></script>
 </body>
 </html>

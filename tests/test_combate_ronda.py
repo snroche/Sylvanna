@@ -54,6 +54,29 @@ async def test_ataque_enemigo_deja_log_visible(client):
 
 
 @pytest.mark.anyio
+async def test_descripcion_de_ataque_queda_en_el_log(client):
+    d = (await client.post("/api/campaigns", json=CAMPO)).json()
+    h = {"X-Player-Token": d["player_token"]}
+    cid = d["campaign_id"]
+    await client.post("/api/characters", json=GUERRERO, headers=h)
+    await client.post(f"/api/campaigns/{cid}/combat/start",
+                      json={"monstruos": ["goblin", "goblin", "goblin"]},
+                      headers=h)
+    est = (await client.get(f"/api/campaigns/{cid}", headers=h)).json()
+    turno = est["combate"]["orden"][est["combate"]["turno_idx"]]
+    assert turno["tipo"] == "pj"   # el server auto-resuelve NPCs hasta el PJ
+    goblins = [e for e in est["combate"]["orden"] if e["tipo"] == "npc"]
+    npc_id = int(goblins[0]["id"].split("_")[1])
+    r = await client.post(f"/api/campaigns/{cid}/combat/attack",
+                          json={"objetivo_npc_id": npc_id,
+                                "descripcion": "finto y le tiro al cuello"},
+                          headers=h)
+    assert r.status_code == 200, r.text
+    msgs = (await client.get(f"/api/campaigns/{cid}/messages", headers=h)).json()
+    assert any("finto y le tiro al cuello" in m["contenido"] for m in msgs), msgs
+
+
+@pytest.mark.anyio
 async def test_concentracion_se_limpia_al_terminar_el_combate(client):
     from app.db import SessionLocal
     d = (await client.post("/api/campaigns", json=CAMPO)).json()

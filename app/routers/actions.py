@@ -115,7 +115,9 @@ def _narrar_fin_de_ronda(bg: BackgroundTasks, camp: Campaign,
         bg, camp,
         f"[COMBATE] {cierre} Narrá en prosa, de forma cinematográfica, TODO lo "
         f"que ocurrió esta ronda. No vuelvas a tirar dados ni cambies los "
-        f"resultados; respetá exactamente lo que dice la bitácora:\n"
+        f"resultados; respetá exactamente lo que dice la bitácora. Cuando una "
+        f"línea incluya cómo lo describe el jugador, incorporá ESE gesto o "
+        f"intención en tu narración (sin alterar el resultado mecánico):\n"
         + "\n".join(lineas),
         None)
     camp.bitacora_combate = []
@@ -479,6 +481,7 @@ class Atacar(BaseModel):
     imprudente: bool = False          # Bárbaro: Ataque Temerario
     mano_secundaria: bool = False     # ataque con arma de mano secundaria
     golpe_aturdidor: bool = False     # Monje: Golpe Aturdidor (1 ki)
+    descripcion: str = ""             # cómo describe el jugador su acción
 
 
 @router.post("/combat/attack")
@@ -603,10 +606,15 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
 
     persistir_personaje(cr_pj, char)
     persistir_npc(cr_npc, npc)
-    _msg(db, campaign_id, "jugador", char.nombre, f"[ataque] contra {npc.nombre}")
+    _desc_msg = (body.descripcion or "").strip()[:240]
+    _msg(db, campaign_id, "jugador", char.nombre,
+         f"[ataque] contra {npc.nombre}"
+         + (f": {_desc_msg}" if _desc_msg else ""))
     _roll(db, campaign_id, r, char.id)
 
     # bitácora de la ronda: el DM la narra entera al cerrar la ronda
+    _desc = (body.descripcion or "").strip()[:240]
+    _como = f' (así lo describe: "{_desc}")' if _desc else ""
     if r["impacta"]:
         _dmg = (r.get("danio") or {}).get("total_final", 0)
         _extras = (r.get("danio") or {}).get("extras", [])
@@ -614,10 +622,10 @@ async def atacar(campaign_id: int, body: Atacar, bg: BackgroundTasks,
             e.get("motivo") == "furtivo" for e in _extras) else ""
         _crit = " ¡crítico!" if r.get("critico") else ""
         _cae = f" {npc.nombre} cae." if (npc.pg_actual or 0) == 0 else ""
-        _bitacora(camp, f"⚔️ {char.nombre} ataca a {npc.nombre}: impacta por "
-                        f"{_dmg} de daño{_crit}{_furt}.{_cae}")
+        _bitacora(camp, f"⚔️ {char.nombre} ataca a {npc.nombre}{_como}: impacta "
+                        f"por {_dmg} de daño{_crit}{_furt}.{_cae}")
     else:
-        _bitacora(camp, f"⚔️ {char.nombre} ataca a {npc.nombre}: falla.")
+        _bitacora(camp, f"⚔️ {char.nombre} ataca a {npc.nombre}{_como}: falla.")
 
     from engine.content import ataques_por_accion
     tiene_oleada = any(c.get("tipo") == "oleada" for c in char.condiciones)
@@ -668,6 +676,7 @@ class Lanzar(BaseModel):
     objetivos_npc_ids: list[int] | None = None   # conjuros de área / multiobjetivo
     nivel_slot: int | None = None
     metamagia: list[str] = []                     # hechicero
+    descripcion: str = ""                         # cómo describe el jugador su acción
 
 
 @router.post("/combat/cast")
@@ -868,13 +877,17 @@ async def lanzar_conjuro(campaign_id: int, body: Lanzar, bg: BackgroundTasks,
             "hechizo": body.conjuro, "desde_ronda": combate.ronda}
 
     persistir_personaje(cr_pj, char)
+    _desc_c = (body.descripcion or "").strip()[:240]
     _msg(db, campaign_id, "jugador", char.nombre,
-         f"[conjuro] {body.conjuro}" +
-         (f" contra {objetivo_nombre}" if objetivo_nombre else ""))
+         f"[conjuro] {body.conjuro}"
+         + (f" contra {objetivo_nombre}" if objetivo_nombre else "")
+         + (f": {_desc_c}" if _desc_c else ""))
     for r in resoluciones:
         _roll(db, campaign_id, r, char.id)
     _bitacora(camp, f"✦ {char.nombre} lanza {body.conjuro.replace('_', ' ')}"
-                    + (f" sobre {objetivo_nombre}" if objetivo_nombre else "") + ".")
+                    + (f" sobre {objetivo_nombre}" if objetivo_nombre else "")
+                    + (f' (así lo describe: "{_desc_c}")' if _desc_c else "")
+                    + ".")
 
     # sacar del orden a los objetivos que hayan caído (área puede matar a varios)
     for t in objetivos_npc:
