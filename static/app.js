@@ -399,7 +399,7 @@ async function prepararCreacionPJ() {
   filtrarEquipo();
 }
 
-// Habilidades: chips de la lista de la clase (elegís la cantidad del PHB) más
+// Habilidades: chips de la lista de la clase (la cantidad que fija la clase) más
 // las que fuerza el trasfondo (pre-marcadas y bloqueadas).
 function montarHabilidades() {
   const hc = getHabClase($("pj-clase").value);

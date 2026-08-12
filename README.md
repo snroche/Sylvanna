@@ -1,479 +1,356 @@
-# DnD AI DM — Servicio multijugador con narrador IA
+# Sylvanna — a multiplayer D&D 5e server with an AI Dungeon Master
 
-Estado: **Paso 2 completo** — motor de reglas + API REST deployable en Render.
+> **The LLM only narrates.** Every die roll, resource, turn order and rule
+> validation lives on the server. The model writes prose around results it
+> cannot change — and neither can the client.
 
-## Correr local
+![screenshot](docs/screenshot.png)
+
+### Try it in 30 seconds
+
+**No configuration, no API key, no database setup.** Clone it, install, run — the
+full rules engine is playable offline against a built-in dummy narrator. Add an
+LLM key later if you want prose.
 
 ```bash
-pip install -r requirements.txt
-uvicorn main:app --reload
-# → http://localhost:8000/docs  (API interactiva)
-# Sin variables de entorno usa SQLite local y narrador dummy.
+pip install -r requirements.txt && uvicorn main:app --reload
 ```
 
-Tests: `pip install pytest && python -m pytest tests/ -q` (183 tests)
+1. Open <http://localhost:8000> and click **Fundar campaña** — pick a campaign
+   name and your player name. You get an invite code (share it to play with
+   others) and a player key (keep it; it's how you rejoin).
+2. **Create a character**: choose race, class and attributes. The server computes
+   HP, AC, spell slots and your starting kit — the client only previews.
+3. **Roll**: type an action in the composer, or hit **Tirada de habilidad**,
+   pick a skill and a DC. The result lands instantly as an ink stamp
+   (`d20 16+4 = 20 vs CD 12 → ÉXITO`); the DM's prose follows a moment later.
 
-## Deploy en Render (Web Service)
+> Interface and identifiers are in Spanish — the table this was built for plays
+> in Spanish. Architecture and code comments are documented in English.
 
-- **Build command:** `pip install -r requirements.txt`
-- **Start command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
-- **Environment variables:**
-  - `OPENROUTER_API_KEY` — key de openrouter.ai
-  - `OPENROUTER_MODEL` — ej: `meta-llama/llama-3.3-70b-instruct:free`
-  - `OPENROUTER_MODEL_SUMMARIZER` — (opcional, default = OPENROUTER_MODEL)
-  - `DATABASE_URL` — connection string de Neon (pegalo tal cual, el código
-    normaliza el driver asyncpg y el SSL solo)
+Sylvanna is a full multiplayer tabletop RPG service: a **complete, dependency-free
+D&D 5e rules engine**, an async **FastAPI** backend, and a zero-build **vanilla JS**
+frontend ("La Mesa") served from the same process. Players share an invite code,
+create characters, explore and fight; an LLM plays the Dungeon Master.
 
-Las tablas se crean automáticamente al primer boot.
+<table>
+<tr><td><b>Rules engine</b></td><td>5e SRD 5.1, levels 1–20, 0 third-party deps</td></tr>
+<tr><td><b>Backend</b></td><td>FastAPI · SQLAlchemy 2.0 async · Pydantic Settings</td></tr>
+<tr><td><b>Storage</b></td><td>SQLite (dev) / Postgres–Neon (prod), same code path</td></tr>
+<tr><td><b>Narrator</b></td><td>OpenRouter, any model, with automatic fallbacks</td></tr>
+<tr><td><b>Frontend</b></td><td>Vanilla JS/CSS, no build step, mobile-friendly</td></tr>
+<tr><td><b>Content</b></td><td>336 monsters · 319 spells · 237 magic items · 13 backgrounds</td></tr>
+<tr><td><b>Tests</b></td><td><b>225 tests</b>, ~12s, no network required</td></tr>
+</table>
 
-## Flujo de la API (probalo desde /docs)
+---
 
-1. `POST /api/campaigns` `{nombre, nombre_jugador}` → devuelve `invite_code` y `player_token`
-2. `POST /api/campaigns/join` `{invite_code, nombre_jugador}` → token del segundo jugador
-3. `POST /api/characters` (header `X-Player-Token`) → crea personaje; el server
-   calcula PG, CA, slots según clase
-4. `GET /api/characters/{id}/sheet` → ficha completa
-5. `POST /api/campaigns/{id}/say` `{texto}` → acción narrativa, responde el DM (IA)
-6. `POST /api/campaigns/{id}/skill-check` `{habilidad, cd, descripcion}` → tirada
-   resuelta por el server + narración
-7. `POST /api/campaigns/{id}/combat/start` `{monstruos: ["goblin","goblin"]}` →
-   iniciativa del server; turnos de NPC se auto-resuelven (IA simple v1)
-8. `POST /api/campaigns/{id}/combat/attack` `{objetivo_npc_id}` → solo en tu turno
-9. `GET /api/campaigns/{id}/messages?since=0` → historial (polling; WS en paso 4)
+## Why this design
 
-Toda tirada queda auditada en la tabla `rolls` con el dict de resolución completo.
+Letting an LLM run a tabletop game the naive way — "you are a DM, track the HP" —
+fails in every direction: the model forgets damage, invents spell slots, lets a
+player act out of turn, and rewards whoever argues hardest. Sylvanna makes that
+structurally impossible.
 
-## Arquitectura
+**The authority split**
+
+| The server owns | The LLM owns |
+| --- | --- |
+| Dice, attack/damage resolution, saving throws | Prose, scene description, NPC voice |
+| HP, spell slots, class resources, conditions | Requesting a check (`pedir_tirada`) |
+| Initiative and turn validation | Declaring *world* effects via a JSON contract |
+| Inventory, gold, XP, level-ups | Nothing that touches a character sheet |
+
+The narrator returns prose **plus** an optional JSON block of world effects
+(create an NPC, open a quest, grant loot, start combat, apply a condition…).
+Every field is whitelisted and clamped server-side — narrative XP is capped at
+`50 × level`, conditions at 3 rounds, purchases are rejected if you can't afford
+them. Anything outside the schema is silently dropped. A hallucinating model
+degrades the story, never the game state.
+
+**Every roll is auditable.** Each one is persisted in the `rolls` table with its
+full resolution dict — the d20, the modifiers, the DC, the outcome.
+
+**Latency is a first-class concern.** Actions return the mechanical resolution
+immediately (~25 ms) and the LLM narration runs in a `BackgroundTask`. The UI
+shows "the DM is narrating…" and adaptive polling (1.3 s in combat, 5 s at rest)
+picks it up when ready. If OpenRouter fails, the mechanics have already been
+applied and a system message explains exactly why — daily free-tier limit,
+saturated model, invalid key — instead of silently degrading.
+
+---
+
+## Running it
+
+The three steps above are the whole setup. With no environment variables the app
+uses local SQLite and a deterministic dummy narrator — every rule, roll and
+combat works offline. `/docs` serves the interactive API.
+
+To enable the real DM, copy `.env.example` to `.env` and set `OPENROUTER_API_KEY`.
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests/ -q        # 225 tests
+```
+
+The combat and dice suites roll real dice rather than mocking them, so a run
+occasionally skips a case the RNG made untestable (the guards say `azar`). A
+handful of scenarios can also end early — see the flaky-test note in the
+roadmap.
+
+---
+
+## Architecture
 
 ```
-engine/    Motor 5e puro (dados, reglas, combate, contenido SRD) — 0 dependencias
+engine/          Pure 5e engine — zero dependencies, no I/O, fully unit-tested
+  dice.py          d20 with advantage/disadvantage, damage dice, crits
+  rules.py         modifiers, proficiency, DCs, progression tables 1–20
+  combat.py        initiative, turn order, attack/save resolution
+  entities.py      combatant value objects
+  content.py       SRD content: races, classes, spells, monsters, items, feats
 app/
-  config.py     pydantic-settings (4 env vars)
-  db.py         SQLAlchemy async: SQLite dev / Neon prod (SSL + pool free-tier)
-  models.py     Campaign, Player, Character, NPC, Quest, PendingConsequence,
-                Message, Roll
-  hydration.py  Puente DB ↔ entidades del motor
-  narrator.py   OpenRouter con fallback dummy si no hay key / falla la red
-  routers/      campaigns, characters, actions (say, skill-check, combat)
-main.py    FastAPI + frontend estático montado en /
-static/    Placeholder (frontend real = paso 5)
+  config.py        pydantic-settings; sane defaults for every variable
+  db.py            async SQLAlchemy; SQLite dev / Neon prod + idempotent migrations
+  models.py        Campaign, Player, Character, NPC, Quest, PendingConsequence,
+                   Message, Roll
+  hydration.py     DB rows ↔ engine entities (the only bridge between layers)
+  context.py       structured prompt assembly under a ~6–8k token budget
+  narrator.py      OpenRouter client: retries, backoff, model fallback, dummy mode
+  effects.py       validates and applies the LLM's JSON world-effect contract
+  routers/         campaigns · characters · actions · admin
+main.py          FastAPI app + static frontend mounted at /
+static/          "La Mesa" — vanilla JS client, no build step
+data/            SRD content imported from Open5e (JSON)
+scripts/         SRD importer, campaign admin CLI
 ```
 
-Principio: el LLM solo narra. Tiradas, validación de turnos, recursos y reglas
-viven en el servidor. El cliente nunca puede inventar un resultado.
+**The engine has no idea a database exists.** It takes value objects and returns
+resolution dicts. `hydration.py` is the single seam between persistence and rules,
+which is why the engine can be tested exhaustively without fixtures or mocks.
 
-## Paso 3 — Pipeline del narrador (nuevo)
+**Context assembly.** Each narrator call gets a rolling summary, the party, NPCs
+in scene with full stat blocks, active quests, pending consequences and the last
+12 messages. Hard data (quests, NPCs, consequences) lives in tables and never
+depends on the summary — the chronicle can drift without corrupting the game.
+The summary is incremental: every `RESUMIR_CADA` messages a (cheaper) model folds
+the new batch into the existing text, one extra call per ~40 actions.
 
-- **Contexto estructurado** (`app/context.py`): cada llamada al LLM incluye
-  resumen rodante + grupo + NPCs en escena (ficha completa) + quests activas +
-  consecuencias pendientes + últimos 12 mensajes. Presupuesto ~6-8k tokens.
-- **Resumen rodante**: cada 40 mensajes sin resumir, un modelo (el summarizer)
-  reescribe `Campaign.resumen_actual` integrando lo nuevo. Los datos duros
-  (quests, NPCs, consecuencias) viven en tablas y nunca dependen del resumen.
-- **Contrato JSON de salida** (`app/narrator.py` + `app/effects.py`): el LLM
-  puede declarar efectos de mundo (crear NPCs/quests/consecuencias, actitudes,
-  XP narrativo topeado a 50×nivel, tiempo, ubicación, iniciar combate).
-  Campos fuera del schema se ignoran: no puede tocar PG ni recursos.
-- **Conjuros en combate** (`POST /combat/cast`): valida preparados/conocidos,
-  gasta slot antes de resolver (falla → slot igual gastado), resuelve por tipo
-  (ataque mágico / salvación del objetivo / curación / auto como proyectil
-  mágico), maneja concentración.
-- **XP automática por CR** al ganar un combate, dividida entre PJs vivos.
-- **`GET /state`**: quests, NPCs conocidos, consecuencias — el `!misiones` /
-  `!lore` del concepto original, con precisión de base de datos.
+---
 
-## Roadmap
+## API tour
 
-1. ✅ Motor de reglas + tests
-2. ✅ Models + API REST deployable
-3. ✅ Pipeline de contexto: resumen rodante, contrato JSON, conjuros, XP por CR
-4. ⬜ WebSockets (el polling adaptativo lo hace innecesario para grupos chicos)
-5. ✅ Frontend completo ("La Mesa") servido desde /
-6. ✅ Versión completa: latencia, descansos, inventario, niveles, timeout,
-   retomar campaña, reemplazo tras muerte
+All game actions are `POST /api/campaigns/{id}/…` and authenticate with an
+`X-Player-Token` header.
 
-## Versión completa — qué se agregó
+```http
+POST /api/campaigns              { nombre, nombre_jugador }   → invite_code + player_token
+POST /api/campaigns/join         { invite_code, nombre_jugador }
+POST /api/characters             → server computes HP, AC, slots, starting kit
+GET  /api/characters/{id}/sheet  → full live sheet
+POST /api/campaigns/{id}/say     { texto }                    → narrative action
+POST /api/campaigns/{id}/skill-check   { habilidad, cd }      → server-resolved roll
+POST /api/campaigns/{id}/combat/start  { monstruos: [...] }   → initiative
+POST /api/campaigns/{id}/combat/attack { objetivo_npc_id }    → your turn only
+GET  /api/campaigns/{id}/messages?since=0                     → adaptive polling
+GET  /api/campaigns/{id}/state                                → quests, NPCs, omens
+```
 
-**Latencia (el cambio grande):** las acciones devuelven la resolución mecánica
-al instante (~25ms) y la narración del LLM corre en un BackgroundTask. La UI
-muestra "El DM narra…" y polling adaptativo (1.3s esperando narración o en
-combate, 5s en reposo) la trae cuando está. El resumen rodante también corre
-en background. Si OpenRouter falla, la mecánica ya quedó aplicada y un mensaje
-de sistema lo avisa.
+Around 50 endpoints in total, including rests, inventory, spell management,
+rituals, level-up, wild shape, metamagic, attunement and mounts.
+`GET /api/health/narrator` runs a real minimal LLM call and reports the exact
+failure cause — handy for diagnosing a deploy without shell access.
 
-**Descansos:** corto por personaje (gasta dados de golpe; el brujo recupera
-slots) y largo grupal (PG/slots al máximo, mitad de dados; limitado a uno por
-día de juego). Botones en la ficha.
+---
 
-**Inventario:** kit inicial automático (arma+armadura elegidas, 2 pociones,
-antorchas, raciones). Usar consumibles (la poción cura 2d4+2 server-side y en
-combate consume el turno), equipar armas del inventario, dar objetos a
-compañeros. El LLM puede otorgar loot y monedas de oro vía contrato (con topes).
+## Rules coverage
 
-**Subida de nivel:** botón en la ficha cuando la XP alcanza; elegís tirar el
-dado de golpe o valor fijo; recalcula PG, dados y slots preservando gastados.
+Everything below is **mechanical** — resolved by the engine, not narrated.
 
-**Timeout de turno:** 120s sin actuar en combate → Esquivar automático y pasa
-el turno (contador visible en la barra de combate). Un AFK no congela la mesa.
+<details>
+<summary><b>Character creation & progression</b></summary>
 
-**Retomar campaña:** tu "llave" de jugador (token) sirve para volver a entrar
-desde cualquier dispositivo (tarjeta en el inicio, botón 🔑 en la cabecera
-para copiarla, endpoint GET /api/campaigns/me).
+- **9 races, 30+ subraces** including all 10 draconic ancestries and 9 infernal
+  tiefling lineages, with real elemental resistances (halved damage).
+- **Point buy 27** (validated against the standard table) or free assignment.
+- **13 backgrounds** granting proficiencies, gear, gold and a roleplay trait.
+- **Levels 1–20**: full slot tables (full/half/pact casters), XP thresholds,
+  spells known, resource uses. Extra Attack scales to 3 and 4.
+- **ASI at 4/8/12/16/19**, or a **feat** instead — a dozen feats with real
+  mechanical effects, not just narrative flavor.
+- **Multiclassing** with ability prerequisites and combined-slot tables.
+- **Subclasses** required at the correct level per class.
+- Custom races/subraces can be added via `data/razas_custom.json` without touching code.
+</details>
 
-**Muerte con reemplazo:** si tu personaje muere podés forjar uno nuevo y
-seguir en la misma campaña; el caído queda en el historial.
+<details>
+<summary><b>Class features</b></summary>
 
-**Narrador visible y diagnosticable:** la cabecera muestra qué modelo narra
-("DM dummy" en rojo si falta la key). Click en esa pastilla = test unitario
-real del narrador (también en GET /api/health/narrator): hace una llamada
-mínima a OpenRouter y devuelve OK o la causa exacta del fallo.
+Rage · Unarmored Defense · fighting styles (all six) · Second Wind · Action Surge ·
+Sneak Attack · Martial Arts · Ki & Stunning Strike · Channel Divinity (Preserve
+Life, Turn Undead) · Lay on Hands · Divine Smite · Bardic Inspiration (scaling to
+d8) · Arcane Recovery · Wild Shape with real beast stat blocks and CR caps ·
+Sorcery Points, Font of Magic and mechanical Metamagic (Empowered, Heightened) ·
+Eldritch Invocations (Agonizing Blast) · Expertise · Reckless Attack.
+</details>
 
-**Errores del narrador visibles:** si OpenRouter falla, el chat muestra la
-causa real ("límite diario del free tier alcanzado", "modelo saturado",
-"key inválida") en vez de caer silenciosamente al dummy. Reintentos con
-backoff en 429 por minuto / 5xx; el límite DIARIO no se reintenta (los
-fallos también consumen cuota).
+<details>
+<summary><b>Combat</b></summary>
 
-**Fallback de modelos:** OPENROUTER_MODEL acepta una lista separada por
-comas; el primero es el principal y el resto fallbacks automáticos (routing
-de OpenRouter). Ej:
-`meta-llama/llama-3.3-70b-instruct:free,deepseek/deepseek-chat:free`
+Initiative and strict turn validation · Attack, Dodge, Help, Shove, Flee ·
+two-weapon fighting · opportunity attacks · critical hits · **full 5e conditions**
+with round durations (restrained, stunned, paralyzed — including auto-crit —
+grappled, prone, frightened) · damage resistances · concentration · death saves
+and Medicine stabilization · **120s turn timeout** that auto-Dodges so one AFK
+player can't freeze the table · automatic XP by CR split among survivors.
+</details>
 
-**Límites del free tier de OpenRouter (importante):** 20 req/min y 50
-req/día sin créditos — y los intentos fallidos cuentan. Comprar USD 10 una
-única vez (no expiran) sube el límite a 1000/día para siempre. Cada acción
-de juego ≈ 1 request, más 1 de resumen cada 40 mensajes.
+<details>
+<summary><b>Magic & items</b></summary>
 
-**Contenido:** 12 monstruos (goblin→ogro), armas naturales, consumibles.
+Slot-accurate casting (the slot is spent *before* resolution, so a failure still
+costs it) · attack/save/healing/auto resolution derived per spell · **area and
+multi-target** spells rolled once and split · **upcasting** for damage, healing
+and magic missile · **ritual casting** without slots · costly material components
+consumed from inventory · cantrip scaling at level 5 · prepared vs known counts
+enforced per class · attunement (max 3) · consumables, equipping, trading, gold
+economy with server-rejected purchases · mounts with their own HP/AC/speed.
+</details>
 
-## Panel del DM humano, condiciones completas y economía
+<details>
+<summary><b>Human DM panel</b></summary>
 
-**Panel de admin (⚙ en la cabecera):** protegido por env `ADMIN_TOKEN`
-(vacío = deshabilitado; el token se pide una vez y queda en el navegador).
-Todo lo que necesitás para corregir rarezas del narrador en segundos:
-- **Hablar como el DM**: tu texto entra como narración; la IA lo ve en su
-  contexto y construye sobre él. Ideal para redirigir la historia.
-- Editar PG/oro/XP de cada personaje, limpiar condiciones, dar/quitar items.
-- NPCs: actitud, en escena, eliminar duplicados.
-- Cambiar estado de misiones, borrar consecuencias pendientes.
-- **Editar la crónica** (el resumen que la IA usa como memoria).
-- Forzar el fin de un combate trabado.
-Whitelist estricta de campos server-side: el token no permite romper fichas.
+Optional admin panel gated by `ADMIN_TOKEN` (empty = disabled). Speak *as* the
+DM so the AI builds on your text, edit HP/gold/XP, clear conditions, manage NPCs
+and quests, rewrite the chronicle the AI uses as memory, force-end a stuck
+combat. A strict server-side field whitelist means the token can steer the story
+but cannot corrupt a character sheet.
+</details>
 
-**Condiciones 5e completas y mecánicas:** restringido (desventaja atacando,
-ventaja en tu contra), aturdido y paralizado (perdés el turno — PJ y NPC —,
-ventaja en tu contra, auto-fallo de salvaciones FUE/DES, y golpear a un
-paralizado es crítico), agarrado (bloquea Huir), atacar derribado da
-desventaja, y levantarse es automático al inicio de tu turno. Las
-condiciones pueden tener **duración en rondas** que expira sola. El DM (IA)
-puede aplicarlas y quitarlas con `aplicar_condicion` / `quitar_condicion`
-(whitelist de tipos, máximo 3 rondas).
+---
 
-**Economía funcional:** la IA ya narraba mercaderes pero no podía cobrar.
-Nuevo efecto `quitar_monedas`: al comprar, el DM emite el item (loot) y el
-precio en la misma respuesta; el sistema rechaza el gasto si no te alcanza
-el oro (y el DM debe renegociar). Precios de referencia del SRD en el
-prompt. Vender = quitar_item + otorgar_monedas a mitad de precio.
+## Frontend — "La Mesa"
 
-## Ascendencias dracónicas, resistencias y razas custom
+Vanilla JS, no bundler, no framework, no build step: open the site root.
 
-**Dracónido completo (SRD):** las 10 ascendencias como subrazas (negro,
-azul, latón, bronce, cobre, oro, verde, rojo, plata, blanco), cada una con
-su elemento y salvación. El **Aliento de Dragón es mecánico**: botón 🐉 en
-la ficha, 2d6 de daño (3d6 a nivel 5+), CD 8+BC+CON, salvación del enemigo
-para mitad, 1 uso por descanso corto, y puede cerrar el combate.
+- **Sessions survive reloads** (localStorage) and devices — your player token is
+  a key you can copy from the header and use to rejoin from anywhere.
+- Mechanical results render as **ink stamps** (`d20 14+5=19 vs AC 15 → HIT`),
+  visually separated from the DM's prose.
+- The composer switches to combat mode automatically: initiative bar, current
+  turn highlighted, targets shown with *narrative* health (unhurt / wounded /
+  badly wounded — never exact HP).
+- Live sheet, quests, known NPCs with attitudes, pending consequences ("omens")
+  and the rolling chronicle, in collapsible panels that remember their state.
+- Party chat that the DM sees but never answers for you.
+- Regenerate ↺ / undo ⌫ on the last exchange — blocked when dice or combat are
+  involved, because rolls don't get re-rolled.
+- Mobile tabs (Game / Sheet / World) and tolerance for cold starts.
 
-**Resistencias elementales reales:** el motor ahora reduce a la mitad el
-daño de tipos resistidos (dracónido → su elemento, tiefling → fuego,
-enano → veneno; data-driven). Aplica en ataques, stat blocks y el aliento;
-la resolución marca `"resistido": true`.
+---
 
-**Razas y subrazas custom (`data/razas_custom.json`):** para contenido de
-tus libros (bloodlines de tiefling de Mordenkainen's, etc.) que no puedo
-precargar por copyright. El formato está documentado en
-`engine/content.py`: las razas nuevas se agregan enteras, y las existentes
-se mergean a nivel subraza — agregás `"tiefling": {"subrazas": {"zariel":
-{...}}}` y aparece en la UI con sus bonos y rasgo, validación server-side
-incluida. Ojo: si le agregás subrazas a una raza que no tenía, la subraza
-pasa a ser obligatoria (agregá una `"estandar"` con `"bonos": {}` para
-conservar la base). Soporta `bonos`, `rasgo`, `velocidad_m`,
-`resistencias` y `bonos_a_eleccion`.
+## Deployment
 
-## Fixes de la sesión de testeo en profundidad
+Single web service, no CORS, frontend served by the API.
 
-- **Encoding (Windows):** el importador ahora escribe UTF-8 explícito, y el
-  loader tolera archivos ya escritos en cp1252 — tu `conjuros_srd.json`
-  actual carga sin regenerarlo (aunque re-correr el script lo deja limpio).
-- **JSON escapado en la narración:** causa raíz: el modelo se quedaba sin
-  tokens a mitad del bloque JSON → fence sin cerrar → el parser no lo
-  reconocía y se filtraba a la mesa. Triple fix: parser que amputa bloques
-  colgados, presupuesto de tokens 700→1100, y prompt que exige JSON breve
-  al final ("si falta espacio se acorta la narración, jamás el JSON").
-- **El DM ahora pide tiradas y saca items:** dos efectos nuevos en el
-  contrato: `pedir_tirada` (acciones inciertas sin tirada → el DM la pide
-  en vez de resolver) y `quitar_item` (objetos dejados/entregados/rotos
-  salen del inventario, con match tolerante de nombre).
-- **Tiradas visibles para todos:** cada skill-check emite un mensaje de
-  sistema con el desglose (d20+bono=total → éxito/fallo).
-- **"X está escribiendo…":** heartbeat liviano (3s de throttle) visible
-  para el resto de la mesa.
-- **↺ Regenerar / ⌫ Deshacer:** botones junto al composer. Solo sobre pares
-  acción→narración simples (con tiradas o combate en el medio se bloquea:
-  los dados no se re-tiran). Los demás clientes detectan el borrado por
-  retroceso de ids y re-renderizan solos.
-- **Doble envío:** guard de in-flight en el cliente.
-- **UI:** chat hasta 90ch de ancho, panel lateral con secciones colapsables
-  (La party, Misiones, Personajes, Presagios, Crónica) que recuerdan su
-  estado — la ficha ya no queda enterrada.
-- **Crónica:** el resumen NO se regenera entero: cada `RESUMIR_CADA`
-  mensajes (env, default 40) integra el lote nuevo al resumen existente.
-  Una llamada extra al modelo cada ~40 acciones.
+| Setting | Value |
+| --- | --- |
+| Build | `pip install -r requirements.txt` |
+| Start | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
+| Env | `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `DATABASE_URL`, `ADMIN_TOKEN` |
 
-## Experiencia completa hasta nivel 5
+Tables are created on first boot and schema changes ship as an idempotent
+`MIGRACIONES` list, so existing campaigns keep working across deploys. Paste the
+Neon connection string as-is — the config layer normalizes the driver to asyncpg
+and strips `sslmode`.
 
-**Nivel 5 mecánico:**
-- **Ataque Extra** (guerrero/bárbaro/paladín/ranger/monje nv5+): el primer
-  ataque del turno no lo consume; el segundo sí. Compatible con Oleada de
-  Acción (que sigue dando un ataque adicional aparte).
-- **Trucos escalados**: a nivel 5 los trucos de daño duplican sus dados
-  (rayo de escarcha 2d8, explosión sobrenatural 2d10, etc.), automático.
-- **Inspiración Bárdica d8** a partir de nivel 5 del bardo.
-- Ataque Furtivo ya escalaba solo ((nivel+1)/2 d6 → 3d6 a nv5), igual que
-  el bonus de competencia (+3 a nv5) y los slots (nivel 3 a nv5).
+**On OpenRouter free tier:** 20 req/min and 50 req/day, and failed attempts
+count. Roughly one request per game action, plus one summary per ~60 messages.
 
-**Gestión de conjuros** (`POST /spells/manage`, botón 📜 en la ficha):
-panel con todo el catálogo (filtro + contador), validación server-side de
-existencia, nivel máximo lanzable según slots de clase, y cantidad:
-conocidos por tabla SRD (bardo/hechicero/brujo/ranger) o preparados =
-mod mágico + nivel (mago/clérigo/druida; paladín mod+nivel/2). Los
-preparados se pueden reorganizar en cualquier momento fuera de combate,
-como manda 5e.
+### Content import
 
-**Subclases**: al llegar al nivel de subclase de tu clase (1 para clérigo/
-hechicero/brujo, 2 para mago/druida, 3 para el resto) el level-up la exige.
-Opciones del SRD precargadas (Campeón, Dominio de la Vida, Ladrón, etc.) o
-texto libre. En v1 es una elección narrativa: figura en la ficha y en el
-contexto del DM, que la respeta; la mecánica fina de cada subclase queda
-para la próxima iteración.
+SRD monsters and spells come from [Open5e](https://open5e.com):
 
-**Razas/subrazas desde el servidor**: `/api/content` ahora expone el
-catálogo completo (bonos, rasgo, velocidad por subraza) y la UI lo muestra
-al elegir — se acabaron los selects sin información. El frontend ya no
-tiene espejo propio de razas: una sola fuente de verdad.
-
-## Ambientación, party chat, nomenclatura e importador SRD
-
-**Ambientación de campaña:** al crearla podés describir el setting
-("transcurre en Baldur's Gate…"). Queda fija en el contexto de TODAS las
-llamadas al narrador, y al crearse el primer personaje el DM genera la
-escena de apertura basada en ella.
-
-**Charla entre jugadores:** botón "💬 Party" — el mensaje llega a la mesa
-(con estilo propio) pero el DM no interviene ni responde por nadie. Además
-el prompt del narrador ahora prohíbe explícitamente hablar o decidir por
-los personajes de los jugadores.
-
-**Nomenclatura:** tiefling (no "tiflin"), camisa_de_mallas, ring_mail,
-cota_de_mallas, armadura_de_placas. Los nombres viejos siguen funcionando
-como aliases (personajes existentes no se rompen). El narrador tiene
-instrucción de usar los nombres de juego tal cual, sin traducciones
-rebuscadas.
-
-**Importador del SRD (Open5e):**
 ```bash
-python scripts/importar_srd.py                 # monstruos hasta CR 10 + conjuros hasta nv 5
+python scripts/importar_srd.py                        # monsters ≤ CR 10, spells ≤ lvl 5
 python scripts/importar_srd.py --cr-max 5 --solo monstruos
 ```
-Genera `data/monstruos_srd.json` y `data/conjuros_srd.json`, que
-`engine/content.py` mergea automáticamente al arrancar (sin pisar lo
-curado). Los monstruos vienen con mecánica completa: PG, CA, atributos y
-**ataques de stat block** (bono y dados reales) que el motor usa en los
-turnos de NPC. Los conjuros traen nivel/concentración seguros y resolución
-mecánica deducida por heurística del texto (ataque/salvación/daño); los no
-deducibles quedan como narrativos con su descripción. La UI carga el
-catálogo desde `GET /api/content` (creación muestra trucos y nivel 1, con
-filtro de texto). Corré el script en tu máquina (necesita internet) y
-comiteá los JSON al repo para que Render los sirva.
 
-## Rasgos de clase, acciones de combate y party (SRD 5.1)
+Monsters arrive with full mechanics (HP, AC, abilities and real stat-block
+attacks the engine uses on NPC turns). Spell resolution is inferred heuristically
+from the text; whatever can't be inferred stays narrative. Generated JSON is
+committed so production needs no network at boot.
 
-**Rasgos de clase mecánicos (niveles 1-4):**
-- Bárbaro: Furia (+2 daño melé todo el combate, 2-3 usos/día) y Defensa sin
-  armadura (CA 10+DES+CON).
-- Guerrero: estilo de combate a elección (Defensa +1 CA / Duelo +2 daño /
-  Arquería +2 ataque), Nuevo Aliento (1d10+nivel, 1/corto) y Oleada de
-  Acción nv2 (ataque extra en el turno, 1/corto).
-- Pícaro: Ataque Furtivo (+1d6 nv1, +2d6 nv3; con arma de finura/distancia
-  y un aliado consciente en combate o ventaja; dobla dados en crítico).
-- Monje: Artes Marciales (1d4 DES) y Defensa sin armadura (10+DES+SAB, sin
-  escudo).
-- Clérigo: Canalizar Divinidad nv2 (Preservar Vida: cura 5×nivel, 1/corto).
-- Paladín: Imposición de Manos (reserva de 5×nivel PG por día).
-- Bardo: Inspiración Bárdica (un aliado suma 1d6 a su próxima tirada de
-  ataque o habilidad; usos = mod CAR por día).
-- Mago: Recuperación Arcana (recupera slots en el descanso corto, automática).
-- Brujo: truco Explosión Sobrenatural (eldritch blast, 1d10).
-Los recursos se muestran en la ficha con botón de uso y se resetean con el
-descanso que corresponde.
+### Campaign admin
 
-**Acciones de combate:** además de atacar y lanzar: Esquivar (desventaja a
-los ataques en tu contra), Ayudar (ventaja al próximo ataque de un aliado),
-Empujar (Atletismo vs 10+DES para derribar) y Huir (Acrobacias CD 12; el
-fallo cuesta un golpe de oportunidad).
-
-**Panel de party:** en la pestaña Mundo, todos los personajes con nombre,
-raza, clase/nivel, alineamiento, PG y condiciones.
-
-**Mejora de atributos (ASI):** en los niveles 4 y 8 el level-up exige
-repartir +2 puntos (+2 a uno o +1/+1), validado server-side con tope 20.
-
-**Feats:** ver la sección "Mecánicas D&D 5e completas" más abajo — ahora hay
-una docena de dotes del PHB con efecto mecánico (Vigoroso, Alerta, Resistente,
-Atleta, etc.), elegibles en los niveles de Mejora en vez del +2.
-
-## Razas, point buy y administración
-
-**Razas y subrazas (9):** humano, elfo (alto/bosques/drow), enano
-(colinas/montañas), mediano (piesligeros/fornido), gnomo (bosque/rocas),
-semielfo (+1 a dos atributos a elección), semiorco, dracónido, tiflin.
-Los bonos raciales y la velocidad los aplica EL SERVIDOR sobre los valores
-base: el cliente solo muestra el preview. El enano de las colinas suma su
-+1 PG por nivel. Las razas con subrazas la exigen.
-
-**Métodos de atributos:** point buy 27 (validado server-side con la tabla
-estándar: 8=0 … 15=9, máx 15 base) o libre (3–18, a criterio de la mesa).
-Contador de puntos en vivo en la UI.
-
-**Salir al menú:** botón en la cabecera (recuerda guardar la llave 🔑).
-
-**Administración de campañas** (`scripts/admin.py`, usa el mismo
-DATABASE_URL que la app):
 ```bash
 python scripts/admin.py list
 python scripts/admin.py delete 3 7
-python scripts/admin.py wipe --yes
-# contra Neon desde tu máquina:
 DATABASE_URL="postgresql://..." python scripts/admin.py wipe --yes
 ```
 
-## Frontend — La Mesa
+---
 
-Vanilla JS sin build step (`static/`): abrí la raíz del sitio y listo.
-- **Inicio**: fundar campaña o unirse con código de invitación (visible en la
-  cabecera para compartir). Sesión en localStorage: recargar no te saca.
-- **Creación de personaje**: clase con info de dado/magia, atributos con
-  modificador en vivo, chips de habilidades (máx 4), armadura/arma, conjuros
-  para lanzadores. El servidor valida y calcula PG/CA/slots.
-- **Mesa**: log de narración con polling; los resultados mecánicos aparecen
-  como "sellos" de tinta (d20 14+5=19 vs CA 15 → IMPACTA) separados de la
-  prosa del DM. Composer de exploración (actuar / tirada de habilidad) que
-  cambia a modo combate automáticamente: barra de iniciativa con turno
-  resaltado, objetivos con estado de salud narrativo (ileso/herido/malherido,
-  nunca PG exactos), atacar y lanzar conjuros solo en tu turno.
-- **Ficha viva**: PG con barra, atributos, CA, slots como puntos, condiciones,
-  concentración. **Mundo**: misiones, NPCs conocidos con actitud, presagios
-  (consecuencias pendientes) y la crónica (resumen rodante).
-- Móvil: tabs Juego/Ficha/Mundo. Tolerante al cold start de Render.
+## Engineering notes
 
-## Mecánicas D&D 5e completas (SRD + PHB)
+A few problems worth writing down:
 
-Segunda tanda de reglas oficiales, toda server-side y sobre la infraestructura
-existente (slots, condiciones, resistencias, recursos, hidratación). Nada de
-sistemas paralelos: cada mecánica reusa lo que ya había.
+- **Truncated JSON leaking into the chat.** Root cause wasn't the parser — the
+  model ran out of tokens mid-block, leaving an unclosed fence. Fixed in three
+  places: a parser that amputates dangling blocks, a raised token budget, and a
+  prompt rule that the *narration* gets shortened when space runs out, never the
+  JSON contract.
+- **Windows encoding.** The importer writes explicit UTF-8 and the loader
+  tolerates files previously written as cp1252, so existing data keeps loading.
+- **One source of truth for content.** The frontend used to mirror the race list;
+  now `GET /api/content` serves the full catalog and the UI just renders it.
+- **Backwards compatibility.** Old characters survive every content rename via
+  alias keys, and the single added column ships through the idempotent migration list.
 
-**Rasgos de clase mecánicos (nuevos):**
-- **Castigo Divino** (Paladín): en `combat/attack`, `castigo_slot` gasta un
-  espacio de conjuro para +2d8 radiante (escala a 5d8, +1d8 vs no-muertos/
-  infernales, tope 6d8). El slot se descuenta solo si el golpe impacta; el
-  daño radiante lleva su propia resistencia.
-- **Forma Salvaje** (Druida nv2): `POST /wild-shape {bestia}` adopta el stat
-  block de una bestia (CR tope por nivel: 1/4 → 1/2 → 1 a nv2/4/8), con sus
-  FUE/DES/CON, PG, CA y ataques; conservás tus mentales. `POST /wild-shape/
-  revert` o auto-revierte al caer a 0 PG. El estado se guarda en `recursos_
-  clase` (sin columna nueva). El descanso la deshace.
-- **Puntos de Hechicería + Metamagia** (Hechicero nv2/3): `POST /sorcery/font`
-  convierte espacios ↔ puntos (Fuente de Magia); `POST /metamagic/select`
-  elige las opciones conocidas. Al lanzar, `metamagia: [...]` gasta puntos:
-  **Empoderado** (re-tira los dados más bajos = mod CAR) y **Elevado**
-  (desventaja del objetivo en su salvación) son mecánicos; el resto gasta los
-  puntos y el narrador los describe.
-- **Invocaciones Sobrenaturales** (Brujo nv2): `POST /invocations/select` con
-  validación de nivel/requisito. **Explosión Agonizante** suma tu mod de CAR
-  al daño de la Explosión Sobrenatural; Influencia Seductora da competencias.
-- **Golpe Aturdidor** (Monje nv5): en `combat/attack`, `golpe_aturdidor` gasta
-  1 ki; salvación de CON (CD ki) o el objetivo queda aturdido a tu próximo turno.
-- **Ataque Temerario** y **resistencia de Furia** (Bárbaro): `imprudente` en el
-  ataque da ventaja melé y expone al bárbaro (ventaja en su contra hasta su
-  turno). La Furia además otorga resistencia a daño contundente/perforante/
-  cortante (vía hidratación).
-- **Expertise** (Pícaro/Bardo): `POST /expertise/select` duplica el bonus de
-  competencia en las habilidades elegidas (2 a nv bajo, 4 más adelante).
-- **Expulsar Muertos Vivientes** (Clérigo nv2): `POST /channel/turn-undead`
-  gasta Canalizar Divinidad; cada no-muerto salva SAB o queda expulsado
-  (asustado). A nv5+ los de CR ≤ 1/2 que fallan son destruidos.
+## Roadmap
 
-**Estilos de combate que faltaban** (además de Defensa/Duelo/Arquería):
-**Gran Arma** (re-tira 1 y 2 en el daño melé a dos manos), **Protección** (con
-escudo, reacción que da desventaja a un ataque contra un aliado) y **Dos Armas**
-(el ataque de mano secundaria — `mano_secundaria` en `combat/attack`, arma
-ligera — suma el mod de atributo con el estilo, y no consume el turno).
+- [x] Rules engine + test suite
+- [x] Models + deployable REST API
+- [x] Narrator pipeline: rolling summary, JSON contract, spells, XP by CR
+- [x] Full frontend served from `/`
+- [x] Levels 1–20, feats, backgrounds, multiclassing, magic items
+- [ ] Per-subclass mechanics (currently narrative: the DM respects them, the engine doesn't enforce them)
+- [ ] Seed the RNG in combat tests. `test_combate_ronda.py::test_descripcion_de_ataque_queda_en_el_log`
+      fails on roughly 5% of runs: three goblins can drop the level-1 fighter
+      before their turn, combat ends, and the test indexes a `None` state. The
+      neighbouring tests guard this with `pytest.skip("azar")`; this one doesn't.
+- [ ] WebSockets (adaptive polling has been sufficient for small tables)
 
-**Sistema de conjuros:**
-- **Conjuros de área / multiobjetivo**: `objetivos_npc_ids: [...]` en
-  `combat/cast`; el daño se tira una vez y se reparte (mitad en salvación
-  exitosa), cada objetivo salva por separado.
-- **Upcasting**: `nivel_slot` mayor al base escala daño (`escalado_danio`),
-  curación (`escalado_curacion`) y proyectiles (proyectil mágico +1 por nivel).
-- **Lanzamiento ritual**: `POST /spells/ritual {conjuro}` lanza conjuros con la
-  etiqueta ritual sin gastar espacio (+10 min de juego), fuera de combate;
-  clases ritualistas (bardo/clérigo/druida/mago) con el conjuro preparado/
-  conocido. Se agregaron detectar_magia, identificar, comprender_idiomas, etc.
-- **Componentes materiales costosos**: los conjuros con `componente_costoso`
-  exigen el item en el inventario (y lo consumen si corresponde), tanto en
-  combate como en ritual.
+---
 
-**Inspiración Heroica**: efecto de narrador `otorgar_inspiracion` (premia buen
-rol); da ventaja en la próxima tirada de ataque o habilidad, y se consume sola.
+## License & attribution
 
-**Estabilizar** (Medicina CD 10): `POST /medicine/stabilize {objetivo_
-character_id}` — un aliado inconsciente deja de tirar salvaciones de muerte;
-en combate consume el turno.
+**Code** — MIT. See [LICENSE](LICENSE). This covers everything in `engine/`,
+`app/`, `static/`, `scripts/`, `tests/` and `main.py`.
 
-**Progresión 1–20 completa:** tablas de espacios de lanzador completo/medio/
-pacto, XP, conjuros conocidos y usos de recursos (Furia, Canalizar, Oleada,
-ki, puntos de hechicería) hasta nivel 20. Ataque Extra escala a 3 (guerrero
-nv11) y 4 (nv20). Mejora de Característica en 4/8/12/16/19.
+**SRD content** — This work includes material taken from the System Reference
+Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at
+<https://dnd.wizards.com/resources/systems-reference-document>. The SRD 5.1 is
+licensed under the Creative Commons Attribution 4.0 International License,
+available at <https://creativecommons.org/licenses/by/4.0/legalcode>.
 
-**Dotes (PHB):** una docena con efecto mecánico — Vigoroso (+2 PG/nivel),
-Alerta (+5 iniciativa), Resistente (+1 y competencia en una salvación), Atleta,
-Actor, Observador, Robusto, y varias con efecto narrado (Gran Maestro de Armas,
-Tirador Agudo, Centinela, Afortunado). Se eligen en los niveles de Mejora en
-vez del +2, o al crear un humano variante.
+**Imported data** — Monsters, spells and magic items under `data/` are imported
+from the [Open5e](https://open5e.com) API, filtered to the `wotc-srd` document
+slug, and carry the SRD 5.1 licence above. Open5e is an open database of 5e
+content; thanks to its maintainers.
 
-**Trasfondos (13 del PHB, incluye Acólito del SRD):** al crear el personaje,
-`trasfondo` otorga 2 competencias de habilidad, equipo, oro inicial y un rasgo
-narrativo que la IA usa. Acólito, Criminal, Soldado, Sabio, Noble, etc.
+Sylvanna is an unofficial fan project, not affiliated with, endorsed, sponsored
+or approved by Wizards of the Coast.
 
-**Linajes de tiefling (Mordenkainen):** las 9 estirpes infernales como subrazas
-(Asmodeus, Baalzebul, Dispater, Fierna, Glasya, Levistus, Mammon,
-Mephistopheles, Zariel), cada una con su segundo atributo, magia por nivel y
-—Levistus— resistencia al frío. Elegir tiefling ahora pide linaje.
+A small number of options outside the SRD (12 backgrounds, 12 feats and 9
+tiefling lineages) ship as **mechanical data only** — ability adjustments,
+proficiency lists and level tables, with original descriptions rather than
+rulebook text. They are marked with `TODO(no-SRD)` comments in
+`engine/content.py`. For anything further, `data/razas_custom.json` is a
+git-ignored extension point: add content from books you own locally rather than
+committing it.
 
-**Multiclase:** `clase_multiclase` en el level-up gana el nivel en otra clase
-(con los requisitos de atributo del PHB). Registra el desglose por clase en
-`opciones_clase`, y calcula los **espacios combinados** con la tabla de
-multiclase (lanzadores completos enteros, medios a mitad; la Magia de Pacto del
-brujo se suma aparte). Dados de golpe y recursos por clase. Nota v1: el atributo
-de conjuro y el límite de conocidos siguen la clase primaria.
+---
 
-**Sintonía de objetos mágicos:** `POST /attunement/attune` / `/end`, máximo 3
-objetos en sintonía (guardados en `opciones_clase`), validando que el objeto
-esté en el inventario.
-
-**Monturas:** `POST /mount {bestia}` / `POST /dismount`; la montura (caballo de
-guerra, pantera, etc.) lleva sus propios PG, CA y velocidad, que usás mientras
-cabalgás.
-
-Todo esto suma **59 tests nuevos** (183 en total) sin romper ninguno de los
-existentes, y **mantiene compatibilidad con partidas viejas**: la única columna
-agregada (`opciones_clase`) entra por la lista idempotente de `MIGRACIONES`.
+Built as a study in keeping an LLM inside a hard boundary: give it the whole
+story and none of the state.

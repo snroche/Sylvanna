@@ -1,4 +1,4 @@
-"""Multiclase: requisitos, nivel de lanzador combinado y espacios del PHB."""
+"""Multiclase: requisitos, nivel de lanzador combinado y espacios."""
 from engine.content import (cumple_requisitos_multiclase,
                             nivel_lanzador_multiclase, slots_multiclase)
 

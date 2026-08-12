@@ -80,7 +80,7 @@ CLASES: dict[str, dict] = {
     "brujo":     {"dado_golpe": "d6",  "lanzador": "brujo",  "atributo_magico": "CAR"},
 }
 
-# Slots de lanzador completo por nivel de personaje (niveles 1-20, SRD/PHB)
+# Slots de lanzador completo por nivel de personaje (niveles 1-20, 5e)
 SLOTS_COMPLETO: dict[int, dict[str, int]] = {
     1:  {"1": 2},
     2:  {"1": 3},
@@ -527,7 +527,7 @@ def puede_aprender_conjuro(clase: str, conjuro: str) -> bool:
     return clase in clases if clases else True
 
 
-# --------- riqueza inicial por clase (PHB "Starting Wealth by Class") ----------
+# --------- riqueza inicial por clase (tabla estandar de 5e) -------------------
 # (cantidad de d4, multiplicador). El monje usa 5d4 sin multiplicar.
 PLATA_INICIAL_CLASE = {
     "barbaro": (2, 10), "bardo": (5, 10), "clerigo": (5, 10), "druida": (2, 10),
@@ -537,7 +537,7 @@ PLATA_INICIAL_CLASE = {
 
 
 def oro_inicial_clase(clase: str) -> int:
-    """Tira la riqueza inicial de la clase (PHB) y devuelve el oro resultante."""
+    """Tira la riqueza inicial de la clase y devuelve el oro resultante."""
     from .dice import roll
     n, mult = PLATA_INICIAL_CLASE.get(clase, (0, 0))
     return roll(f"{n}d4")["total"] * mult if n else 0
@@ -653,7 +653,10 @@ RAZAS: dict[str, dict] = {
         "rasgo": "Resistencia al fuego, visión en la oscuridad. Tu linaje "
                  "infernal define tu segundo atributo y tu magia.",
         "resistencias": ["fuego"],
-        # Linajes de Mordenkainen (todos suman CAR+2 en la base y un +1 propio).
+        # TODO(no-SRD): los 9 linajes infernales de abajo NO están en el
+        # SRD 5.1 (solo datos mecánicos, descripciones propias). Si hay que
+        # dejar el repo SRD-only, este bloque sale a data/razas_custom.json.
+        # Linajes infernales (todos suman CAR+2 en la base y un +1 propio).
         "subrazas": {
             "asmodeus": {"bonos": {"INT": 1},
                          "rasgo": "Legado de Asmodeus: truco Taumaturgia; a nv3 "
@@ -732,7 +735,10 @@ def recursos_raciales(raza_str: str, nivel: int) -> dict:
 
 
 # ---------------------------------------------------------------- trasfondos
-# Trasfondos (SRD Acólito + los 13 del PHB). Otorgan 2 competencias de
+# TODO(no-SRD): de los 13 trasfondos, SOLO "acolito" está en el SRD 5.1.
+# Los otros 12 son datos mecánicos (competencias/equipo/oro) con descripciones
+# propias. Para dejar el repo SRD-only, sacar todo menos "acolito".
+# Trasfondos (Acólito es SRD; el resto, no-SRD). Otorgan 2 competencias de
 # habilidad, equipo, oro inicial y un rasgo narrativo que la IA puede usar.
 # "competencias" usa las claves de HABILIDADES.
 TRASFONDOS: dict[str, dict] = {
@@ -757,15 +763,15 @@ TRASFONDOS: dict[str, dict] = {
         "herramientas": ["kit_de_ladron"], "oro": 15,
         "equipo": [{"nombre": "palanca", "cantidad": 1}],
         "rasgo": "Contacto Criminal",
-        "rasgo_desc": "Tenés un contacto confiable en el bajomundo que hace de "
-                      "enlace con otros criminales."},
+        "rasgo_desc": "Alguien del bajomundo te debe lo suficiente como para "
+                      "pasarte data y abrirte puertas cuando lo necesitás."},
     "artista": {
         "nombre": "Artista", "competencias": ["acrobacias", "actuacion"],
         "herramientas": ["kit_de_disfraz", "instrumento_musical"], "oro": 15,
         "equipo": [{"nombre": "instrumento_musical", "cantidad": 1}],
         "rasgo": "Por Demanda Popular",
-        "rasgo_desc": "Siempre encontrás dónde actuar; a cambio te dan hospedaje "
-                      "y comida, y la gente del lugar te aprecia."},
+        "rasgo_desc": "Donde haya público hay changa: tocás a cambio de plato "
+                      "y catre, y el pueblo te toma cariño."},
     "heroe_del_pueblo": {
         "nombre": "Héroe del Pueblo",
         "competencias": ["trato_con_animales", "supervivencia"],
@@ -788,8 +794,8 @@ TRASFONDOS: dict[str, dict] = {
         "herramientas": ["kit_de_herboristeria"], "idiomas": 1, "oro": 5,
         "equipo": [{"nombre": "kit_de_herboristeria", "cantidad": 1}],
         "rasgo": "Descubrimiento",
-        "rasgo_desc": "En tu aislamiento hallaste una verdad única y poderosa "
-                      "(un secreto, una reliquia o una revelación)."},
+        "rasgo_desc": "Del retiro te trajiste algo que nadie más tiene: un "
+                      "secreto, una reliquia o una certeza incómoda."},
     "noble": {
         "nombre": "Noble", "competencias": ["historia", "persuasion"],
         "herramientas": ["set_de_juego"], "idiomas": 1, "oro": 25,
@@ -812,24 +818,24 @@ TRASFONDOS: dict[str, dict] = {
         "equipo": [{"nombre": "frasco_de_tinta", "cantidad": 1},
                    {"nombre": "pluma", "cantidad": 1}],
         "rasgo": "Investigador",
-        "rasgo_desc": "Aunque no sepas un dato, sabés dónde y de quién "
-                      "obtenerlo: bibliotecas, universidades, colegas."},
+        "rasgo_desc": "Tu fuerte no es saberlo todo, es saber a qué archivo, "
+                      "claustro o colega ir a buscarlo."},
     "marinero": {
         "nombre": "Marinero", "competencias": ["atletismo", "percepcion"],
         "herramientas": ["herramientas_de_navegante"], "oro": 10,
         "equipo": [{"nombre": "cuerda_de_seda", "cantidad": 1},
                    {"nombre": "amuleto_de_la_suerte", "cantidad": 1}],
         "rasgo": "Pasaje de Barco",
-        "rasgo_desc": "Podés conseguir pasaje gratis en un barco para vos y el "
-                      "grupo, a cambio de ayudar con la tripulación."},
+        "rasgo_desc": "Conocés tripulaciones en cada puerto: viajás sin pagar "
+                      "boleto, siempre que arrimes el hombro a bordo."},
     "soldado": {
         "nombre": "Soldado", "competencias": ["atletismo", "intimidacion"],
         "herramientas": ["set_de_juego"], "oro": 10,
         "equipo": [{"nombre": "insignia_de_rango", "cantidad": 1},
                    {"nombre": "set_de_juego", "cantidad": 1}],
         "rasgo": "Rango Militar",
-        "rasgo_desc": "Tu rango es reconocido: soldados leales a tu antiguo "
-                      "ejército te obedecen en asuntos menores."},
+        "rasgo_desc": "La insignia todavía pesa: la tropa de tu vieja unidad "
+                      "te sigue tratando de superior en cuestiones chicas."},
     "huerfano": {
         "nombre": "Pilluelo", "competencias": ["juego_de_manos", "sigilo"],
         "herramientas": ["kit_de_disfraz", "kit_de_ladron"], "oro": 10,
@@ -966,7 +972,7 @@ ARMADURAS_COMP_CLASE = {
 }
 
 
-# Lista de habilidades entre las que elige cada clase, y cuántas (PHB).
+# Lista de habilidades entre las que elige cada clase, y cuántas.
 # Las competencias de habilidad del PJ = estas elegidas + las del trasfondo.
 CLASE_HABILIDADES = {
     "barbaro": ["trato_con_animales", "atletismo", "intimidacion", "naturaleza",
@@ -998,7 +1004,7 @@ CLASE_HABILIDADES = {
               "naturaleza", "religion"],
 }
 
-# Cantidad de habilidades que elige cada clase (PHB): la mayoría 2; pícaro 4;
+# Cantidad de habilidades que elige cada clase: la mayoría 2; pícaro 4;
 # bardo y explorador 3.
 CLASE_HABILIDADES_N = {
     "barbaro": 2, "bardo": 3, "clerigo": 2, "druida": 2, "guerrero": 2,
@@ -1254,7 +1260,10 @@ SUBCLASES_INFO = {
 }
 
 # ---------------------------------------------------------------- feats
-# Dotes (feats) del PHB + el Grappler del SRD. Efectos soportados por el motor:
+# TODO(no-SRD): de las 13 dotes, SOLO "luchador_agarrador" (Grappler) está en
+# el SRD 5.1. Las otras 12 son datos mecánicos con descripciones propias.
+# Para dejar el repo SRD-only, sacar todo menos "luchador_agarrador".
+# Dotes (feats): Grappler es SRD, el resto no-SRD. Efectos del motor:
 #   "asi": {"ATR": n}                 → suma fija a atributo(s) (tope 20)
 #   "asi_eleccion": ["FUE","DES"]     → +1 a UNO de esos a elección del jugador
 #   "hp_por_nivel": n                 → +n PG por nivel de personaje (Vigoroso)
@@ -1281,14 +1290,14 @@ FEATS: dict[str, dict] = {
     "alerta": {  # Alert
         "nombre": "Alerta", "requisito": {},
         "efectos": {"bono_iniciativa": 5,
-                    "pasivo": "No podés ser sorprendido mientras estés "
-                              "consciente; los atacantes ocultos no ganan "
-                              "ventaja contra vos."}},
+                    "pasivo": "Dormido no, pero despierto no te agarran "
+                              "desprevenido: nada de sorpresa, y esconderse "
+                              "de vos no le da ventaja a nadie."}},
     "atleta": {  # Athlete
         "nombre": "Atleta", "requisito": {},
         "efectos": {"asi_eleccion": ["FUE", "DES"],
-                    "pasivo": "Te levantás de estar derribado con solo 1.5m de "
-                              "movimiento; trepás sin coste extra."}},
+                    "pasivo": "Volvés a estar de pie casi sin gastar "
+                              "movimiento (1.5m), y trepar no te frena."}},
     "actor": {
         "nombre": "Actor", "requisito": {},
         "efectos": {"asi": {"CAR": 1},
@@ -1445,7 +1454,7 @@ def ataques_por_accion(clase: str, nivel: int) -> int:
     return 1
 
 
-# Conjuros conocidos máximos por nivel de personaje (SRD/PHB, niveles 1-20)
+# Conjuros conocidos máximos por nivel de personaje (5e, niveles 1-20)
 CONOCIDOS_MAX = {
     "bardo":     {1: 4, 2: 5, 3: 6, 4: 7, 5: 8, 6: 9, 7: 10, 8: 11, 9: 12,
                   10: 14, 11: 15, 12: 15, 13: 16, 14: 18, 15: 19, 16: 19,
@@ -1507,7 +1516,7 @@ NIVEL_SUBCLASE = {"clerigo": 1, "hechicero": 1, "brujo": 1,
                   "mago": 2}
 
 # ---------------------------------------------------------------- multiclase
-# Requisitos de atributo para multiclasear a/desde cada clase (PHB).
+# Requisitos de atributo para multiclasear a/desde cada clase.
 MULTICLASE_REQUISITOS: dict[str, dict[str, int]] = {
     "barbaro": {"FUE": 13},
     "bardo": {"CAR": 13},
@@ -1523,7 +1532,7 @@ MULTICLASE_REQUISITOS: dict[str, dict[str, int]] = {
     "brujo": {"CAR": 13},
 }
 
-# Aporte al "nivel de lanzador" combinado para los espacios de multiclase (PHB):
+# Aporte al "nivel de lanzador" combinado para los espacios de multiclase:
 # lanzadores completos aportan su nivel entero; medios (paladín/ranger) la mitad
 # redondeada abajo. El brujo NO cuenta acá (Magia de Pacto es aparte).
 _APORTE_LANZADOR = {
@@ -1545,7 +1554,7 @@ def cumple_requisitos_multiclase(clase: str, atributos: dict) -> tuple[bool, str
 
 
 def nivel_lanzador_multiclase(clases: dict[str, int]) -> int:
-    """Nivel de lanzador combinado (PHB) a partir de {clase: nivel}."""
+    """Nivel de lanzador combinado a partir de {clase: nivel}."""
     total = 0.0
     for cls, lvl in clases.items():
         total += _APORTE_LANZADOR.get(cls, 0.0) * lvl
@@ -1553,7 +1562,7 @@ def nivel_lanzador_multiclase(clases: dict[str, int]) -> int:
 
 
 def slots_multiclase(clases: dict[str, int]) -> dict:
-    """Espacios de conjuro combinados (PHB) para una mezcla de clases.
+    """Espacios de conjuro combinados para una mezcla de clases.
     Usa la tabla de lanzador completo con el nivel de lanzador combinado, y
     agrega los espacios de Magia de Pacto del brujo por separado (aprox v1:
     se suman al mismo nivel; se recuperan con descanso largo)."""

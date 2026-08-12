@@ -1,9 +1,27 @@
-﻿.env
+# Secrets — never commit real credentials
+.env
 .env.*
 !.env.example
+
+# Local tooling
 .claude/*
 CLAUDE.md
+.vscode/
+.idea/
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.pytest_cache/
+.venv/
+venv/
+
+# Local databases / test artifacts
+*.db
+*.sqlite
+*.sqlite3
+
+# Optional custom content (see engine/content.py)
+data/razas_custom.json

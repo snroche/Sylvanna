@@ -5,7 +5,7 @@ from engine.content import TRASFONDOS, aplicar_trasfondo
 
 
 def test_catalogo_trasfondos():
-    # los 13 trasfondos del PHB (incluye el Acólito del SRD)
+    # los 13 trasfondos disponibles (el Acólito es el del SRD)
     assert "acolito" in TRASFONDOS
     assert len(TRASFONDOS) >= 13
     for clave, t in TRASFONDOS.items():

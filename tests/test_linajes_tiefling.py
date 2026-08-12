@@ -1,4 +1,4 @@
-"""Linajes de tiefling (Mordenkainen): bonos de atributo y resistencias."""
+"""Linajes infernales de tiefling: bonos de atributo y resistencias."""
 import pytest
 
 from engine.content import (RAZAS, aplicar_bonos_raciales,

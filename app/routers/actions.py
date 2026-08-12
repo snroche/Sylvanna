@@ -2346,7 +2346,7 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
     objetivo_clase = body.clase_multiclase or char.clase
     if objetivo_clase not in CLASES:
         raise HTTPException(400, f"Clase inválida: {objetivo_clase}")
-    if objetivo_clase not in breakdown:   # abrís una clase nueva: chequeo PHB
+    if objetivo_clase not in breakdown:   # abrís una clase nueva: chequeo de requisitos
         ok_n, falta_n = cumple_requisitos_multiclase(objetivo_clase, char.atributos)
         ok_p, falta_p = cumple_requisitos_multiclase(char.clase, char.atributos)
         if not (ok_n and ok_p):
@@ -2401,7 +2401,7 @@ async def subir_nivel(campaign_id: int, body: SubirNivel,
     char.recursos_clase = nuevos_rec
 
     # recalcular slots preservando los gastados. En multiclase se usa la tabla
-    # combinada del PHB; en monoclase, la tabla propia de la clase.
+    # combinada de multiclase; en monoclase, la tabla propia de la clase.
     if es_multiclase and any(CLASES[c]["lanzador"] for c in breakdown):
         nuevos = slots_multiclase(breakdown)
     else:

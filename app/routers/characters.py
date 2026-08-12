@@ -179,12 +179,12 @@ async def crear_personaje(body: CrearPersonaje, bg: BackgroundTasks,
     tras = TRASFONDOS.get(body.trasfondo) if body.trasfondo else None
     n_clase = CLASE_HABILIDADES_N.get(body.clase, 2)
     # habilidades del PJ = las elegidas de la clase (tope por clase) + las del
-    # trasfondo (forzadas por el PHB, p. ej. soldado → atletismo + intimidación)
+    # trasfondo (fijas por trasfondo, p. ej. soldado → atletismo + intimidación)
     habilidades = list(dict.fromkeys(
         list(dict.fromkeys(body.habilidades))[:n_clase]
         + (tras["competencias"] if tras else [])))
     inventario = _inventario_inicial(body)
-    # riqueza inicial: la de la clase (PHB) + la del trasfondo
+    # riqueza inicial: la de la clase + la del trasfondo
     from engine.content import oro_inicial_clase
     monedas = {"mo": oro_inicial_clase(body.clase), "mp": 0, "mc": 0}
     opciones = {}
