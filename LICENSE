@@ -24,7 +24,8 @@ SOFTWARE.
 
 NOTE: The MIT license above covers the SOURCE CODE of this project only.
 
-Game content under data/ and the rules tables in engine/content.py derive from
-the System Reference Document 5.1 by Wizards of the Coast LLC, licensed under
-CC BY 4.0. See the "License & attribution" section of README.md for the full
-notice.
+The rules tables in engine/content.py derive from the System Reference Document
+5.1 by Wizards of the Coast LLC, licensed under CC BY 4.0. SRD game data is not
+redistributed in this repository: data/*.json is git-ignored and generated
+locally by scripts/importar_srd.py. See the "License & attribution" section of
+README.md for the full notice.

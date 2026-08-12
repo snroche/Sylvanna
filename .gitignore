@@ -23,5 +23,7 @@ venv/
 *.sqlite
 *.sqlite3
 
-# Optional custom content (see engine/content.py)
-data/razas_custom.json
+# Game content is NOT tracked. Regenerate the SRD data with
+#   python scripts/importar_srd.py
+# and keep any content from books you own in data/razas_custom.json.
+data/*.json

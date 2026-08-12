@@ -39,7 +39,7 @@ create characters, explore and fight; an LLM plays the Dungeon Master.
 <tr><td><b>Storage</b></td><td>SQLite (dev) / Postgres–Neon (prod), same code path</td></tr>
 <tr><td><b>Narrator</b></td><td>OpenRouter, any model, with automatic fallbacks</td></tr>
 <tr><td><b>Frontend</b></td><td>Vanilla JS/CSS, no build step, mobile-friendly</td></tr>
-<tr><td><b>Content</b></td><td>336 monsters · 319 spells · 237 magic items · 13 backgrounds</td></tr>
+<tr><td><b>Content</b></td><td>336 monsters · 319 spells · 237 magic items after one import step</td></tr>
 <tr><td><b>Tests</b></td><td><b>225 tests</b>, ~12s, no network required</td></tr>
 </table>
 
@@ -121,7 +121,7 @@ app/
   routers/         campaigns · characters · actions · admin
 main.py          FastAPI app + static frontend mounted at /
 static/          "La Mesa" — vanilla JS client, no build step
-data/            SRD content imported from Open5e (JSON)
+data/            SRD content imported from Open5e (JSON, not tracked in git)
 scripts/         SRD importer, campaign admin CLI
 ```
 
@@ -255,7 +255,7 @@ Single web service, no CORS, frontend served by the API.
 
 | Setting | Value |
 | --- | --- |
-| Build | `pip install -r requirements.txt` |
+| Build | `pip install -r requirements.txt && python scripts/importar_srd.py` |
 | Start | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
 | Env | `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `DATABASE_URL`, `ADMIN_TOKEN` |
 
@@ -267,19 +267,31 @@ and strips `sslmode`.
 **On OpenRouter free tier:** 20 req/min and 50 req/day, and failed attempts
 count. Roughly one request per game action, plus one summary per ~60 messages.
 
-### Content import
+### Content import — required for the full catalog
 
-SRD monsters and spells come from [Open5e](https://open5e.com):
+**Game content is not tracked in this repository.** `data/*.json` is git-ignored,
+so a fresh clone starts with only the hand-curated content compiled into
+`engine/content.py`: **15 monsters, 31 spells, 0 magic items**. Everything runs
+and every test passes at that baseline — you just have a small bestiary.
+
+One command pulls the full SRD catalog from [Open5e](https://open5e.com)
+(needs internet, takes a minute):
 
 ```bash
 python scripts/importar_srd.py                        # monsters ≤ CR 10, spells ≤ lvl 5
 python scripts/importar_srd.py --cr-max 5 --solo monstruos
 ```
 
-Monsters arrive with full mechanics (HP, AC, abilities and real stat-block
-attacks the engine uses on NPC turns). Spell resolution is inferred heuristically
-from the text; whatever can't be inferred stays narrative. Generated JSON is
-committed so production needs no network at boot.
+That writes `data/monstruos_srd.json`, `data/conjuros_srd.json` and
+`data/objetos_magicos_srd.json`, which `engine/content.py` merges at boot without
+overwriting curated entries — taking you to **336 monsters, 319 spells and 237
+magic items**. Monsters arrive with full mechanics (HP, AC, abilities and real
+stat-block attacks the engine uses on NPC turns). Spell resolution is inferred
+heuristically from the text; whatever can't be inferred stays narrative.
+
+> **Deploying:** because the JSON is no longer committed, run the importer as
+> part of your build step (or ship the files out of band). Otherwise production
+> boots on the 15-monster baseline instead of the full catalog.
 
 ### Campaign admin
 
@@ -334,10 +346,11 @@ Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at
 licensed under the Creative Commons Attribution 4.0 International License,
 available at <https://creativecommons.org/licenses/by/4.0/legalcode>.
 
-**Imported data** — Monsters, spells and magic items under `data/` are imported
+**Imported data** — Monsters, spells and magic items are imported into `data/`
 from the [Open5e](https://open5e.com) API, filtered to the `wotc-srd` document
 slug, and carry the SRD 5.1 licence above. Open5e is an open database of 5e
-content; thanks to its maintainers.
+content; thanks to its maintainers. That data is **not redistributed here**:
+`data/*.json` is git-ignored and generated locally by `scripts/importar_srd.py`.
 
 Sylvanna is an unofficial fan project, not affiliated with, endorsed, sponsored
 or approved by Wizards of the Coast.
